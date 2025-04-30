@@ -1,0 +1,33 @@
+==========================================
+전체 클래스 목록 및 역할 정리 (MVC + OOAD 적용)
+==========================================
+
+src/model/
+- Horse.java        : Model — 말 객체, 현재 위치 및 완료 상태 저장 (SRP)
+- Node.java         : Model — 윷판의 위치 노드, 다음 노드 리스트 관리 (OCP 활용 가능)
+- DiceManager.java  : Model — 윷 결과를 무작위 생성하는 로직 담당 (DIP 적용 가능)
+- YutResult.java    : Model — 윷 결과 Enum 정의 (Enum 타입 활용으로 명확한 도메인 표현)
+
+src/view/
+- BoardPanel.java   : View — 윷판 그리드 UI 구성, 말 위치 시각화 가능 (SRP)
+- DicePanel.java    : View — 주사위 던지기 버튼 및 결과 표시 UI (SRP)
+- MainFrame.java    : View — 전체 프레임 초기화 및 UI 컴포넌트 조립 (UI 컨테이너)
+
+src/controller/
+- GameManager.java  : Controller — 게임 초기화, 윷 결과 처리, 말 이동 및 승리 조건 판별
+                   (Model 제어 + View와 연결, SRP/OCP 기반 설계)
+- TurnManager.java  : Controller — 현재 플레이어 추적 및 턴 전환 (SRP, 단일 책임 분리)
+
+루트
+- App.java          : Entry Point — Swing 기반 앱 실행 시작점
+
+==========================================
+설계 원칙 요약 (적용된 객체지향 설계 원칙)
+==========================================
+- SRP (단일 책임 원칙): 모든 클래스가 한 가지 역할만 수행하도록 설계
+- OCP (개방-폐쇄 원칙): Node 구조와 판의 변형이 쉽게 확장될 수 있도록 설계 가능
+- DIP (의존 역전 원칙): DiceManager는 YutResult에만 의존하며 외부에서 주입 가능함
+- Enum 사용: 도메인 고유 개념(YutResult)을 명확히 표현하며 실수 방지
+
+*/
+
