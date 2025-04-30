@@ -1,6 +1,6 @@
-<pre><code>
 # 📑 시퀀스 다이어그램 초안
-
+---
+<pre><code>
 사용자
 ↓ 입력
 MainFrame
