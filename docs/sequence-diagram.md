@@ -1,3 +1,4 @@
+<pre><code>
 # 📑 시퀀스 다이어그램 초안
 
 사용자
@@ -28,3 +29,4 @@ BoardPanel
 MainFrame
 └── nextTurn() → 다음 플레이어로 전환
 
+</code></pre>
