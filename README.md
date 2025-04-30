@@ -36,3 +36,9 @@ src/
 - Controller: 흐름을 제어하고 Model과 View 연결
 
 > 이 구조를 통해 각 클래스가 명확하게 분리되어 유지보수 및 확장이 쉬운 구조로 설계됨.
+
+## 📂 관련 문서
+- 📄 [게임 전체 흐름도](docs/gameflow.md)
+- 📄 [시퀀스 다이어그램 초안](docs/sequence-diagram.md)
+- 📄 [클래스 설계와 유스케이스 간 대응 점검](docs/classusecase.md)
+- 📄 [4월 30일 테스트 시나리오](docs/test1.md)
