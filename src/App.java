@@ -1,8 +1,7 @@
-import view.MainFrame;
-
 public class App {
-    public static void main(String[] args) throws Exception {
-        MainFrame frame = new MainFrame();
-        frame.setVisible(true);
+    public static void main(String[] args) {
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            new view.MainFrame().setVisible(true);
+        });
     }
 }
