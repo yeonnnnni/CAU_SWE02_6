@@ -46,4 +46,5 @@ src/
 - 📄 [게임 전체 흐름도](docs/gameflow.md)
 - 📄 [시퀀스 다이어그램 초안](docs/sequence-diagram.md)
 - 📄 [클래스 설계와 유스케이스 간 대응 점검](docs/classusecase.md)
-- 📄 [4월 30일 테스트 시나리오](docs/test1.md)
+- 📄 [4월 30일 테스트 시나리오](docs/4_30.md)
+- 📄 [5월 1일 테스트 시나리오](docs/5_1.md)
