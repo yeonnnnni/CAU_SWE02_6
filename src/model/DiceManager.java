@@ -3,6 +3,8 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /*
 - 랜덤 주사위 던지기 및 수동 입력 처리
@@ -53,6 +55,16 @@ public class DiceManager {
     //YutResult를 이동 칸수(int)로 변환
     public int convertToSteps(YutResult result) {
         return result.getSteps();
+    }
+
+    public Queue<YutResult> rollRandomQueue() {
+        Queue<YutResult> resultQueue = new LinkedList<>();
+        while (true) {
+            YutResult result = rollOnce();
+            resultQueue.add(result);
+            if (result != YutResult.YUT && result != YutResult.MO) break;
+        }
+        return resultQueue;
     }
 }
 

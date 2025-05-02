@@ -4,34 +4,62 @@ import javax.swing.*;
 import java.awt.*;
 
 public class DicePanel extends JPanel {
+
     private JLabel resultLabel;
-    private JButton randomButton;
-    private JButton manualButton;
+    private JButton rollButton;
+    private JTextField manualInputField;
+    private JRadioButton randomMode;
+    private JRadioButton manualMode;
+    private ButtonGroup modeGroup;
 
     public DicePanel() {
-        setLayout(new FlowLayout());
+        setLayout(new GridLayout(4, 1));
 
+        // 결과 출력 라벨
         resultLabel = new JLabel("결과: -");
-        randomButton = new JButton("랜덤 윷 던지기");
-        manualButton = new JButton("지정 윷 결과 입력");
 
+        // 랜덤/수동 모드 라디오 버튼
+        randomMode = new JRadioButton("랜덤", true);
+        manualMode = new JRadioButton("수동");
+        modeGroup = new ButtonGroup();
+        modeGroup.add(randomMode);
+        modeGroup.add(manualMode);
+
+        JPanel modePanel = new JPanel();
+        modePanel.add(randomMode);
+        modePanel.add(manualMode);
+
+        // 수동 입력 필드
+        manualInputField = new JTextField(5);
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(new JLabel("수동 입력 (-1~5):"));
+        inputPanel.add(manualInputField);
+
+        // 굴리기 버튼
+        rollButton = new JButton("주사위 굴리기");
+
+        // 패널 배치
         add(resultLabel);
-        add(randomButton);
-        add(manualButton);
-
-        // 이벤트 연결은 나중에 controller에서 할 예정
+        add(modePanel);
+        add(inputPanel);
+        add(rollButton);
     }
 
-    public JLabel getResultLabel() {
-        return resultLabel;
+    // --- Getter 메서드 ---
+
+    public boolean isRandomMode() {
+        return randomMode.isSelected();
     }
 
-    public JButton getRandomButton() {
-        return randomButton;
+    public String getManualInputText() {
+        return manualInputField.getText();
     }
 
-    public JButton getManualButton() {
-        return manualButton;
+    public JButton getRollButton() {
+        return rollButton;
+    }
+
+    public void setResultText(String text) {
+        resultLabel.setText("결과: " + text);
     }
 }
-
