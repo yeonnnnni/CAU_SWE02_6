@@ -1,28 +1,30 @@
-// controller/GameController.java — 지름길 및 승리 조건 업데이트, 재시작 지원 통합
+// controller/GameController.java
 package controller;
 
-import controller.Board;
-import model.YutResult;
 import model.DiceManager;
+import model.YutResult;
 import view.DicePanel;
-
+import controller.GameManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Queue;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
-/**
- * GameController: 게임 로직 담당
- */
 public class GameController {
-    private Board board;
-    private DiceManager diceManager;
-    private DicePanel dicePanel;
+    private final Board board;
+    private final DiceManager diceManager;
+    private final GameManager gameManager;
+    private final DicePanel dicePanel;
 
-    public GameController(Board board, DiceManager diceManager, DicePanel dicePanel) {
+    public GameController(Board board, DiceManager diceManager, GameManager gameManager, DicePanel dicePanel) {
         this.board = board;
         this.diceManager = diceManager;
+        this.gameManager = gameManager;
         this.dicePanel = dicePanel;
 
-        // 🎯 버튼 클릭 시 윷 던지기 처리하도록 연결
+        // 🎯 버튼 클릭 시 윷 던지기 처리
         dicePanel.addRollListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -32,36 +34,32 @@ public class GameController {
     }
 
     public void handleDiceRoll() {
-        YutResult result = diceManager.roll();
-        // TODO: 결과에 따라 말 이동 가능 상태로 UI 전환 등 처리
-        System.out.println("윷 결과: " + result);
+    Queue<YutResult> results;
+
+    if (dicePanel.isRandomMode()) {
+        // 랜덤 윷 던지기
+        results = diceManager.rollRandomQueue();
+    } else {
+        // 수동 입력 모드
+        try {
+            int input = Integer.parseInt(dicePanel.getManualInputText());
+            YutResult result = diceManager.rollManual(input);
+            results = new LinkedList<>();
+            results.add(result);
+        } catch (NumberFormatException e) {
+            System.err.println("유효하지 않은 숫자 입력");
+            return;
+        } catch (IllegalArgumentException e) {
+            System.err.println("유효하지 않은 윷 입력값: " + e.getMessage());
+            return;
+        }
     }
 
-    public void handlePieceMove(int pieceId, int steps) {
-        // 말 이동 처리
-    }
+    // 1. 결과 DicePanel에 표시
+    dicePanel.showResult(new ArrayList<>(results));
 
-    public void handleShortcutSelection(int nodeId) {
-        // 지름길 선택 처리
-    }
-
-    public void checkCaptureOrStack(int nodeId) {
-        // 잡기 or 업기 처리
-    }
-
-    public void checkWinCondition() {
-        // 승리 조건 검사
-    }
-
-    public void endTurn() {
-        // 턴 종료 및 다음 플레이어로 전환
-    }
-
-    public void restartGame() {
-        // 게임 재시작 처리
-    }
-
-    public void exitGame(){
-        // 게임 종료 처리
-    }
+    // 2. GameManager로 전달
+    gameManager.handleMoveQueue(results);
 }
+}
+
