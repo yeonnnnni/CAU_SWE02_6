@@ -2,6 +2,7 @@ package model;
 
 import model.Node;
 import model.HorseState;
+import model.Team;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +14,14 @@ public class Horse {
     private Node            position;
     private List<Horse> groupedHorses;
 
-    public Horse(int horseIdx, int teamID) {
+    public Horse(int horseIdx, Team team) {
+        this.teamID = team.getTeamID();
         this.id = "T" + teamID + "-H" + horseIdx;
-        this.teamID = teamID;
         this.horseIdx = horseIdx;
         this.state = HorseState.WAITING;
         this.position = null;
-        this.groupHorses = new ArrayList<>();
+        this.groupedHorses = new ArrayList<>();
+        team.addHorse(this);
     }
 
     public String getId() { return id; }
@@ -76,6 +78,11 @@ public class Horse {
     }
 
     public void move(int steps) {
+        if (isFinished()) {
+            System.out.println("Horse " + id + " is already finished"); // for test
+            return;
+        }
+
         if (position == null) {
             position = getStartNode(); // TODO: Nodemap 추가시 보완 필요
             state = HorseState.MOVING;
@@ -94,10 +101,20 @@ public class Horse {
         List<Horse> others = position.getHorsesOnNode();
         for (Horse grouped : groupedHorses) {
             if (isCaptured(grouped)) {
-                grouped.setPosition(getStartNode());
+                grouped.reset();
             }
         }
 
+    }
+
+    public void reset() {
+        if (position != null) {
+            position.removeHorse(this);
+        }
+
+        position = null;
+        state = HorseState.WAITING;
+        groupedHorses.clear();
     }
 
     public boolean isCaptured(Horse other) {
@@ -119,6 +136,10 @@ public class Horse {
             other.groupedHorses.add(this);
             other.setPosition(this.position);
         }
+    }
+
+    public boolean isFinished() {
+        return this.state == HorseState.FINISHED;
     }
 
     private boolean teamIdEquals(Horse other) {
