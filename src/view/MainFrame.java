@@ -1,12 +1,17 @@
 package view;
 
+import builder.BoardBuilder;
+import builder.BoardFactory;
+import controller.Board;
 import controller.GameManager;
 import model.Node;
 import model.Horse;
+import model.DiceManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+
 
 public class MainFrame extends JFrame {
 
@@ -14,6 +19,8 @@ public class MainFrame extends JFrame {
     private DicePanel dicePanel;
     private Node[] nodes;
     private GameManager gameManager;
+    private Board board;
+    private DiceManager diceManager;
 
     public MainFrame() {
         setTitle("윷놀이 게임");
@@ -22,23 +29,38 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // 1. 노드 생성
-        nodes = new Node[23];
-        for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = new Node(i);
-        }
+        // 1. BoardBuilder 선택(square/pentagon/hexagon)
+        BoardBuilder builder=BoardFactory.create("square");
+        List<Node> nodes=builder.buildBoard();
 
         // 2. 보드 초기화
         boardPanel = new BoardPanel();
-        boardPanel.initialize("square", nodes);
+        boardPanel.renderBoard(nodes, builder.getNodePositions());
         add(boardPanel, BorderLayout.CENTER);
 
+        // 3. DIcePanel UI 설정
+        dicePanel=new DicePanel();
+        add(dicePanel, BorderLayout.NORTH);
+
+        //4. 게임 로직 클래스 초기화
+        List<String> players=List.of("0","1");
+        board=new Board();
+        for(String player : players){
+            board.registerPlayer(player);
+        }
+
         // GameManager 연결
-        gameManager = new GameManager(this);
+        gameManager = new GameManager(this, board, diceManager, players);
+
+        // DiceManager 연결
+        diceManager=new DiceManager();
 
         // 나중에 DicePanel 추가
         // dicePanel = new DicePanel();
         // add(dicePanel, BorderLayout.NORTH);
+
+        // 게임 시작
+        gameManager.startGame();
 
         setVisible(true);
     }
@@ -58,7 +80,13 @@ public class MainFrame extends JFrame {
         );
 
         if (selected != null) {
+            //추후 getPosition 연동 추가 예정
+            //Node from=selected.getPosition();  // 이동 전 위치 저장
             selected.move(steps);         // 선택된 말 이동
+            //Node to=selected.getPosition();  // 이동 후 위치
+
+            //Color color=selected.getTeamID()==0?Color.RED:Color.BLUE;
+            //boardPanel.updatePiecePosition(from, to, selected.getId(),color);
             boardPanel.repaint();         // 보드 화면 갱신
         }
     }
