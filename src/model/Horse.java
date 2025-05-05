@@ -23,24 +23,84 @@ public class Horse {
     }
 
     public String getId() { return id; }
-
     public int getTeamID() { return teamID; }
-
     public HorseState getState() { return state; }
-
     public List<Horse> getGroupedHorses() { return groupedHorses; }
-
     public void setState(HorseState state) { this.state = state; }
+    public void setPosition(Node position) { this.position = position; }
 
-    public void move(Node target) {
+    private Node getStartNode() {
+        // TODO: NodeRepository.getStartNodeForDirection 메서드 필요
+        return position == null ? position : position;
+    }
+
+    private Node chooseNextNode(List <Node> candidates) {
+        // TODO
+
+    }
+
+    private void moveStep() {
+        if (position == null) throw new IllegalStateException("Position has not been set");
+
+        List<Node> nextList = position.getNextNodes();
+        if (nextList == null || nextList.isEmpty()) {
+            // 더 이상 이동할 곳이 없으면 완주로 간주
+            this.state = HorseState.FINISHED;
+            return;
+        }
+
+        Node next = (nextList.size() == 1)
+                ? nextList.getFirst()
+                : chooseNextNode(nextList);  // 복수일 경우 선택
+
+        setPosition(next); // 본인 위치 갱신
+
+        // 그룹된 말들도 함께 이동
+        for (Horse grouped : groupedHorses) {
+            grouped.setPosition(next);
+        }
+
+        // 도착 지점인지 확인하여 상태 업데이트
+        if (position.isGoal()) {
+            this.state = HorseState.FINISHED;
+        }
+    }
+
+    public void move(int steps) {
+        if (position == null) {
+            position = getStartNode(); // TODO: Nodemap 추가시 보완 필요
+            state = HorseState.MOVING;
+            if (steps < 0) return;
+        }
+
+        for (int i = 0; i < steps; i++) {
+            moveStep();
+            if (position.isGoal()){
+                state = HorseState.FINISHED;
+                break;
+            }
+        }
     }
 
     public boolean isCaptured(Horse other) {
         return !this.teamIdEquals(other) && this.currentPosition == other.currentPosition;
     }
 
+    public boolean isGroupable(Horse other) {
+        return this.teamIdEquals(other) && this.position == other.position && !groupedHorses.contains(other);
+    }
+
     public boolean isWin() {
         return this.state == HorseState.FINISHED;
+    }
+
+    public void groupWith(Horse other) {
+        if (isGroupable(other)) { // this 대표말, oth 부속말
+            groupedHorses.add(other);
+            other.groupedHorses.clear(); // 말 하나는 여러 그룹에 속할 수 없다.
+            other.groupedHorses.add(this);
+            other.setPosition(this.position);
+        }
     }
 
     private boolean teamIdEquals(Horse other) {
