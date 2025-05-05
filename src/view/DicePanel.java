@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 
 public class DicePanel extends JPanel {
@@ -34,6 +35,8 @@ public class DicePanel extends JPanel {
         JPanel inputPanel = new JPanel();
         inputPanel.add(new JLabel("수동 입력 (-1~5):"));
         inputPanel.add(manualInputField);
+        // 숫자만 입력 가능하게 필터 적용
+        ((AbstractDocument) manualInputField.getDocument()).setDocumentFilter(new NumericFilter());
 
         // 굴리기 버튼
         rollButton = new JButton("주사위 굴리기");
@@ -43,6 +46,27 @@ public class DicePanel extends JPanel {
         add(modePanel);
         add(inputPanel);
         add(rollButton);
+    }
+
+    // 내부 클래스: 숫자(-1~5) 외 입력 차단
+    private static class NumericFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+            if (isValidInput(string)) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+            if (isValidInput(text)) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
+
+        private boolean isValidInput(String text) {
+            return text.matches("-?\\d*"); // 음수 포함 숫자만 허용
+        }
     }
 
     // --- Getter 메서드 ---
@@ -62,4 +86,5 @@ public class DicePanel extends JPanel {
     public void setResultText(String text) {
         resultLabel.setText("결과: " + text);
     }
+
 }
