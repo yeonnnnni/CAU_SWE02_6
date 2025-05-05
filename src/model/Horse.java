@@ -27,7 +27,16 @@ public class Horse {
     public HorseState getState() { return state; }
     public List<Horse> getGroupedHorses() { return groupedHorses; }
     public void setState(HorseState state) { this.state = state; }
-    public void setPosition(Node position) { this.position = position; }
+
+    public void setPosition(Node position) {
+        if (this.position != null) {
+            this.position.removeHorse(this);
+        }
+        this.position = position;
+        if (position != null) {
+            position.addHorse(this);
+        }
+    }
 
     private Node getStartNode() {
         // TODO: NodeRepository.getStartNodeForDirection 메서드 필요
@@ -77,9 +86,18 @@ public class Horse {
             moveStep();
             if (position.isGoal()){
                 state = HorseState.FINISHED;
-                break;
+                return;
             }
         }
+
+        assert position != null;
+        List<Horse> others = position.getHorsesOnNode();
+        for (Horse grouped : groupedHorses) {
+            if (isCaptured(grouped)) {
+                grouped.setPosition(getStartNode());
+            }
+        }
+
     }
 
     public boolean isCaptured(Horse other) {
