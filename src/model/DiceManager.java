@@ -18,6 +18,7 @@ import java.util.Queue;
 public class DiceManager {
 
     private Random random = new Random();
+    private Queue<YutResult> resultQueue = new LinkedList<>();
 
     //주사위 던지기
     //윷 또는 모가 나오면 보너스 턴: 한 번 더 던짐
@@ -57,8 +58,20 @@ public class DiceManager {
         return result.getSteps();
     }
 
+    public void resetDice() {
+        resultQueue.clear();  // 큐 초기화
+    }
+
+    public Queue<YutResult> getResultQueue() {
+        return resultQueue;
+    }
+
+    public void setResultQueue(Queue<YutResult> queue) {
+        this.resultQueue = queue;
+    }
+
     public Queue<YutResult> rollRandomQueue() {
-        Queue<YutResult> resultQueue = new LinkedList<>();
+        resultQueue.clear();
         while (true) {
             YutResult result = rollOnce();
             resultQueue.add(result);
