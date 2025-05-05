@@ -94,10 +94,20 @@ public class Horse {
         List<Horse> others = position.getHorsesOnNode();
         for (Horse grouped : groupedHorses) {
             if (isCaptured(grouped)) {
-                grouped.setPosition(getStartNode());
+                grouped.reset();
             }
         }
 
+    }
+
+    public void reset() {
+        if (position != null) {
+            position.removeHorse(this);
+        }
+
+        position = null;
+        state = HorseState.WAITING;
+        groupedHorses.clear();
     }
 
     public boolean isCaptured(Horse other) {
