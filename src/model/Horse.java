@@ -2,6 +2,7 @@ package model;
 
 import model.Node;
 import model.HorseState;
+import model.Team;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +14,14 @@ public class Horse {
     private Node            position;
     private List<Horse> groupedHorses;
 
-    public Horse(int horseIdx, int teamID) {
+    public Horse(int horseIdx, Team team) {
+        this.teamID = team.getTeamID();
         this.id = "T" + teamID + "-H" + horseIdx;
-        this.teamID = teamID;
         this.horseIdx = horseIdx;
         this.state = HorseState.WAITING;
         this.position = null;
-        this.groupHorses = new ArrayList<>();
+        this.groupedHorses = new ArrayList<>();
+        team.addHorse(this);
     }
 
     public String getId() { return id; }
