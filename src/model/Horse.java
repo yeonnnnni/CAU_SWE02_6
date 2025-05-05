@@ -78,6 +78,11 @@ public class Horse {
     }
 
     public void move(int steps) {
+        if (isFinished()) {
+            System.out.println("Horse " + id + " is already finished"); // for test
+            return;
+        }
+
         if (position == null) {
             position = getStartNode(); // TODO: Nodemap 추가시 보완 필요
             state = HorseState.MOVING;
@@ -131,6 +136,10 @@ public class Horse {
             other.groupedHorses.add(this);
             other.setPosition(this.position);
         }
+    }
+
+    public boolean isFinished() {
+        return this.state == HorseState.FINISHED;
     }
 
     private boolean teamIdEquals(Horse other) {
