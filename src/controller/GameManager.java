@@ -1,6 +1,11 @@
 package controller;
 
+import view.MainFrame;
 public class GameManager {
+    private MainFrame mainFrame;
+    public GameManager(MainFrame mainFrame){
+        this.mainFrame=mainFrame;
+    }
 }
 
 

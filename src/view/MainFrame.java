@@ -1,5 +1,7 @@
+/*
 package view;
 
+import controller.GameManager;
 import model.Node;
 
 import javax.swing.*;
@@ -50,3 +52,56 @@ public class MainFrame extends JFrame {
         return nodes;
     }
 }
+*/
+package view;
+
+import controller.GameManager;
+import model.Node;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class MainFrame extends JFrame {
+
+    private BoardPanel boardPanel;
+    private Node[] nodes;
+    private GameManager gameManager;
+
+    public MainFrame() {
+        setTitle("윷놀이 게임");
+        setSize(800, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        nodes = new Node[23];
+        for (int i = 0; i < nodes.length; i++) {
+            nodes[i] = new Node(i);
+        }
+
+        boardPanel = new BoardPanel();
+        boardPanel.initialize("square", nodes);
+        add(boardPanel, BorderLayout.CENTER);
+
+        gameManager = new GameManager(this);
+
+        setVisible(true);
+    }
+
+    public BoardPanel getBoardPanel() {
+        return boardPanel;
+    }
+
+    public Node[] getNodes() {
+        return nodes;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(MainFrame::new);
+    }
+}
+
