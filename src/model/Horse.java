@@ -3,6 +3,7 @@ package model;
 import model.Node;
 import model.HorseState;
 import model.Team;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +11,14 @@ public class Horse {
     private final String	id;
     private final int   	teamID;
     private final int       horseIdx;
+    private final Team team;
     private HorseState      state;
     private Node            position;
     private List<Horse> groupedHorses;
 
     public Horse(int horseIdx, Team team) {
         this.teamID = team.getTeamID();
+        this.team=team;
         this.id = "T" + teamID + "-H" + horseIdx;
         this.horseIdx = horseIdx;
         this.state = HorseState.WAITING;
@@ -29,6 +32,15 @@ public class Horse {
     public HorseState getState() { return state; }
     public List<Horse> getGroupedHorses() { return groupedHorses; }
     public void setState(HorseState state) { this.state = state; }
+
+    public Color getTeamColor(){
+        return team.getColor();
+    }
+
+    // 말의 현재 위치를 외부에서 확인할 수 있는 메서드 추가
+    public Node getPosition(){
+        return this.position;
+    }
 
     public void setPosition(Node position) {
         if (this.position != null) {
@@ -47,6 +59,7 @@ public class Horse {
 
     private Node chooseNextNode(List <Node> candidates) {
         // TODO
+        return candidates.get(0);  // 첫번째 노드 선택(임시)
 
     }
 
@@ -118,7 +131,7 @@ public class Horse {
     }
 
     public boolean isCaptured(Horse other) {
-        return !this.teamIdEquals(other) && this.currentPosition == other.currentPosition;
+        return !this.teamIdEquals(other) && this.position == other.position;
     }
 
     public boolean isGroupable(Horse other) {
@@ -143,6 +156,6 @@ public class Horse {
     }
 
     private boolean teamIdEquals(Horse other) {
-        return this.teamId == other.teamId;
+        return this.teamID == other.teamID;
     }
 }

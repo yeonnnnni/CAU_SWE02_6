@@ -81,13 +81,13 @@ public class MainFrame extends JFrame {
 
         if (selected != null) {
             //추후 getPosition 연동 추가 예정
-            //Node from=selected.getPosition();  // 이동 전 위치 저장
-            selected.move(steps);         // 선택된 말 이동
-            //Node to=selected.getPosition();  // 이동 후 위치
+            Node from = selected.getPosition();         // 이동 전 위치 저장
+            selected.move(steps);                       // 이동
+            Node to = selected.getPosition();           // 이동 후 위치
+            Color teamColor = selected.getTeamColor();  // 팀 색상 한 번만 호출
 
-            //Color color=selected.getTeamID()==0?Color.RED:Color.BLUE;
-            //boardPanel.updatePiecePosition(from, to, selected.getId(),color);
-            boardPanel.repaint();         // 보드 화면 갱신
+            boardPanel.updatePiecePosition(from, to, selected.getId(), teamColor);
+            //boardPanel.repaint();         // 보드 화면 갱신
         }
     }
 
