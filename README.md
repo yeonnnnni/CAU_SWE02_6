@@ -1,3 +1,13 @@
+<center>
+
+**Team Members**
+
+| **김희서** | **박도연** | **이정연** | **여지원** | **임정원** |
+|:---------:|:---------:|:----------:|:---------:|:----------:|
+| [dearHS](https://github.com/hs03290811) | [dp44rk](https://github.com/dp44rk) | [Lee Jeongyeon](https://github.com/yeonnnnni) | [yjione](https://github.com/yjione) | [jeongwon](https://github.com/garden0324) |
+
+</center>
+
 # 🧠 프로젝트 구조 개요 (OOAD + MVC 기반)
 ```
 src/
