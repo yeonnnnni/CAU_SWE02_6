@@ -41,6 +41,12 @@ public class Node {
 
     public List<Horse> getHorsesOnNode() { return new ArrayList<>(horsesOnNode); }
 
+    public boolean isCorner() {
+        if (id == null || id.startsWith("N")) return false; // N 노드는 제외
+
+        return id.charAt(1) == '2';
+    }
+
     // toString() for Debugging
     @Override
     public String toString() {
