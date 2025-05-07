@@ -21,6 +21,7 @@ public class MainFrame extends JFrame {
     private GameManager gameManager;
     private Board board;
     private DiceManager diceManager;
+    private List<Node> nodeList;
 
     public MainFrame() {
         setTitle("윷놀이 게임");
@@ -31,11 +32,11 @@ public class MainFrame extends JFrame {
 
         // 1. BoardBuilder 선택(square/pentagon/hexagon)
         BoardBuilder builder=BoardFactory.create("square");
-        List<Node> nodes=builder.buildBoard();
+        this.nodeList=builder.buildBoard();
 
         // 2. 보드 초기화
         boardPanel = new BoardPanel();
-        boardPanel.renderBoard(nodes, builder.getNodePositions());
+        boardPanel.renderBoard(nodeList, builder.getNodePositions());
         add(boardPanel, BorderLayout.CENTER);
 
         // 3. DIcePanel UI 설정
@@ -82,7 +83,7 @@ public class MainFrame extends JFrame {
         if (selected != null) {
             //추후 getPosition 연동 추가 예정
             Node from = selected.getPosition();         // 이동 전 위치 저장
-            selected.move(steps);                       // 이동
+            selected.move(steps, nodeList);                       // 이동
             Node to = selected.getPosition();           // 이동 후 위치
             Color teamColor = selected.getTeamColor();  // 팀 색상 한 번만 호출
 
