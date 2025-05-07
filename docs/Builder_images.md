@@ -1,0 +1,11 @@
+### 사각형 윷놀이판
+
+![Square board](/Users/imjeong-won/Downloads/B*와 D* 위치 교환한 사각형 윷놀이 노드 연결도.png)
+
+### 오각형 윷놀이판
+
+![Pentagon board](/Users/imjeong-won/Downloads/정오각형 윷놀이판 - 72도 회전 및 겹침 보정.png)
+
+### 육각형 윷놀이판
+
+![Hexagon board](/Users/imjeong-won/Downloads/정육각형 윷놀이판 구조 - 90도 반시계 회전.png)
