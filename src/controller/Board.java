@@ -1,6 +1,7 @@
 package controller;
 
 import model.Horse;
+import model.Node;
 import model.Team;
 
 import java.util.*;
@@ -35,8 +36,8 @@ public class Board {
     }
 
     // 말 이동
-    public void moveHorse(Horse horse, int steps) {
-        horse.move(steps);
+    public void moveHorse(Horse horse, int steps, List<Node> board) {
+        horse.move(steps, board);
     }
 
     // 전체 리셋 시 팀 초기화도 가능하게 추가 (선택)

@@ -105,7 +105,6 @@ public class BoardPanel extends JPanel {
 }
 */
 
-
 //package view;
 //
 //import model.Node;
@@ -276,15 +275,17 @@ public class BoardPanel extends JPanel {
         if (to != null && nodeToButton.containsKey(to)) {
             JButton btn = nodeToButton.get(to);
             List<Horse> horses = to.getHorsesOnNode();  // 말 여러마리 추적
+
             StringBuilder sb = new StringBuilder();
             sb.append(to.getId()).append("\n");
+
             for (Horse h : horses) {
                 sb.append(h.getId()).append("+");
             }
             if (!horses.isEmpty()) sb.setLength(sb.length() - 1); // 마지막 + 제거
 
             btn.setText("<html>" + sb.toString().replace("\n", "<br>") + "</html>");
-            btn.setForeground(color);
+            btn.setForeground(color);  // 말 색상 반영
         }
     }
 
