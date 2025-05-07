@@ -28,9 +28,6 @@
 //        return positions;
 //    }
 //}
-//
-
-
 
 //
 //package builder;
@@ -63,8 +60,8 @@
 //    }
 //}
 
-
-package builder;
+/*
+ * package builder;
 
 import model.Node;
 
@@ -191,3 +188,139 @@ public class HexagonBoardBuilder implements BoardBuilder {
         positions.put("F3", new Point(7, 16));
     }
 }
+
+ */
+
+ package builder;
+
+ import model.Node;
+ 
+ import java.awt.Point;
+ import java.util.*;
+ 
+ public class HexagonBoardBuilder implements BoardBuilder {
+ 
+     private final Map<String, Node> nodeMap = new LinkedHashMap<>();
+     private final Map<String, Point> positions = new HashMap<>();
+ 
+     private Node node(String id) {
+         return nodeMap.computeIfAbsent(id, Node::new);
+     }
+ 
+     @Override
+     public List<Node> buildBoard() {
+         createNodes();
+         connectNodes();
+         createPositions();
+         return new ArrayList<>(nodeMap.values());
+     }
+ 
+     @Override
+     public Map<String, Point> getNodePositions() {
+         return positions;
+     }
+ 
+     private void createNodes() {
+         node("OO").setCenter(true); // 중심
+ 
+         // 외곽 N0 ~ N23
+         for (int i = 0; i < 24; i++) {
+             node("N" + i);
+         }
+ 
+         // A~F 방향 노드 (0~2)
+         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
+             for (int i = 0; i <= 2; i++) {
+                 node(dir + "" + i);
+             }
+         }
+ 
+         // 골지점 지정
+         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
+             node(dir + "2").setGoal(true);
+         }
+     }
+ 
+     private void connectNodes() {
+         // 외곽 연결
+         for (int i = 0; i < 24; i++) {
+             node("N" + i).addNextNode(node("N" + ((i + 1) % 24)));
+         }
+ 
+         // 중심과 지름길 연결
+         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
+             node(dir + "0").addNextNode(node(dir + "1"));
+             node(dir + "1").addNextNode(node(dir + "2"));
+             node(dir + "2").addNextNode(node("OO"));
+             node("OO").addNextNode(node(dir + "1"));
+         }
+ 
+         // 제외된 외곽 연결
+         Map<String, String> invalidLinks = Map.of(
+                 "F0", "N20",
+                 "E0", "N16",
+                 "C0", "N8",
+                 "B0", "N4"
+         );
+ 
+         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
+             String end = dir + "0";
+             int targetIdx = "ABCDEF".indexOf(dir) * 4;
+             String target = "N" + targetIdx;
+             if (!invalidLinks.getOrDefault(end, "").equals(target)) {
+                 node(end).addNextNode(node(target));
+             }
+         }
+ 
+         // 분기 연결
+         node("F2").addNextNode(node("N3"));
+         node("F2").addNextNode(node("N4"));
+         node("E2").addNextNode(node("N7"));
+         node("E2").addNextNode(node("N8"));
+         node("D2").addNextNode(node("N11"));
+         node("D2").addNextNode(node("N12"));
+         node("C2").addNextNode(node("N15"));
+         node("C2").addNextNode(node("N16"));
+         node("B2").addNextNode(node("N19"));
+         node("B2").addNextNode(node("N20"));
+         node("A2").addNextNode(node("N23"));
+         node("A2").addNextNode(node("N0"));
+     }
+ 
+     private void createPositions() {
+         // 회전된 외곽 노드 배치
+         double radius = 6.0;
+         for (int i = 0; i < 24; i++) {
+             double angle = Math.toRadians(90 + 90 - i * (360.0 / 24)); // 반시계 90도 회전
+             int x = (int) (Math.cos(angle) * radius * 10);
+             int y = (int) (Math.sin(angle) * radius * 10);
+             positions.put("N" + i, new Point(x, y));
+         }
+ 
+         // 중심
+         positions.put("OO", new Point(0, 0));
+ 
+         // 회전 적용된 지름길 방향 설정
+         Map<String, Integer> baseAngles = Map.of(
+                 "A", 180,
+                 "B", 120,
+                 "C", 60,
+                 "D", 0,
+                 "E", -60,
+                 "F", -120
+         );
+ 
+         for (Map.Entry<String, Integer> entry : baseAngles.entrySet()) {
+             String dir = entry.getKey();
+             int angleDeg = entry.getValue();
+             for (int j = 0; j <= 2; j++) {
+                 double dist = 1.5 + j;
+                 double angleRad = Math.toRadians(angleDeg);
+                 int x = (int) (Math.cos(angleRad) * dist * 10);
+                 int y = (int) (Math.sin(angleRad) * dist * 10);
+                 positions.put(dir + j, new Point(x, y));
+             }
+         }
+     }
+ }
+ 
