@@ -1,8 +1,10 @@
 package model;
 
+import builder.BoardFactory;
 import model.Node;
 import model.HorseState;
 import model.Team;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,15 +42,11 @@ public class Horse {
         }
     }
 
-    private Node getStartNode() {
-        // TODO: NodeRepository.getStartNodeForDirection 메서드 필요
-        return position == null ? position : position;
-    }
+    private Node chooseNextNode(List <Node> candidates) {
+        // TODO
 
-//    private Node chooseNextNode(List <Node> candidates) {
-//        // TODO
-//
-//    }
+        return new Node("test");
+    }
 
     private void moveStep() {
         if (position == null) throw new IllegalStateException("Position has not been set");
@@ -77,14 +75,14 @@ public class Horse {
         }
     }
 
-    public void move(int steps) {
+    public void move(int steps, List<Node> board) {
         if (isFinished()) {
             System.out.println("Horse " + id + " is already finished"); // for test
             return;
         }
 
         if (position == null) {
-            position = getStartNode(); // TODO: Nodemap 추가시 보완 필요
+            position = BoardFactory.getStartNode(board);
             state = HorseState.MOVING;
             if (steps < 0) return;
         }
@@ -118,7 +116,7 @@ public class Horse {
     }
 
     public boolean isCaptured(Horse other) {
-        return !this.teamIdEquals(other) && this.currentPosition == other.currentPosition;
+        return !this.teamIdEquals(other) && this.position == other.position;
     }
 
     public boolean isGroupable(Horse other) {
