@@ -12,7 +12,7 @@ public class Horse {
     private final int       horseIdx;
     private HorseState      state;
     private Node            position;
-    private List<Horse> groupedHorses;
+    private List<Horse>     groupedHorses;
 
     public Horse(int horseIdx, Team team) {
         this.teamID = team.getTeamID();
@@ -45,10 +45,10 @@ public class Horse {
         return position == null ? position : position;
     }
 
-    private Node chooseNextNode(List <Node> candidates) {
-        // TODO
-
-    }
+//    private Node chooseNextNode(List <Node> candidates) {
+//        // TODO
+//
+//    }
 
     private void moveStep() {
         if (position == null) throw new IllegalStateException("Position has not been set");
@@ -143,6 +143,6 @@ public class Horse {
     }
 
     private boolean teamIdEquals(Horse other) {
-        return this.teamId == other.teamId;
+        return this.teamID == other.teamID;
     }
 }
