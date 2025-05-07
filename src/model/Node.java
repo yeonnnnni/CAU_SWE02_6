@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
-    private final String id; // 위치 식별자 (e.g., "S", "A1", "C", "E")
-    private final List<Node> nextNodes;
-    private boolean isGoal;
-    private boolean isCenter;
-    public Node(String id) {
+    private final int        id; // 위치 식별자 (e.g., "S", "A1", "C", "E")
+    private final List<Node>    nextNodes;
+    private boolean             isGoal;
+    private boolean             isCenter;
+    private List<Horse>         horsesOnNode = new ArrayList<>();
+
+    public Node(int id) {
         this.id = id;
         this.nextNodes = new ArrayList<>();
         this.isGoal = false;
@@ -33,6 +35,12 @@ public class Node {
 
     public void setCenter(boolean center) { isCenter = center; }
 
+    public void addHorse(Horse horse) { horsesOnNode.add(horse); }
+
+    public void removeHorse(Horse horse) { horsesOnNode.remove(horse); }
+
+    public List<Horse> getHorsesOnNode() { return new ArrayList<>(horsesOnNode); }
+
     // toString() for Debugging
     @Override
     public String toString() {
@@ -44,3 +52,4 @@ public class Node {
                 '}';
     }
 }
+

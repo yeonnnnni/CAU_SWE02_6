@@ -3,68 +3,148 @@ package controller;
 import model.YutResult;
 import model.DiceManager;
 import model.Horse;
+import model.Team;
 import view.MainFrame;
+import view.DicePanel;
+import view.BoardPanel;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
 public class GameManager {
-    private MainFrame mainFrame;
-    private Board board;
-    private DiceManager diceManager;
+    private final MainFrame mainFrame;
+    private final Board board;
+    private final DiceManager diceManager;
 
-    private List<String> players;
+    private final List<Team> teams;
     private int currentPlayerIndex;
 
-    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<String> players) {
+    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams) {
         this.mainFrame = mainFrame;
         this.board = board;
         this.diceManager = diceManager;
-        this.players = players;
+        this.teams = teams;
         this.currentPlayerIndex = 0;
     }
 
-    /** 게임 시작 시 호출 */
+    /**
+     * 게임 시작 시 호출: 현재 플레이어 초기화 및 UI 갱신
+     */
     public void startGame() {
-        // 초기화 및 시작 알림
+        currentPlayerIndex = 0;
+        mainFrame.setCurrentPlayer(getCurrentTeam().getName());
+        mainFrame.getBoardPanel().repaint();
+        // 초기화된 윷 결과 목록 표시
+        mainFrame.getDicePanel().showResult(new ArrayList<YutResult>());
     }
 
-    /** 현재 플레이어가 윷을 던질 때 호출 */
-    public void startTurn() {
-        // DiceManager를 이용해 결과 받고 → 큐에 저장
+    /**
+     * 턴 종료 후 다음 플레이어로 전환 및 UI 갱신
+     */
+    public void nextTurn() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % teams.size();
+        mainFrame.setCurrentPlayer(getCurrentTeam().getName());
+        // 초기화된 윷 결과 목록 표시
+        mainFrame.getDicePanel().showResult(new ArrayList<YutResult>());
     }
+
+    /**
+     * 현재 플레이어의 승리 조건을 검사
+     */
+    public void checkWin() {
+        Team team = getCurrentTeam();
+        boolean allFinished = true;
+        for (Horse h : board.getHorsesForTeam(team)) {
+            if (!h.isFinished()) {
+                allFinished = false;
+                break;
+            }
+        }
+        if (allFinished) {
+            Object[] options = {"다시 시작", "종료"};
+            int choice = JOptionPane.showOptionDialog(
+                mainFrame,
+                team.getName() + " 팀이 승리했습니다!",
+                "게임 종료",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                // 다시 시작
+                startGame();
+            } else {
+                // 프로그램 종료
+                System.exit(0);
+            }
+    }
+
+    /**
+     * 현재 차례의 팀 반환
+     */
+    public Team getCurrentTeam() {
+        return teams.get(currentPlayerIndex);
+    }
+
+    /**
+         * 이동 가능한 말이 없을 경우 자동으로 턴을 넘깁니다.
+         */
+        private void autoSkipTurn() {
+            JOptionPane.showMessageDialog(
+                mainFrame,
+                "이동 가능한 말이 없어 턴을 건너뜁니다.",
+                "턴 스킵",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            nextTurn();
+        }
 
     /** 윷 결과 큐를 처리하여 말 이동 */
     public void handleMoveQueue(Queue<YutResult> resultQueue) {
+        boolean moved = false;
+        Queue<YutResult> queue = (resultQueue == null || resultQueue.isEmpty())
+            ? diceManager.rollRandomQueue()
+            : resultQueue;
+
+        mainFrame.getDicePanel().setEnabled(false);
+
         while (!resultQueue.isEmpty()) {
             YutResult result = resultQueue.poll();
             int steps = diceManager.convertToSteps(result);
-            
-            List<Horse> movable = getMovableHorses(steps);
-            if (movable.isEmpty()) {
-                System.out.println("이동 가능한 말 없음. 턴 넘김.");
-                continue;
+
+            List<Horse> movable = board.getHorsesForTeam(getCurrentTeam());
+            movable.removeIf(h -> !board.canMove(h, steps));
+            if (movable.isEmpty()) continue;
+
+            // 사용자 선택 및 이동
+            Horse selected = mainFrame.promptHorseSelection(movable, steps);
+            if (selected == null) return; // 취소 시 중단
+
+            // 잡기/그룹핑 처리
+            for (Horse other : board.getAllHorses()) {
+                if (selected.isGroupable(other)) {
+                    selected.groupWith(other);
+                } else if (selected.isCaptured(other)) {
+                    other.setPosition(board.getStartNode());
+                }
             }
-        
-            // 👉 사용자에게 movable 리스트를 넘겨서 선택하게 하기
-            //mainFrame.promptHorseSelection(movable, steps);
-            return; // 선택 후 다시 이어지도록 흐름 잠시 멈춤
+            mainFrame.getBoardPanel().repaint();
+        }
+
+        if (!moved) {
+            autoSkipTurn();
+            mainFrame.getDicePanel().setEnabled(true);
+            return;
         }
     
         checkWin();
         nextTurn();
-    }
-    
-
-    /** 턴 종료 후 다음 플레이어로 넘김 */
-    public void nextTurn() {
-        // currentPlayerIndex 증가 및 UI 갱신
-    }
-
-    /** 플레이어가 승리 조건을 만족했는지 체크 */
-    public void checkWin() {
-        // 말 4개 모두 도착했는지 등
+        mainFrame.getDicePanel().setEnabled(true);
+        //false 로 설정하면 그 패널(DicePanel)과 그 안에 들어 있는 모든 버튼·입력창이 클릭이나 입력을 받지 않게됨
     }
 
     /** 게임을 완전히 초기화하고 새로 시작 */
@@ -73,8 +153,8 @@ public class GameManager {
     }
 
     /** 현재 플레이어 이름 반환 */
-    public String getCurrentPlayer() {
-        return players.get(currentPlayerIndex);
+    public Team getCurrentTeam() {
+        return Team.get(currentPlayerIndex);
     }
 
     /** 윷 결과를 받아 처리 (GameController에서 호출) */
@@ -85,7 +165,7 @@ public class GameManager {
 
     //이동 가능 말 필터 메서드
     public List<Horse> getMovableHorses(int steps) {
-        List<Horse> horses = board.getHorsesForPlayer(getCurrentPlayer());
+        List<Horse> horses = board.getHorsesForTeam(getCurrentTeam());
         List<Horse> movable = new ArrayList<>();
         for (Horse h : horses) {
             if (board.canMove(h, steps)) {
@@ -134,3 +214,4 @@ nextTurn()  다음 플레이어로 전환
 restartGame()   판 전체 리셋
 getCurrentPlayer()  UI에서 현재 사용자 표시용
 */
+

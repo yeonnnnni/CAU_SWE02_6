@@ -1,10 +1,19 @@
 package view;
 
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.text.*;
+
+import model.YutResult;
+
+import java.util.Queue;
+import java.util.List;
+import java.awt.GridLayout;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 public class DicePanel extends JPanel {
 
+    private Queue<YutResult> lastResults = new LinkedList<>();
     private JLabel resultLabel;
     private JButton rollButton;
     private JTextField manualInputField;
@@ -34,6 +43,8 @@ public class DicePanel extends JPanel {
         JPanel inputPanel = new JPanel();
         inputPanel.add(new JLabel("수동 입력 (-1~5):"));
         inputPanel.add(manualInputField);
+        // 숫자만 입력 가능하게 필터 적용
+        ((AbstractDocument) manualInputField.getDocument()).setDocumentFilter(new NumericFilter());
 
         // 굴리기 버튼
         rollButton = new JButton("주사위 굴리기");
@@ -44,6 +55,48 @@ public class DicePanel extends JPanel {
         add(inputPanel);
         add(rollButton);
     }
+
+    public void addRollListener(ActionListener listener) {
+        rollButton.addActionListener(listener);
+    }
+
+    public void showResult(List<YutResult> results) {
+        lastResults.clear();
+        lastResults.addAll(results);
+        StringBuilder sb = new StringBuilder("결과: ");
+        for (YutResult r : results) {
+            sb.append(r.name()).append(" ");
+        }
+        resultLabel.setText(sb.toString().trim());
+    }
+
+    /** 새로 추가: GameManager가 사용할 수 있도록 마지막 결과 큐 반환 */
+    public Queue<YutResult> getResultQueue() {
+        return new LinkedList<>(lastResults);
+    }
+
+    // 내부 클래스: 숫자(-1~5) 외 입력 차단
+    private static class NumericFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+            if (isValidInput(string)) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+            if (isValidInput(text)) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
+
+        private boolean isValidInput(String text) {
+            return text.matches("-?\\d*"); // 음수 포함 숫자만 허용
+        }
+    }
+
+    
 
     // --- Getter 메서드 ---
 
@@ -62,4 +115,6 @@ public class DicePanel extends JPanel {
     public void setResultText(String text) {
         resultLabel.setText("결과: " + text);
     }
+
 }
+
