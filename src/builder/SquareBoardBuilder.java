@@ -71,6 +71,10 @@
          connect("OO", "A0"); connect("A0", "A1"); connect("A1", "A2");
  
          connect("OO", "B0"); connect("B0", "B1"); connect("B1", "B2"); connect("B2", "N12");
+
+         connect("D2", "N4");
+         connect("C2", "N8");
+         connect("B2", "N11");
      }
  
      private void connect(String fromId, String toId) {
