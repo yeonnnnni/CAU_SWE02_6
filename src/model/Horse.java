@@ -59,34 +59,63 @@ public class Horse {
 
     // 분기점에서 사용자에게 경로 선택 유도
     private Node chooseNextNode(List<Node> candidates) {
-        if (position.isCenter()) {
+        String currentId = position.getId();  // position은 Node
+
+        // center 노드인 경우
+        if (currentId.equals("00")) {
             return candidates.stream()
                     .filter(n -> n.getId().startsWith("A"))
                     .findFirst()
                     .orElse(candidates.getFirst());
-        } else {
-            String direction = position.getId().substring(0, 1);
-            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
+        } // center노드일경우
+//        else if (currentId.endsWith("2") && !currentId.equals("A2")) {
+//            System.out.println("here!!!!!!!!!!!!!!!");
+//            String direction = position.getId().substring(0, 1);
+//            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
+//
+//            if (useShortcut) {
+//                int level = Character.getNumericValue(position.getId().charAt(1));
+//                return candidates.stream()
+//                        .filter(n -> n.getId().startsWith(direction))
+//                        .filter(n -> n.getId().length() >= 2 &&
+//                                Character.getNumericValue(n.getId().charAt(1)) == level - 1)
+//                        .findFirst()
+//                        .orElse(candidates.getFirst());
+//            } else {
+//                return candidates.stream()
+//                        .filter(n -> n.getId().startsWith("N"))
+//                        .findFirst()
+//                        .orElse(candidates.getFirst());
+//            }
+//        }
+        // 2. A2 노드인 경우 → 무조건 N0 선택
+        else if (currentId.equals("A2")) {
+            return candidates.stream()
+                    .filter(n -> n.getId().equals("N0"))
+                    .findFirst()
+                    .orElse(candidates.getFirst());
 
-            if (useShortcut) {
-                int level = Character.getNumericValue(position.getId().charAt(1));
+        }
+        // 3. 현재 노드가 N방향인 경우 → N방향 + 숫자 +1 노드로 이동
+        else if (currentId.startsWith("N")) {
+            try {
+                int currentNum = Integer.parseInt(currentId.substring(1)); // "N3" → 3
+                String targetId = "N" + (currentNum + 1);
                 return candidates.stream()
-                        .filter(n -> n.getId().startsWith(direction))
-                        .filter(n -> n.getId().length() >= 2 &&
-                                Character.getNumericValue(n.getId().charAt(1)) == level - 1)
+                        .filter(n -> n.getId().equals(targetId))
                         .findFirst()
                         .orElse(candidates.getFirst());
-            } else {
-                return candidates.stream()
-                        .filter(n -> n.getId().startsWith("N"))
-                        .findFirst()
-                        .orElse(candidates.getFirst());
+            } catch (NumberFormatException e) {
+                // 잘못된 형식이면 fallback
+                return candidates.getFirst();
             }
         }
+        return candidates.getFirst();
     }
 
-    // 한 칸 이동
-    private void moveStep() {
+
+
+    private void moveStep(boolean isRemain) {
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
         List<Node> nextList = position.getNextNodes();
@@ -95,10 +124,12 @@ public class Horse {
             return;
         }
 
-        Node next = (nextList.size() == 1)
-                ? nextList.getFirst()
-                : chooseNextNode(nextList);
+        Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
+                nextList.get(2) : // 마지막칸이 남아있지않고, n이면서 sizerk가 3이라면
+                chooseNextNode (nextList);
 
+        System.out.println("$$$$$$next: " + next.getId());
+        System.out.println("next: " + nextList.toString());
         setPosition(next);
 
         // 그룹 말도 함께 이동
@@ -134,7 +165,7 @@ public class Horse {
         }
 
         for (int i = 0; i < steps; i++) {
-            moveStep();
+            moveStep(steps == i+1); //마지막 노드일경우 참
             if (isFinished()) return;
         }
 
