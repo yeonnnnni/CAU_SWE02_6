@@ -6,6 +6,7 @@ import model.*;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import view.MainFrame;
 
 public class Horse {
     private final String	id;
@@ -52,26 +53,20 @@ public class Horse {
         }
     }
 
-    // 추후 리펙토링 필요
-    private Node chooseNextNode(List <Node> candidates) {
-        // 센터 노드일 경우: PATH1으로 이동(A번 노드)
+    private Node chooseNextNode(List<Node> candidates) {
         if (position.isCenter()) {
             // 무조건 A 방향으로 진행
             return candidates.stream()
                     .filter(n -> n.getId().startsWith("A"))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("No A-direction node from center"));
-        }
+        } else {
+            String currentDir = position.getId().substring(0, 1);
+            int currentLevel = Character.getNumericValue(position.getId().charAt(1));
 
-        else{ // corner
-            System.out.println("지름길로 진입하시겠습니까? (y/n): ");
+            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(currentDir);
 
-            String currentDir = position.getId().substring(0, 1);   // 예: A, B
-            int currentLevel = Character.getNumericValue(position.getId().charAt(1)); // 예: 2
-
-            String input = "y"; // 일단
-            if (input.equals("y")) {
-                // 지름길 선택: 같은 방향 + level 1 감소
+            if (useShortcut) {
                 return candidates.stream()
                         .filter(n -> n.getId().startsWith(currentDir))
                         .filter(n -> {
@@ -82,7 +77,6 @@ public class Horse {
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("No shortcut node found"));
             } else {
-                // 일반 경로: N 방향 노드
                 return candidates.stream()
                         .filter(n -> n.getId().startsWith("N"))
                         .findFirst()
@@ -90,6 +84,7 @@ public class Horse {
             }
         }
     }
+
 
     private void moveStep() {
         if (position == null) throw new IllegalStateException("Position has not been set");
@@ -131,6 +126,8 @@ public class Horse {
             System.out.println("Horse " + id + " is already finished"); // for test
             return;
         }
+
+        backupState();
 
         if (position == null) {
             position = BoardFactory.getStartNode(board);

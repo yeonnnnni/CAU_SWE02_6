@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
+import java.util.LinkedList;
+import javax.swing.JOptionPane;
+
+
 public class GameManager {
     private MainFrame mainFrame;
     private Board board;
@@ -94,6 +98,30 @@ public class GameManager {
         }
         return movable;
     }
+
+    /** 윷 버튼 클릭 시 호출됨: 윷 결과 생성 + 처리 시작 */
+    public void handleDiceRoll() {
+        if (mainFrame.getDicePanel().isRandomMode()) {
+            Queue<YutResult> resultQueue = diceManager.rollRandomQueue();
+            mainFrame.getDicePanel().showResult(List.copyOf(resultQueue));
+            handleMoveQueue(resultQueue);
+        } else {
+            // 👉 수동 모드
+            try {
+                int input = Integer.parseInt(mainFrame.getDicePanel().getManualInputText().trim());
+                YutResult result = diceManager.rollManual(input);
+                Queue<YutResult> resultQueue = new LinkedList<>();
+                resultQueue.add(result);
+                mainFrame.getDicePanel().showResult(List.of(result));
+                handleMoveQueue(resultQueue);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(mainFrame, "수동 입력은 -1부터 5 사이의 정수를 입력해야 합니다.", "입력 오류", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(mainFrame, "잘못된 수치입니다: " + e.getMessage(), "입력 오류", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
 
 
 }
