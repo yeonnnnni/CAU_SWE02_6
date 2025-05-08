@@ -122,13 +122,13 @@ public class Horse {
     }
 
     // n칸 이동
-    public void move(int steps, List<Node> board) {
+    public void move(int steps, List<Node> board, String boardType) {
         if (isFinished()) return;
 
         backupState();
 
         if (position == null) {
-            position = BoardFactory.getStartNode(board);
+            position = BoardFactory.getStartNode(board, boardType);
             state = HorseState.MOVING;
             if (steps < 0) return;
         }

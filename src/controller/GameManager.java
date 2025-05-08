@@ -24,12 +24,15 @@ public class GameManager {
     private final List<Team> teams;
     private int currentPlayerIndex;
 
+    private final String boardType;
+
     // 생성자: 필요한 참조 객체들을 주입받아 초기화
-    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams) {
+    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams, String boardType) {
         this.mainFrame = mainFrame;
         this.board = board;
         this.diceManager = diceManager;
         this.teams = teams;
+        this.boardType = boardType;
         this.currentPlayerIndex = 0;
     }
 
@@ -104,7 +107,7 @@ public class GameManager {
             }
 
             // 말 이동 수행
-            selected.move(steps, board.getNodes());
+            selected.move(steps, board.getNodes(), boardType);
 
             // 도착한 위치에서 잡기/그룹핑 처리
             for (Horse other : board.getAllHorses()) {
@@ -138,7 +141,7 @@ public class GameManager {
         Horse selected = mainFrame.promptHorseSelection(movable, steps);
         if (selected == null) return;
 
-        selected.move(steps, board.getNodes());
+        selected.move(steps, board.getNodes(), boardType);
 
         // 잡기 및 그룹핑 처리
         for (Horse other : board.getAllHorses()) {

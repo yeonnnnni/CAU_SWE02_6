@@ -69,7 +69,7 @@ public class MainFrame extends JFrame {
         for (Team t : teams) board.registerTeam(t);
 
         // 게임 매니저 연결
-        gameManager = new GameManager(this, board, new DiceManager(), teams);
+        gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
         gameManager.startGame();
 
         // 윷 이벤트
