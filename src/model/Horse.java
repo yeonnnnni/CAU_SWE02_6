@@ -1,34 +1,33 @@
 package model;
 
 import builder.BoardFactory;
-import model.*;
+import view.MainFrame;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import view.MainFrame;
-
 import javax.swing.JButton;
 import java.awt.Point;
 
 public class Horse {
-    private final String	id;
-    private final int   	teamID;
-    private final int       horseIdx;
-    private final Team      team;
-    private HorseState      state;
-    private Node            position;
-    private List<Horse>     groupedHorses;
-    private HorseBackup     backup;
+    private final String id;
+    private final int teamID;
+    private final int horseIdx;
+    private final Team team;
+
+    private HorseState state;
+    private Node position;
+    private List<Horse> groupedHorses;
+    private HorseBackup backup;
 
     public Horse(int horseIdx, Team team) {
-        this.teamID = team.getTeamID();
-        this.team=team;
-        this.id = "T" + teamID + "-H" + horseIdx;
         this.horseIdx = horseIdx;
+        this.teamID = team.getTeamID();
+        this.team = team;
+        this.id = "T" + teamID + "-H" + horseIdx;
         this.state = HorseState.WAITING;
-        this.position = null;
         this.groupedHorses = new ArrayList<>();
+        this.position = null;
         team.addHorse(this);
     }
 
@@ -37,15 +36,17 @@ public class Horse {
     public HorseState getState() { return state; }
     public List<Horse> getGroupedHorses() { return groupedHorses; }
     public void setState(HorseState state) { this.state = state; }
+    public Team getTeam() { return team; }
 
-    public Node getPosition(){
-        return this.position;
+    public Node getPosition() {
+        return position;
     }
 
-    public Color getTeamColor(){
+    public Color getTeamColor() {
         return team.getColor();
     }
 
+    // 말 위치 설정 (노드 등록 및 제거 포함)
     public void setPosition(Node position) {
         if (this.position != null) {
             this.position.removeHorse(this);
@@ -56,79 +57,73 @@ public class Horse {
         }
     }
 
+    // 분기점에서 사용자에게 경로 선택 유도
     private Node chooseNextNode(List<Node> candidates) {
         if (position.isCenter()) {
-            // 무조건 A 방향으로 진행
             return candidates.stream()
                     .filter(n -> n.getId().startsWith("A"))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No A-direction node from center"));
+                    .orElse(candidates.getFirst());
         } else {
-            String currentDir = position.getId().substring(0, 1);
-            int currentLevel = Character.getNumericValue(position.getId().charAt(1));
-
-            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(currentDir);
+            String direction = position.getId().substring(0, 1);
+            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
 
             if (useShortcut) {
+                int level = Character.getNumericValue(position.getId().charAt(1));
                 return candidates.stream()
-                        .filter(n -> n.getId().startsWith(currentDir))
-                        .filter(n -> {
-                            if (n.getId().length() < 2) return false;
-                            int level = Character.getNumericValue(n.getId().charAt(1));
-                            return level == currentLevel - 1;
-                        })
+                        .filter(n -> n.getId().startsWith(direction))
+                        .filter(n -> n.getId().length() >= 2 &&
+                                Character.getNumericValue(n.getId().charAt(1)) == level - 1)
                         .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("No shortcut node found"));
+                        .orElse(candidates.getFirst());
             } else {
                 return candidates.stream()
                         .filter(n -> n.getId().startsWith("N"))
                         .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("No normal path node found"));
+                        .orElse(candidates.getFirst());
             }
         }
     }
 
-
+    // 한 칸 이동
     private void moveStep() {
-        if (position == null) throw new IllegalStateException("Position has not been set");
+        if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
         List<Node> nextList = position.getNextNodes();
         if (nextList == null || nextList.isEmpty()) {
-            // 더 이상 이동할 곳이 없으면 완주로 간주
             this.state = HorseState.FINISHED;
             return;
         }
 
         Node next = (nextList.size() == 1)
-                ? nextList.getFirst() // 첫번째 노드
-                : chooseNextNode(nextList);  // 복수일 경우 선택
+                ? nextList.getFirst()
+                : chooseNextNode(nextList);
 
-        setPosition(next); // 본인 위치 갱신
+        setPosition(next);
 
-        // 그룹된 말들도 함께 이동
+        // 그룹 말도 함께 이동
         for (Horse grouped : groupedHorses) {
             grouped.setPosition(next);
         }
 
-        // 도착 지점인지 확인하여 상태 업데이트
+        // 도착 지점인지 확인
         if (position.isGoal()) {
             this.state = HorseState.FINISHED;
             return;
         }
 
+        // 도착 후 자동 그룹핑
         List<Horse> others = position.getHorsesOnNode();
         for (Horse other : others) {
-            if (this != other && this.isGroupable(other)) {
-                this.groupWith(other);
+            if (this != other && isGroupable(other)) {
+                groupWith(other);
             }
         }
     }
 
-    public void move ( int steps, List<Node > board) { // 사용자 상호작용 지점
-        if (isFinished()) {
-            System.out.println("Horse " + id + " is already finished"); // for test
-            return;
-        }
+    // n칸 이동
+    public void move(int steps, List<Node> board) {
+        if (isFinished()) return;
 
         backupState();
 
@@ -138,78 +133,72 @@ public class Horse {
             if (steps < 0) return;
         }
 
-
         for (int i = 0; i < steps; i++) {
-            moveStep(); // 지름길 or 외곽경로 선택 필요시 콜백함수 -> 나중에 ui랑 ㄱㄱ
-            if (this.isFinished()) {
-                return;
-            } // 말 완주
+            moveStep();
+            if (isFinished()) return;
         }
 
-        assert position != null; // 말 잡기
+        // 도착 후 말 잡기
         List<Horse> others = position.getHorsesOnNode();
-        for (Horse oth : others) {
-            if (isCaptured(oth)) {
-                oth.reset();
+        for (Horse other : others) {
+            if (isCaptured(other)) {
+                other.reset();
             }
         }
 
-        printStatus();
+        printStatus(); // 디버깅 로그 출력
     }
 
+    // 현재 상태 백업
     public void backupState() {
         this.backup = new HorseBackup(this.position, this.state, this.groupedHorses);
     }
 
+    // 백업 상태로 롤백
     public void rollback() {
         if (backup != null) {
             this.setPosition(backup.position);
             this.state = backup.state;
             this.groupedHorses = new ArrayList<>(backup.groupedHorses);
-        } else {
-            IllegalAccessError e = new IllegalAccessError("No backup state to rollback.");
         }
     }
 
-    public void reset () {
+    // 말 상태 초기화
+    public void reset() {
         if (position != null) {
             position.removeHorse(this);
         }
-
         position = null;
         state = HorseState.WAITING;
         groupedHorses.clear();
     }
 
     public boolean isCaptured(Horse other) {
-        return !this.teamIdEquals(other) && this.position == other.position;
+        return !teamIdEquals(other) && this.position == other.position;
     }
 
     public boolean isGroupable(Horse other) {
-        return this.teamIdEquals(other) && this.position == other.position && !groupedHorses.contains(other);
-    }
-
-    public boolean isWin() {
-        return this.state == HorseState.FINISHED;
-    }
-
-    public void groupWith(Horse other) {
-        if (isGroupable(other)) { // this 대표말, oth 부속말
-            groupedHorses.add(other);
-            other.groupedHorses.clear(); // 말 하나는 여러 그룹에 속할 수 없다.
-            other.groupedHorses.add(this);
-            other.setPosition(this.position);
-        }
+        return teamIdEquals(other) && this.position == other.position && !groupedHorses.contains(other);
     }
 
     public boolean isFinished() {
-        return this.state == HorseState.FINISHED;
+        return state == HorseState.FINISHED;
+    }
+
+    public void groupWith(Horse other) {
+        if (isGroupable(other)) {
+            groupedHorses.add(other);
+            other.groupedHorses.clear();
+            other.groupedHorses.add(this);
+            other.setPosition(this.position);
+        }
     }
 
     private boolean teamIdEquals(Horse other) {
         return this.teamID == other.teamID;
     }
 
+    // 디버깅용 말 상태 출력
     public void printStatus() {
         String positionId = (position != null) ? position.getId() : "null";
         String coord = "null";
@@ -223,7 +212,7 @@ public class Horse {
                 Point p = btn.getLocation();
                 coord = "(" + p.x + ", " + p.y + ")";
             } else {
-                coord = "(버튼 미존재)";
+                coord = "(버튼 없음)";
             }
         }
 
@@ -232,5 +221,4 @@ public class Horse {
                 this.id, this.state, positionId, coord
         );
     }
-
 }

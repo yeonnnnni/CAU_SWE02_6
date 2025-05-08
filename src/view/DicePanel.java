@@ -1,93 +1,70 @@
 package view;
 
+import model.YutResult;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
+/*
+윷 던지기 관련 UI 컴포넌트
+랜덤 모드와 수동 입력 모드를 모두 지원합니다.
+*/
 public class DicePanel extends JPanel {
 
-    private JLabel resultLabel;
-    private JButton rollButton;
-    private JTextField manualInputField;
-    private JRadioButton randomMode;
-    private JRadioButton manualMode;
-    private ButtonGroup modeGroup;
+    private final JLabel resultLabel;
+    private final JButton rollButton;
+    private final JTextField manualInputField;
+    private final JRadioButton randomMode;
+    private final JRadioButton manualMode;
+    private final Queue<YutResult> lastResults = new LinkedList<>();
 
     public DicePanel() {
         setLayout(new GridLayout(4, 1));
 
-        // 결과 출력 라벨
         resultLabel = new JLabel("결과: -");
+        add(resultLabel);
 
-        // 랜덤/수동 모드 라디오 버튼
         randomMode = new JRadioButton("랜덤", true);
-        manualMode = new JRadioButton("수동");
-        modeGroup = new ButtonGroup();
-        modeGroup.add(randomMode);
-        modeGroup.add(manualMode);
-
+        manualMode = new JRadioButton("지정");
+        ButtonGroup group = new ButtonGroup();
+        group.add(randomMode);
+        group.add(manualMode);
         JPanel modePanel = new JPanel();
         modePanel.add(randomMode);
         modePanel.add(manualMode);
-
-        // 수동 입력 필드
-        manualInputField = new JTextField(5);
-        JPanel inputPanel = new JPanel();
-        inputPanel.add(new JLabel("수동 입력 (-1~5):"));
-        inputPanel.add(manualInputField);
-        // 숫자만 입력 가능하게 필터 적용
-        ((AbstractDocument) manualInputField.getDocument()).setDocumentFilter(new NumericFilter());
-
-        // 굴리기 버튼
-        rollButton = new JButton("주사위 굴리기");
-
-        // 패널 배치
-        add(resultLabel);
         add(modePanel);
+
+        manualInputField = new JTextField(5);
+        ((AbstractDocument) manualInputField.getDocument()).setDocumentFilter(new NumericFilter());
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(new JLabel("입력 (-1~5):"));
+        inputPanel.add(manualInputField);
         add(inputPanel);
+
+        rollButton = new JButton("윷 던지기");
         add(rollButton);
     }
 
-    // 내부 클래스: 숫자(-1~5) 외 입력 차단
-    private static class NumericFilter extends DocumentFilter {
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if (isValidInput(string)) {
-                super.insertString(fb, offset, string, attr);
-            }
-        }
-
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if (isValidInput(text)) {
-                super.replace(fb, offset, length, text, attrs);
-            }
-        }
-
-        private boolean isValidInput(String text) {
-            return text.matches("-?\\d*"); // 음수 포함 숫자만 허용
-        }
-    }
-
-    // GameController가 호출하는 메서드 1: 주사위 굴리기 버튼에 리스너 붙이기
+    //버튼 클릭 리스너 등록
     public void addRollListener(ActionListener listener) {
         rollButton.addActionListener(listener);
     }
 
-    // GameController가 호출하는 메서드 2: 윷 결과 보여주기
-    public void showResult(List<model.YutResult> results) {
-        StringBuilder sb = new StringBuilder();
-        for (model.YutResult result : results) {
-            sb.append(result.name()).append(" ");
+    //윷 결과 표시
+    public void showResult(List<YutResult> results) {
+        lastResults.clear();
+        lastResults.addAll(results);
+        StringBuilder sb = new StringBuilder("결과: ");
+        for (YutResult r : results) {
+            sb.append(r.name()).append(" ");
         }
-        setResultText(sb.toString().trim());
+        resultLabel.setText(sb.toString().trim());
     }
-
-
-
-    // --- Getter 메서드 ---
 
     public boolean isRandomMode() {
         return randomMode.isSelected();
@@ -97,12 +74,19 @@ public class DicePanel extends JPanel {
         return manualInputField.getText();
     }
 
-    public JButton getRollButton() {
-        return rollButton;
+    public Queue<YutResult> getResultQueue() {
+        return new LinkedList<>(lastResults);
     }
 
-    public void setResultText(String text) {
-        resultLabel.setText("결과: " + text);
-    }
+    private static class NumericFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+            if (string.matches("-?\\d*")) super.insertString(fb, offset, string, attr);
+        }
 
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+            if (text.matches("-?\\d*")) super.replace(fb, offset, length, text, attrs);
+        }
+    }
 }
