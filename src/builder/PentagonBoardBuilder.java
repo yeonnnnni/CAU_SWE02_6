@@ -91,8 +91,8 @@ public class PentagonBoardBuilder implements BoardBuilder {
             for (int j = 0; j <= 2; j++) {
                 double r = outerR - (2 - j) * step;
                 double angle = Math.toRadians(angles[i]);
-                int x = (int) (Math.cos(angle) * r * 10);
-                int y = (int) (Math.sin(angle) * r * 10);
+                int x = (int) (Math.cos(angle) * r * 40);
+                int y = (int) (Math.sin(angle) * r * 40);
                 // Java 좌표계 y축 반전
                 positions.put(dirs[i] + j, new Point(x, -y));
             }
@@ -105,8 +105,8 @@ public class PentagonBoardBuilder implements BoardBuilder {
         // 꼭짓점 위치 저장 (A2 ~ E2와 동일)
         for (int i = 0; i < 5; i++) {
             double angle = Math.toRadians(vertexAngles[i]);
-            int x = (int)(Math.cos(angle) * outerR * 10);
-            int y = (int)(Math.sin(angle) * outerR * 10);
+            int x = (int)(Math.cos(angle) * outerR * 40);
+            int y = (int)(Math.sin(angle) * outerR * 40);
             vertices[i] = new Point(x, -y);  // Java 좌표계 반영
         }
 
