@@ -5,6 +5,7 @@ import view.MainFrame;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.swing.JButton;
 import java.awt.Point;
@@ -58,42 +59,84 @@ public class Horse {
     }
 
     // 분기점에서 사용자에게 경로 선택 유도
-    private Node chooseNextNode(List<Node> candidates) {
+    /*
+     * candidates: 현재 위치에서 갈 수 있는 노드들 → position.getNextNodes()가 넘겨주는 리스트
+     * 반환값: 다음에 이동할 Node
+     * 지금 위치한 노드(position)의 nextNodes 목록(candidates) 중에서 어디로 이동할지를 결정해주는 함수
+     * */
+    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep) {
+        // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
 
+        // 중심 노드일 경우: "OO"
         // center 노드인 경우
+        //"A" 방향으로 가는 지름길 선택 (우선순위) -> 도착지점에 가장 가까운게 A니까.
+        //A방향 노드 (A1, A0 등)가 없다면 그냥 candidates의 첫 번째 노드 선택
         if (currentId.equals("00")) {
             return candidates.stream()
                     .filter(n -> n.getId().startsWith("A"))
                     .findFirst()
                     .orElse(candidates.getFirst());
-        } // center노드일경우
-//        else if (currentId.endsWith("2") && !currentId.equals("A2")) {
-//            System.out.println("here!!!!!!!!!!!!!!!");
-//            String direction = position.getId().substring(0, 1);
-//            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
-//
-//            if (useShortcut) {
-//                int level = Character.getNumericValue(position.getId().charAt(1));
-//                return candidates.stream()
-//                        .filter(n -> n.getId().startsWith(direction))
-//                        .filter(n -> n.getId().length() >= 2 &&
-//                                Character.getNumericValue(n.getId().charAt(1)) == level - 1)
-//                        .findFirst()
-//                        .orElse(candidates.getFirst());
-//            } else {
-//                return candidates.stream()
-//                        .filter(n -> n.getId().startsWith("N"))
-//                        .findFirst()
-//                        .orElse(candidates.getFirst());
-//            }
-//        }
+        }
+
+        else if (currentId.startsWith("A") && !currentId.equals("A2")) {
+            try {
+                int level = Character.getNumericValue(currentId.charAt(1));
+                String targetId = "A" + (level + 1);
+                return candidates.stream()
+                        .filter(n -> n.getId().equals(targetId))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("A" + level + " → " + targetId + " 경로가 없습니다."));
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("A 방향 노드 ID 형식이 잘못되었습니다: " + currentId);
+            }
+        }
+
+        //각 방향의 "2"번 노드이면서 A2는 아니면서 N2는 아니면서 시작이 vertex인 경우.
+        else if (isFirstStep && currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.startsWith("N")) {
+            System.out.println("vertex!!");
+            //사용자가 지름길을 쓸지 물어보고, 사용하면 "D1"로, 아니면 "N*"으로 감.
+            String direction = position.getId().substring(0, 1);    // D2 → "D" : 현재 노드의 맨 앞 알파벳 따옴.
+            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
+
+            //지름길 선택한 경우
+            if (useShortcut) {
+                // 지름길로 갈 대상 ID를 명확히 만듦: "D2" → "D1"
+                String shortcutId = direction + "1";
+
+                return candidates.stream()
+                        .filter(n -> n.getId().equals(shortcutId))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("지름길 노드 " + shortcutId + "를 찾을 수 없습니다."));
+            } else {
+                // 지름길 안 쓰는 경우 → 가장 숫자가 큰 N 노드로 이동
+                return candidates.stream()
+                        .filter(n -> n.getId().startsWith("N"))
+                        .max(Comparator.comparingInt(n -> Integer.parseInt(n.getId().substring(1))))
+                        .orElseThrow(() -> new IllegalStateException("기본 경로에서 이동 가능한 N 노드를 찾을 수 없습니다. 후보: "
+                                + candidates.stream().map(Node::getId).toList()));
+            }
+        }
+
+        else if (currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.startsWith("N")) {
+            // 지름길 안 쓰는 경우 → 가장 숫자가 큰 N 노드로 이동
+                return candidates.stream()
+                    .filter(n -> n.getId().startsWith("N"))
+                    .max(Comparator.comparingInt(n -> Integer.parseInt(n.getId().substring(1))))
+                    .orElseThrow(() -> new IllegalStateException("기본 경로에서 이동 가능한 N 노드를 찾을 수 없습니다. 후보: "
+                            + candidates.stream().map(Node::getId).toList()));
+
+        }
+
+
         // 2. A2 노드인 경우 → 무조건 N0 선택
+        //시작은 일단 무조건 앞으로 가야하니까.
+        //⚠️백도 나오면? 뒤로 가야하는 거 아닌가?
         else if (currentId.equals("A2")) {
             return candidates.stream()
                     .filter(n -> n.getId().equals("N0"))
                     .findFirst()
-                    .orElse(candidates.getFirst());
+                    .orElseThrow(() -> new IllegalStateException("노드 " + currentId + "를 찾을 수 없습니다."));
 
         }
         // 3. 현재 노드가 N방향인 경우 → N방향 + 숫자 +1 노드로 이동
@@ -101,32 +144,82 @@ public class Horse {
             try {
                 int currentNum = Integer.parseInt(currentId.substring(1)); // "N3" → 3
                 String targetId = "N" + (currentNum + 1);
-                return candidates.stream()
-                        .filter(n -> n.getId().equals(targetId))
-                        .findFirst()
-                        .orElse(candidates.getFirst());
+
+                // 1. N+1 노드 있는지 확인
+                for (Node n : candidates) {
+                    if (n.getId().equals(targetId)) {
+                        return n;  // 바로 반환
+                    }
+                }
+
+                // 2. 그게 없으면 다른 후보 중에서 현재 또는 뒤로 가는 노드 제외
+                List<Node> nonCurrent = new ArrayList<>();
+                for (Node n : candidates) {
+                    String id = n.getId();
+                    if (!id.equals("N" + currentNum) && !id.equals("N" + (currentNum - 1))) {
+                        nonCurrent.add(n);
+                    }
+                }
+
+                if (nonCurrent.size() == 1) {
+                    return nonCurrent.get(0);
+                } else {
+                    throw new IllegalStateException("N" + (currentNum + 1) + "도 없고, 유효한 분기 노드도 1개가 아님. 후보들: "
+                            + candidates.stream().map(Node::getId).toList());
+                }
+
             } catch (NumberFormatException e) {
-                // 잘못된 형식이면 fallback
-                return candidates.getFirst();
+                throw new IllegalStateException("현재 노드 ID 형식 오류: " + currentId, e);
             }
         }
+
+        //지름길 안에 있으면서 A1, B1, 이런 거는 숫자를 하나 줄인 A0, B0 로 가야함.
+        else if (currentId.endsWith("1") && !currentId.startsWith("N")) {
+            // 예: 현재 D1이면 다음 D0으로 가야 함
+            String direction = currentId.substring(0, 1);
+            String targetId = direction + "0";
+
+            return candidates.stream()
+                    .filter(n -> n.getId().equals(targetId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("노드 " + targetId + "를 찾을 수 없습니다."));
+        }
+
+        else if (currentId.endsWith("0") && !currentId.startsWith("N")) {
+            return candidates.stream()
+                    .filter(n -> n.getId().equals("00"))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("0단계 노드에서 중심(00)으로 가는 경로가 없습니다."));
+        }
+
+
+        //위 조건 모두 해당 안 되는 경우는 그냥 첫 번째 후보 노드로 이동
         return candidates.getFirst();
     }
 
 
 
-    private void moveStep(boolean isRemain) {
+    private void moveStep(boolean isRemain, boolean isFirstStep) {
+        //현재 위치가 없으면 오류
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
+        //다음으로 갈 수 있는 후보 노드 리스트
         List<Node> nextList = position.getNextNodes();
         if (nextList == null || nextList.isEmpty()) {
             this.state = HorseState.FINISHED;
             return;
         }
 
+        //다음 이동 노드 선택
+        /*
+         * isRemain: 지금 이동이 마지막 칸인지 여부 (즉, steps 중 마지막)
+         * position.getId().startsWith("N"): 현재 위치가 N0, N1, ... 등 바깥 테두리 노드인지 확인
+         * nextList.size() == 3: 후보가 3개 있을 때 → 지름길 포함된 분기점이라는 뜻
+         * */
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
+                //⚠️이러면 사용자의 선택 없이 무조건 지름길로 감.
                 nextList.get(2) : // 마지막칸이 남아있지않고, n이면서 sizerk가 3이라면
-                chooseNextNode (nextList);
+                chooseNextNode (nextList, isFirstStep);
 
         System.out.println("$$$$$$next: " + next.getId());
         System.out.println("next: " + nextList.toString());
@@ -143,7 +236,7 @@ public class Horse {
             return;
         }
 
-        // 도착 후 자동 그룹핑
+        // 현재 위치에 같은 팀 말이 있으면 그룹핑
         List<Horse> others = position.getHorsesOnNode();
         for (Horse other : others) {
             if (this != other && isGroupable(other)) {
@@ -165,8 +258,9 @@ public class Horse {
         }
 
         for (int i = 0; i < steps; i++) {
-            moveStep(steps == i+1); //마지막 노드일경우 참
-            if (isFinished()) return;
+            boolean isFirst = (i == 0);
+            boolean isLast = (i == steps - 1);
+            moveStep(isLast, isFirst);
         }
 
         // 도착 후 말 잡기
