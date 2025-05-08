@@ -80,4 +80,18 @@ public class Board {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("A2 노드를 찾을 수 없습니다."));
     }
+
+    // Board.java 내부에 아래 메서드 추가
+    public void registerTeam(Team team) {
+        String teamIdAsString = String.valueOf(team.getTeamID());
+        if (playerToTeam.containsKey(teamIdAsString)) return;
+
+        for (int i = 0; i < 4; i++) {
+            Horse h = new Horse(i, team);   // 팀에 자동 등록
+            allHorses.add(h);               // 전체 말 목록에도 추가
+        }
+
+        playerToTeam.put(teamIdAsString, team);  // 팀 등록
+    }
+
 }

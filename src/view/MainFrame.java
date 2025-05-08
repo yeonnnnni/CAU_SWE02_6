@@ -1,3 +1,4 @@
+// MainFrame.java
 package view;
 
 import builder.BoardBuilder;
@@ -30,7 +31,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // 보드 유형 선택
+        // 보드 생성
         String[] types = {"square", "pentagon", "hexagon"};
         String boardType = (String) JOptionPane.showInputDialog(
                 null,
@@ -43,7 +44,6 @@ public class MainFrame extends JFrame {
         );
         if (boardType == null) boardType = "square";
 
-        // 보드 생성
         BoardBuilder builder = BoardFactory.create(boardType);
         this.nodeList = builder.buildBoard();
 
@@ -56,23 +56,23 @@ public class MainFrame extends JFrame {
         dicePanel = new DicePanel();
         add(dicePanel, BorderLayout.NORTH);
 
-        // 현재 플레이어 라벨
+        // 플레이어 라벨
         currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
         add(currentPlayerLabel, BorderLayout.SOUTH);
 
-        // 팀 구성
+        // 팀 구성 및 등록
         List<Team> teams = List.of(
                 new Team(0, "A", Color.BLUE),
                 new Team(1, "B", Color.RED)
         );
+        Board board = new Board();
+        for (Team t : teams) board.registerTeam(t);
 
         // 게임 매니저 연결
-        Board board = new Board();
-        teams.forEach(t -> board.getHorsesForTeam(t));  // 초기화용 호출
         gameManager = new GameManager(this, board, new DiceManager(), teams);
         gameManager.startGame();
 
-        // 주사위 버튼 이벤트
+        // 윷 이벤트
         dicePanel.addRollListener(e -> gameManager.handleDiceRoll());
 
         setVisible(true);
@@ -82,21 +82,10 @@ public class MainFrame extends JFrame {
         currentPlayerLabel.setText("현재: " + name);
     }
 
-    public BoardPanel getBoardPanel() {
-        return boardPanel;
-    }
-
-    public DicePanel getDicePanel() {
-        return dicePanel;
-    }
-
-    public List<Node> getNodes() {
-        return nodeList;
-    }
-
-    public static MainFrame getInstance() {
-        return instance;
-    }
+    public BoardPanel getBoardPanel() { return boardPanel; }
+    public DicePanel getDicePanel() { return dicePanel; }
+    public List<Node> getNodes() { return nodeList; }
+    public static MainFrame getInstance() { return instance; }
 
     public boolean promptShortcutChoice(String direction) {
         int choice = JOptionPane.showOptionDialog(
@@ -114,7 +103,7 @@ public class MainFrame extends JFrame {
 
     public Horse promptHorseSelection(List<Horse> candidates, int steps) {
         Object[] options = candidates.toArray();
-        Horse selected = (Horse) JOptionPane.showInputDialog(
+        return (Horse) JOptionPane.showInputDialog(
                 this,
                 steps + "칸 이동할 말을 선택하세요:",
                 "말 선택",
@@ -123,13 +112,9 @@ public class MainFrame extends JFrame {
                 options,
                 options[0]
         );
-        return selected;
     }
 
     public static void main(String[] args) {
-        // Swing UI는 이벤트 디스패치 스레드에서 실행되어야 함
-        SwingUtilities.invokeLater(() -> {
-            new MainFrame();  // 메인 프레임 생성 및 실행
-        });
+        SwingUtilities.invokeLater(MainFrame::new);
     }
 }
