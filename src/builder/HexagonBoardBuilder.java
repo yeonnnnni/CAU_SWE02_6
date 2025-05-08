@@ -118,7 +118,7 @@ public class HexagonBoardBuilder implements BoardBuilder {
 
         for (Map.Entry<String, Point> entry : positions.entrySet()) {
             Point p = entry.getValue();
-            entry.setValue(new Point(p.x, p.y - 100));
+            entry.setValue(new Point(p.x, -(p.y + 100)));
         }
     }
 

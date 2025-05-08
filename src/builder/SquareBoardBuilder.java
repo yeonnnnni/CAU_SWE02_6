@@ -26,11 +26,12 @@
          return nodeMap.computeIfAbsent(id, Node::new);
      }
  
-    private Node add(String id, int row, int col) {
-        Node n = node(id);
-        positions.put(id, new Point(col * 50, row * 50));
-        return n;
-    }
+ private Node add(String id, int row, int col) {
+     Node n = node(id);
+     // Reflect across y = x by swapping row and col, and use positive orientation
+     positions.put(id, new Point(row * 50, col * 50));
+     return n;
+ }
  
      private void createNodes() {
          add("OO", 3, 3).setCenter(true);
