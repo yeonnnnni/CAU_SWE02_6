@@ -49,7 +49,7 @@ public class BoardPanel extends JPanel {
 
             JButton btn = new JButton();
             btn.setBounds(pt.y * gridSize + 100, pt.x * gridSize + 100, buttonSize, buttonSize);
-            btn.setFont(new Font("Arial", Font.BOLD, 9));
+            btn.setFont(new Font("Arial", Font.BOLD, 8));
             btn.setText(node.getId());
             btn.setBackground(Color.WHITE);
 
