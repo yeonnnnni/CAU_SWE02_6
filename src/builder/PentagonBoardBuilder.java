@@ -88,12 +88,14 @@ public class PentagonBoardBuilder implements BoardBuilder {
         String[] dirs = {"A", "B", "C", "D", "E"};
 
         for (int i = 0; i < dirs.length; i++) {
+            double angle = Math.toRadians(angles[i]);
+            double dx = Math.cos(angle);
+            double dy = Math.sin(angle);
+            double[] radii = {2, 4, 6.0};  // A0 ~ A2: progressively farther from center
             for (int j = 0; j <= 2; j++) {
-                double r = outerR - (2 - j) * step;
-                double angle = Math.toRadians(angles[i]);
-                int x = (int) (Math.cos(angle) * r * 10);
-                int y = (int) (Math.sin(angle) * r * 10);
-                // Java 좌표계 y축 반전
+                double r = radii[j];
+                int x = (int)(dx * r * 40);
+                int y = (int)(dy * r * 40);
                 positions.put(dirs[i] + j, new Point(x, -y));
             }
         }
@@ -105,19 +107,19 @@ public class PentagonBoardBuilder implements BoardBuilder {
         // 꼭짓점 위치 저장 (A2 ~ E2와 동일)
         for (int i = 0; i < 5; i++) {
             double angle = Math.toRadians(vertexAngles[i]);
-            int x = (int)(Math.cos(angle) * outerR * 10);
-            int y = (int)(Math.sin(angle) * outerR * 10);
+            int x = (int)(Math.cos(angle) * outerR * 40);
+            int y = (int)(Math.sin(angle) * outerR * 40);
             vertices[i] = new Point(x, -y);  // Java 좌표계 반영
         }
 
         // 외곽 노드 20개를 지정된 순서로 배치 (A2 → N0, N1, N2, N3 → E2 → N4, N5, N6, N7 → D2 → N8, N9, N10, N11 → C2 → N12, N13, N14, N15 → B2 → N16, N17, N18, N19 → A2)
         int idx = 0;
         int[][] connectionOrder = {
-            {0, 4}, // A2 → E2
-            {4, 3}, // E2 → D2
-            {3, 2}, // D2 → C2
-            {2, 1}, // C2 → B2
-            {1, 0}  // B2 → A2
+                {0, 4}, // A2 → E2
+                {4, 3}, // E2 → D2
+                {3, 2}, // D2 → C2
+                {2, 1}, // C2 → B2
+                {1, 0}  // B2 → A2
         };
 
         for (int[] pair : connectionOrder) {
@@ -129,6 +131,11 @@ public class PentagonBoardBuilder implements BoardBuilder {
                 int y = (int)((1 - t) * start.y + t * end.y);
                 positions.put("N" + idx++, new Point(x, y));
             }
+        }
+
+        for (Map.Entry<String, Point> entry : positions.entrySet()) {
+            Point p = entry.getValue();
+            positions.put(entry.getKey(), new Point(p.x, -p.y));
         }
     }
 }

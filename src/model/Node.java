@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 //Node 클래스는 게임 보드의 각 지점(칸)을 나타냅니다.
@@ -58,6 +59,23 @@ public class Node {
 
     public List<Horse> getHorsesOnNode() {
         return new ArrayList<>(horsesOnNode);
+    }
+
+    public boolean isDiagonal() {
+        String[] diagonalIds = {
+                "C1", "C0", "00", "A0", "A1", "A2",
+                "D2", "D1", "D0", "B0", "B1", "B2"
+        };
+        System.out.println("diagonalIds: " + Arrays.toString(diagonalIds) + "");
+
+        return Arrays.asList(diagonalIds).contains(this.id);
+    }
+
+    public static Node findById(List<Node> nodes, String id) {
+        return nodes.stream()
+                .filter(n -> id.equals(n.getId()))
+                .findFirst()
+                .orElse(null);
     }
 
     // 디버깅용 toString

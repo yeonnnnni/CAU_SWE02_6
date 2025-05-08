@@ -55,7 +55,7 @@ public class HexagonBoardBuilder implements BoardBuilder {
         }
 
         Map<String, String> invalidLinks = Map.of(
-            "F0", "N20", "E0", "N16", "C0", "N8", "B0", "N4"
+                "F0", "N20", "E0", "N16", "C0", "N8", "B0", "N4"
         );
 
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
@@ -81,7 +81,7 @@ public class HexagonBoardBuilder implements BoardBuilder {
         positions.put("OO", new Point(0, 0));
 
         Map<String, Integer> baseAngles = Map.of(
-            "A", 180, "B", 120, "C", 60, "D", 0, "E", -60, "F", -120
+                "A", 180, "B", 120, "C", 60, "D", 0, "E", -60, "F", -120
         );
 
         for (Map.Entry<String, Integer> entry : baseAngles.entrySet()) {
@@ -90,8 +90,8 @@ public class HexagonBoardBuilder implements BoardBuilder {
             for (int j = 0; j <= 2; j++) {
                 double dist = 1.5 + j;
                 double angleRad = Math.toRadians(angleDeg);
-                int x = (int) (Math.cos(angleRad) * dist * 10);
-                int y = (int) (Math.sin(angleRad) * dist * 10);
+                int x = (int) (Math.cos(angleRad) * dist * 80);
+                int y = (int) (Math.sin(angleRad) * dist * 80);
                 positions.put(dir + j, new Point(x, y));
             }
         }
@@ -114,6 +114,11 @@ public class HexagonBoardBuilder implements BoardBuilder {
                 int y = (int)((1 - t) * start.y + t * end.y);
                 positions.put("N" + nIdx++, new Point(x, y));
             }
+        }
+
+        for (Map.Entry<String, Point> entry : positions.entrySet()) {
+            Point p = entry.getValue();
+            entry.setValue(new Point(p.x, -(p.y + 100)));
         }
     }
 

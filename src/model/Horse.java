@@ -15,6 +15,7 @@ public class Horse {
     private final int horseIdx;
     private final Team team;
     private int delStep;
+    private int plusStep;
 
     private HorseState state;
     private Node position;
@@ -31,6 +32,7 @@ public class Horse {
         this.position = null;
         team.addHorse(this);
         delStep = 0;
+        plusStep = 0;
     }
 
     public String getId() { return id; }
@@ -59,6 +61,39 @@ public class Horse {
         }
     }
 
+    private Node getMaxNNode(List<Node> candidates) {
+        return candidates.stream()
+                .filter(n -> n.getId().startsWith("N"))
+                .max((a, b) -> {
+                    int numA = Integer.parseInt(a.getId().substring(1));
+                    int numB = Integer.parseInt(b.getId().substring(1));
+                    return Integer.compare(numA, numB);
+                })
+                .orElse(null); // 없을 경우 null 반환
+    }
+
+    public Node getDiagonalNextNode(Node current, List<Node> board) {
+        String id = current.getId();
+
+        List<String> diagonalPath1 = List.of("C2", "C1", "C0", "00", "A0", "A1", "A2");
+        List<String> diagonalPath2 = List.of("D2", "D1", "D0", "00", "B0", "B1", "B2");
+
+        int index = diagonalPath1.indexOf(id);
+        if (index != -1 && index < diagonalPath1.size() - 1) {
+            String nextId = diagonalPath1.get(index + 1);
+            System.out.println("[getDiagonalNextNode] nextId: " + nextId);
+            return Node.findById(board, nextId);
+        }
+
+        index = diagonalPath2.indexOf(id);
+        if (index != -1 && index < diagonalPath2.size() - 1) {
+            String nextId = diagonalPath2.get(index + 1);
+            return Node.findById(board, nextId);
+        }
+
+        return null; // 대각선 경로에 포함되지 않거나 끝 지점이면 null
+    }
+
     // 분기점에서 사용자에게 경로 선택 유도
     private Node chooseNextNode(List<Node> candidates, boolean isLast) {
         String currentId = position.getId();
@@ -85,7 +120,10 @@ public class Horse {
         // 3. 코너 노드 + 마지막 이동
         if ((currentId.endsWith("2") && !currentId.equals("A2") && isLast && position.isCorner()) || delStep == 2) {
             System.out.println("[chooseNextNode] 코너 노드에서 지름길 여부 확인");
-            delStep = 0;
+            if (delStep == 2){
+                delStep = 0;
+                plusStep = 1;
+            }
 
             String direction = currentId.substring(0, 1);
             boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
@@ -103,7 +141,8 @@ public class Horse {
                         .orElse(candidates.getFirst());
             } else {
                 System.out.println("[chooseNextNode] 일반 경로 선택 → 외곽(N 방향)");
-//                return candidates.get(1) candidates.stream()
+                return getMaxNNode(candidates);
+//                candidates.stream()
 //                        .filter(n -> n.getId().startsWith("N"))
 //                        .findFirst()
 //                        .orElse(candidates.getFirst());
@@ -113,8 +152,9 @@ public class Horse {
         // 4. N방향 → N+1
         if (currentId.startsWith("N")) {
             try {
-                if (position.getId().startsWith("N") && candidates.size() == 3)
+                if (position.getId().startsWith("N") && candidates.size() == 3){
                     delStep = 1;
+                }
                 int n = Integer.parseInt(currentId.substring(1));
                 String nextId = "N" + (n + 1);
                 System.out.println("[chooseNextNode] N 노드 → 다음 노드: " + nextId);
@@ -126,6 +166,12 @@ public class Horse {
                 System.out.println("[chooseNextNode] N 노드 번호 파싱 실패");
             }
         }
+
+        if (!isLast && position.isDiagonal()) {
+            System.out.println("[chooseNextNode] digonal");
+            return getDiagonalNextNode(position, candidates);
+        }
+
 
         // fallback
         System.out.println("[chooseNextNode] 기본 선택 (첫 번째 후보)");
@@ -188,6 +234,10 @@ public class Horse {
             if (delStep == 1) {
                 steps--;
                 delStep = 0;
+            }
+            if (plusStep == 1) {
+                steps++;
+                plusStep = 0;
             }
             if (position.isCorner()) delStep = 2;
             if (isFinished()) return;
