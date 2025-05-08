@@ -1,9 +1,7 @@
 package model;
 
 import builder.BoardFactory;
-import model.Node;
-import model.HorseState;
-import model.Team;
+import model.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
