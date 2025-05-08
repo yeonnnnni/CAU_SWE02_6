@@ -84,11 +84,12 @@ public class BoardPanel extends JPanel {
             StringBuilder sb = new StringBuilder();
             sb.append(to.getId()).append("\n");
             for (Horse h : horses) {
-                sb.append(h.getId()).append("+");
+                sb.append(h.getId()).append("<br>");
             }
             if (!horses.isEmpty()) sb.setLength(sb.length() - 1);  // 마지막 + 제거
 
-            btn.setText("<html>" + sb.toString().replace("\n", "<br>") + "</html>");
+            btn.setText("<html><center>"+sb.toString()+"</center></html>");
+            //btn.setText("<html><center>" + sb.toString().replace("\n", "<br>") + "</html>");
             btn.setForeground(color);
         }
     }
