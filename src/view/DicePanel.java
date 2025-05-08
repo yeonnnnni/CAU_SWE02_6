@@ -3,6 +3,8 @@ package view;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.List;
 
 public class DicePanel extends JPanel {
 
@@ -68,6 +70,22 @@ public class DicePanel extends JPanel {
             return text.matches("-?\\d*"); // 음수 포함 숫자만 허용
         }
     }
+
+    // GameController가 호출하는 메서드 1: 주사위 굴리기 버튼에 리스너 붙이기
+    public void addRollListener(ActionListener listener) {
+        rollButton.addActionListener(listener);
+    }
+
+    // GameController가 호출하는 메서드 2: 윷 결과 보여주기
+    public void showResult(List<model.YutResult> results) {
+        StringBuilder sb = new StringBuilder();
+        for (model.YutResult result : results) {
+            sb.append(result.name()).append(" ");
+        }
+        setResultText(sb.toString().trim());
+    }
+
+
 
     // --- Getter 메서드 ---
 
