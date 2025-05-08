@@ -248,7 +248,7 @@ public class BoardPanel extends JPanel {
 
             JButton btn = new JButton();
             btn.setBounds(pt.y * gridSize + 100, pt.x * gridSize + 100, buttonSize, buttonSize);
-            btn.setFont(new Font("Arial", Font.BOLD, 12));
+            btn.setFont(new Font("Arial", Font.BOLD, 9));
             btn.setText(node.getId()); // 디버깅용 텍스트
             btn.setBackground(Color.WHITE);
 
