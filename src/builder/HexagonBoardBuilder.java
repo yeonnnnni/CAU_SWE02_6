@@ -27,7 +27,7 @@ public class HexagonBoardBuilder implements BoardBuilder {
     }
 
     private void createNodes() {
-        node("OO").setCenter(true);
+        node("00").setCenter(true);
 
         for (int i = 0; i < 24; i++) {
             node("N" + i);
@@ -50,8 +50,8 @@ public class HexagonBoardBuilder implements BoardBuilder {
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
             connect(dir + "0", dir + "1");
             connect(dir + "1", dir + "2");
-            connect(dir + "2", "OO");
-            connect("OO", dir + "1");
+            connect(dir + "2", "00");
+            connect("00", dir + "1");
         }
 
         Map<String, String> invalidLinks = Map.of(
@@ -78,7 +78,7 @@ public class HexagonBoardBuilder implements BoardBuilder {
     private void createPositions() {
         double radius = 6.0;
 
-        positions.put("OO", new Point(0, 0));
+        positions.put("00", new Point(0, 0));
 
         Map<String, Integer> baseAngles = Map.of(
             "A", 180, "B", 120, "C", 60, "D", 0, "E", -60, "F", -120

@@ -34,7 +34,7 @@
  }
  
      private void createNodes() {
-         add("OO", 3, 3).setCenter(true);
+         add("00", 3, 3).setCenter(true);
  
          add("A0", 4, 4); add("A1", 5, 5); add("A2", 6, 6);
          add("D0", 4, 2); add("D1", 5, 1); add("D2", 6, 0);
@@ -66,11 +66,11 @@
          connect("N11", "N12"); connect("N12", "N13"); connect("N13", "N14"); connect("N14", "N15");
          connect("N15", "A2");
  
-         connect("N3", "D2"); connect("D2", "D1"); connect("D1", "D0"); connect("D0", "OO");
-         connect("N7", "C2"); connect("C2", "C1"); connect("C1", "C0"); connect("C0", "OO");
-         connect("OO", "A0"); connect("A0", "A1"); connect("A1", "A2");
+         connect("N3", "D2"); connect("D2", "D1"); connect("D1", "D0"); connect("D0", "00");
+         connect("N7", "C2"); connect("C2", "C1"); connect("C1", "C0"); connect("C0", "00");
+         connect("00", "A0"); connect("A0", "A1"); connect("A1", "A2");
  
-         connect("OO", "B0"); connect("B0", "B1"); connect("B1", "B2"); connect("B2", "N12");
+         connect("00", "B0"); connect("B0", "B1"); connect("B1", "B2"); connect("B2", "N12");
 
          connect("D2", "N4");
          connect("C2", "N8");

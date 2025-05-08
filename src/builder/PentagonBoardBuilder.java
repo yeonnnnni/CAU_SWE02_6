@@ -37,7 +37,7 @@ public class PentagonBoardBuilder implements BoardBuilder {
     }
 
     private void createNodes() {
-        node("OO").setCenter(true);
+        node("00").setCenter(true);
 
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E'}) {
             for (int i = 0; i <= 2; i++) {
@@ -55,7 +55,7 @@ public class PentagonBoardBuilder implements BoardBuilder {
     private void connectNodes() {
         // 지름길 연결
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E'}) {
-            connect(dir + "0", "OO");
+            connect(dir + "0", "00");
             connect(dir + "0", dir + "1");
             connect(dir + "1", dir + "2");
         }
@@ -81,7 +81,7 @@ public class PentagonBoardBuilder implements BoardBuilder {
     private void createPositions() {
         double outerR = 6.0;  // 바깥 반지름
         double step = 1.0;    // 안쪽 말까지 거리 간격
-        positions.put("OO", new Point(0, 0));
+        positions.put("00", new Point(0, 0));
 
         // A2, B2, ..., E2가 꼭짓점이 되도록 각도 지정 (반시계 방향)
         int[] angles = {-162, -90, -18, 54, 126}; // A, B, C, D, E
