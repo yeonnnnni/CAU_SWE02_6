@@ -90,8 +90,8 @@ public class HexagonBoardBuilder implements BoardBuilder {
             for (int j = 0; j <= 2; j++) {
                 double dist = 1.5 + j;
                 double angleRad = Math.toRadians(angleDeg);
-                int x = (int) (Math.cos(angleRad) * dist * 10);
-                int y = (int) (Math.sin(angleRad) * dist * 10);
+                int x = (int) (Math.cos(angleRad) * dist * 80);
+                int y = (int) (Math.sin(angleRad) * dist * 80);
                 positions.put(dir + j, new Point(x, y));
             }
         }
@@ -114,6 +114,11 @@ public class HexagonBoardBuilder implements BoardBuilder {
                 int y = (int)((1 - t) * start.y + t * end.y);
                 positions.put("N" + nIdx++, new Point(x, y));
             }
+        }
+
+        for (Map.Entry<String, Point> entry : positions.entrySet()) {
+            Point p = entry.getValue();
+            entry.setValue(new Point(p.x, -(p.y + 100)));
         }
     }
 

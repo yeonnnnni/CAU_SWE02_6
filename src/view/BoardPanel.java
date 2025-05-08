@@ -35,10 +35,29 @@ public class BoardPanel extends JPanel {
      */
     public void renderBoard(List<Node> nodes, Map<String, Point> nodePositions) {
         removeAll();
+        revalidate();
         nodeToButton.clear();
         buttonToNode.clear();
 
         int gridSize = buttonSize + 20;
+
+        // Calculate bounding box and center offset
+        int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+
+        for (Point pt : nodePositions.values()) {
+            if (pt.x < minX) minX = pt.x;
+            if (pt.x > maxX) maxX = pt.x;
+            if (pt.y < minY) minY = pt.y;
+            if (pt.y > maxY) maxY = pt.y;
+        }
+
+        int offsetX = (minX + maxX) / 2;
+        int offsetY = (minY + maxY) / 2;
+
+        Dimension size = getPreferredSize();
+        int panelWidth = size.width;
+        int panelHeight = size.height;
 
         for (Node node : nodes) {
             Point pt = nodePositions.get(node.getId());
@@ -48,7 +67,9 @@ public class BoardPanel extends JPanel {
             }
 
             JButton btn = new JButton();
-            btn.setBounds(pt.y * gridSize + 100, pt.x * gridSize + 100, buttonSize, buttonSize);
+            btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2,
+                          pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
+                          buttonSize, buttonSize);
             btn.setFont(new Font("Arial", Font.BOLD, 8));
             btn.setText(node.getId());
             btn.setBackground(Color.WHITE);

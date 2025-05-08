@@ -88,12 +88,14 @@ public class PentagonBoardBuilder implements BoardBuilder {
         String[] dirs = {"A", "B", "C", "D", "E"};
 
         for (int i = 0; i < dirs.length; i++) {
+            double angle = Math.toRadians(angles[i]);
+            double dx = Math.cos(angle);
+            double dy = Math.sin(angle);
+            double[] radii = {2, 4, 6.0};  // A0 ~ A2: progressively farther from center
             for (int j = 0; j <= 2; j++) {
-                double r = outerR - (2 - j) * step;
-                double angle = Math.toRadians(angles[i]);
-                int x = (int) (Math.cos(angle) * r * 10);
-                int y = (int) (Math.sin(angle) * r * 10);
-                // Java 좌표계 y축 반전
+                double r = radii[j];
+                int x = (int)(dx * r * 40);
+                int y = (int)(dy * r * 40);
                 positions.put(dirs[i] + j, new Point(x, -y));
             }
         }
@@ -105,8 +107,8 @@ public class PentagonBoardBuilder implements BoardBuilder {
         // 꼭짓점 위치 저장 (A2 ~ E2와 동일)
         for (int i = 0; i < 5; i++) {
             double angle = Math.toRadians(vertexAngles[i]);
-            int x = (int)(Math.cos(angle) * outerR * 10);
-            int y = (int)(Math.sin(angle) * outerR * 10);
+            int x = (int)(Math.cos(angle) * outerR * 40);
+            int y = (int)(Math.sin(angle) * outerR * 40);
             vertices[i] = new Point(x, -y);  // Java 좌표계 반영
         }
 
@@ -129,6 +131,11 @@ public class PentagonBoardBuilder implements BoardBuilder {
                 int y = (int)((1 - t) * start.y + t * end.y);
                 positions.put("N" + idx++, new Point(x, y));
             }
+        }
+
+        for (Map.Entry<String, Point> entry : positions.entrySet()) {
+            Point p = entry.getValue();
+            positions.put(entry.getKey(), new Point(p.x, -p.y));
         }
     }
 }
