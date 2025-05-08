@@ -77,12 +77,6 @@ public class HexagonBoardBuilder implements BoardBuilder {
 
     private void createPositions() {
         double radius = 6.0;
-        for (int i = 0; i < 24; i++) {
-            double angle = Math.toRadians(180 - i * (360.0 / 24));
-            int x = (int) (Math.cos(angle) * radius * 10);
-            int y = (int) (Math.sin(angle) * radius * 10);
-            positions.put("N" + i, new Point(x, y));
-        }
 
         positions.put("OO", new Point(0, 0));
 
@@ -99,6 +93,26 @@ public class HexagonBoardBuilder implements BoardBuilder {
                 int x = (int) (Math.cos(angleRad) * dist * 10);
                 int y = (int) (Math.sin(angleRad) * dist * 10);
                 positions.put(dir + j, new Point(x, y));
+            }
+        }
+
+        // Define hexagon corners (A2, B2, ..., F2) counter-clockwise
+        String[] hexCorners = {"A2", "F2", "E2", "D2", "C2", "B2"};
+        List<Point> cornerPoints = new ArrayList<>();
+        for (String dir : hexCorners) {
+            cornerPoints.add(positions.get(dir));
+        }
+
+        // Interpolate 4 nodes between each corner (6 corners)
+        int nIdx = 0;
+        for (int i = 0; i < 6; i++) {
+            Point start = cornerPoints.get(i);
+            Point end = cornerPoints.get((i + 1) % 6);
+            for (int j = 1; j <= 4; j++) {
+                double t = j / 5.0;
+                int x = (int)((1 - t) * start.x + t * end.x);
+                int y = (int)((1 - t) * start.y + t * end.y);
+                positions.put("N" + nIdx++, new Point(x, y));
             }
         }
     }
