@@ -221,4 +221,9 @@ public class Horse {
                 this.id, this.state, positionId, coord
         );
     }
+
+    @Override
+    public String toString() {
+        return "T" + teamID + "-H" + horseIdx;
+    }
 }

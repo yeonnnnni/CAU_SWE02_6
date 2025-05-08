@@ -32,11 +32,6 @@ public class BoardFactory {
                 throw new IllegalArgumentException("지원하지 않는 보드 타입입니다: " + boardType);
         }
 
-        System.out.println("모든 노드 ID 목록: ");
-        for (Node n : board) {
-            System.out.println("- " + n.getId());
-        }
-
         return board.stream()
                 .filter(n -> startId.equals(n.getId()))
                 .findFirst()
