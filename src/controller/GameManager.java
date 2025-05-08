@@ -52,7 +52,7 @@ public class GameManager {
             }
         
             // 👉 사용자에게 movable 리스트를 넘겨서 선택하게 하기
-            //mainFrame.promptHorseSelection(movable, steps);
+            mainFrame.promptHorseSelection(movable, steps);
             return; // 선택 후 다시 이어지도록 흐름 잠시 멈춤
         }
     
@@ -85,7 +85,6 @@ public class GameManager {
     public void processRollResult(YutResult result) {
         // TODO: 한 결과에 대해 칸 수 계산 → 이동 처리 (예: moveHorse)
     }
-
 
     //이동 가능 말 필터 메서드
     public List<Horse> getMovableHorses(int steps) {

@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import view.MainFrame;
 
+import javax.swing.JButton;
+import java.awt.Point;
+
 public class Horse {
     private final String	id;
     private final int   	teamID;
@@ -150,6 +153,8 @@ public class Horse {
                 oth.reset();
             }
         }
+
+        printStatus();
     }
 
     public void backupState() {
@@ -204,4 +209,28 @@ public class Horse {
     private boolean teamIdEquals(Horse other) {
         return this.teamID == other.teamID;
     }
+
+    public void printStatus() {
+        String positionId = (position != null) ? position.getId() : "null";
+        String coord = "null";
+
+        if (position != null) {
+            JButton btn = MainFrame.getInstance()
+                    .getBoardPanel()
+                    .getNodeToButtonMap()
+                    .get(position);
+            if (btn != null) {
+                Point p = btn.getLocation();
+                coord = "(" + p.x + ", " + p.y + ")";
+            } else {
+                coord = "(버튼 미존재)";
+            }
+        }
+
+        System.out.printf(
+                "[말 상태] %s | 상태: %s | 위치: %s | 좌표: %s\n",
+                this.id, this.state, positionId, coord
+        );
+    }
+
 }
