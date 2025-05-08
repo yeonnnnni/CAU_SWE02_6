@@ -2,9 +2,10 @@
 
 **Team Members**
 
-| **김희서** | **박도연** | **이정연** | **여지원** | **임정원** |
-|:---------:|:---------:|:----------:|:---------:|:----------:|
-| [dearHS](https://github.com/hs03290811) | [dp44rk](https://github.com/dp44rk) | [Lee Jeongyeon](https://github.com/yeonnnnni) | [yjione](https://github.com/yjione) | [jeongwon](https://github.com/garden0324) |
+|                 **김희서**                 |                    **박도연**                     |                   **이정연**                    |                   **여지원**                   |                  **임정원**                  |
+|:---------------------------------------:|:----------------------------------------------:|:--------------------------------------------:|:-------------------------------------------:|:-----------------------------------------:|
+|                  ![]()                  | <img src="docs/images/dpark.png" width="100"/> | <img src="docs/images/ejy.png" width="100"/> | <img src="docs/images/jw.png" width="100"/> |                     <img src="docs/images/mjy.png" width="100"/>                      | 
+| [dearHS](https://github.com/hs03290811) |      [dp44rk](https://github.com/dp44rk)       |  [yeonnnnni](https://github.com/yeonnnnni)   |     [yjione](https://github.com/yjione)     | [jeongwon](https://github.com/garden0324) |
 
 </center>
 
