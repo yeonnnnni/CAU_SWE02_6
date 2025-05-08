@@ -19,9 +19,27 @@ public class BoardFactory {
         }
     }
 
-    public static Node getStartNode(List<Node> board) {
+    public static Node getStartNode(List<Node> board, String boardType) {
+        String startId;
+
+        switch (boardType.toLowerCase()) {
+            case "square":
+            case "pentagon":
+            case "hexagon":
+                startId = "A2";  // 향후 필요 시 다르게 설정 가능
+                break;
+            default:
+                throw new IllegalArgumentException("지원하지 않는 보드 타입입니다: " + boardType);
+        }
+
+        System.out.println("모든 노드 ID 목록: ");
+        for (Node n : board) {
+            System.out.println("- " + n.getId());
+        }
+
         return board.stream()
-                    .filter(node-> "A2".equals(node.getId())).findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No start node with 'A2' found on the board."));
+                .filter(n -> startId.equals(n.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(startId + " 노드를 찾을 수 없습니다."));
     }
 }

@@ -1,75 +1,20 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
-/*
-- 랜덤 주사위 던지기 및 수동 입력 처리
-- 윷/모가 나온 경우 보너스 턴(중복 이동) 처리까지 지원
-
-사용 흐름:
-1. rollRandomSequence() → 주사위를 던지고 YutResult 리스트 반환 (윷/모 연속 반영)
-2. rollManual(int value) → 입력 숫자를 YutResult로 변환
-3. convertToSteps(YutResult) → 윷 결과를 실제 이동 칸 수(int)로 변환
-*/
+//윷 던지기 처리 클래스: 랜덤 모드와 수동 입력 모두 지원합니다.
 public class DiceManager {
-
-    private Random random = new Random();
+    private final Random random = new Random();
     private Queue<YutResult> resultQueue = new LinkedList<>();
 
-    //주사위 던지기
-    //윷 또는 모가 나오면 보너스 턴: 한 번 더 던짐
-    //도/개/걸/백도 중 하나가 나오면 종료
-    public List<YutResult> rollRandomSequence() {
-        List<YutResult> results = new ArrayList<>();
-        while (true) {
-            YutResult result = rollOnce();
-            results.add(result);
-            if (result != YutResult.YUT && result != YutResult.MO) break; // 윷 or 모 아니면 중단
-        }
-        return results;
-    }
-
-    // 한 번 던져서 YutResult 하나 생성
+    //윷을 한 번 던져 결과 생성
     private YutResult rollOnce() {
-        int val = random.nextInt(6);
+        int val = random.nextInt(6); // 0~5
         return YutResult.values()[val];
     }
 
-    //사용자가 입력한 숫자(-1~5)로 결과 매칭
-    public YutResult rollManual(int value) {
-        switch (value) {
-            case -1: return YutResult.BACKDO;
-            case 1: return YutResult.DO;
-            case 2: return YutResult.GAE;
-            case 3: return YutResult.GEOL;
-            case 4: return YutResult.YUT;
-            case 5: return YutResult.MO;
-            default:
-                throw new IllegalArgumentException("유효하지 않은 윷 입력값: " + value);
-        }
-    }
 
-    //YutResult를 이동 칸수(int)로 변환
-    public int convertToSteps(YutResult result) {
-        return result.getSteps();
-    }
-
-    public void resetDice() {
-        resultQueue.clear();  // 큐 초기화
-    }
-
-    public Queue<YutResult> getResultQueue() {
-        return resultQueue;
-    }
-
-    public void setResultQueue(Queue<YutResult> queue) {
-        this.resultQueue = queue;
-    }
-
+    //윷을 랜덤으로 연속 던지기 (윷/모가 나오면 반복)
     public Queue<YutResult> rollRandomQueue() {
         resultQueue.clear();
         while (true) {
@@ -79,5 +24,33 @@ public class DiceManager {
         }
         return resultQueue;
     }
-}
 
+    //수동 입력 값을 YutResult로 변환
+    public YutResult rollManual(int value) {
+        return switch (value) {
+            case -1 -> YutResult.BACKDO;
+            case 1 -> YutResult.DO;
+            case 2 -> YutResult.GAE;
+            case 3 -> YutResult.GEOL;
+            case 4 -> YutResult.YUT;
+            case 5 -> YutResult.MO;
+            default -> throw new IllegalArgumentException("입력은 -1 ~ 5 사이여야 합니다.");
+        };
+    }
+
+    public int convertToSteps(YutResult result) {
+        return result.getSteps();
+    }
+
+    public void resetDice() {
+        resultQueue.clear();
+    }
+
+    public Queue<YutResult> getResultQueue() {
+        return resultQueue;
+    }
+
+    public void setResultQueue(Queue<YutResult> queue) {
+        this.resultQueue = queue;
+    }
+}
