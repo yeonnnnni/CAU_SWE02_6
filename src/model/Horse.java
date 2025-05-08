@@ -11,10 +11,11 @@ public class Horse {
     private final String	id;
     private final int   	teamID;
     private final int       horseIdx;
-    private final Team team;
+    private final Team      team;
     private HorseState      state;
     private Node            position;
     private List<Horse>     groupedHorses;
+    private HorseBackup     backup;
 
     public Horse(int horseIdx, Team team) {
         this.teamID = team.getTeamID();
@@ -154,6 +155,19 @@ public class Horse {
         }
     }
 
+    public void backupState() {
+        this.backup = new HorseBackup(this.position, this.state, this.groupedHorses);
+    }
+
+    public void rollback() {
+        if (backup != null) {
+            this.setPosition(backup.position);
+            this.state = backup.state;
+            this.groupedHorses = new ArrayList<>(backup.groupedHorses);
+        } else {
+            IllegalAccessError e = new IllegalAccessError("No backup state to rollback.");
+        }
+    }
 
     public void reset () {
         if (position != null) {
