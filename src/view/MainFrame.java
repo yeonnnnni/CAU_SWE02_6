@@ -66,6 +66,7 @@ public class MainFrame extends JFrame {
                 new Team(1, "B", Color.RED)
         );
         Board board = new Board();
+        board.setNodes(nodeList);
         for (Team t : teams) board.registerTeam(t);
 
         // 게임 매니저 연결
