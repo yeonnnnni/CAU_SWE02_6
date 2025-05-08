@@ -14,6 +14,7 @@ public class Horse {
     private final int teamID;
     private final int horseIdx;
     private final Team team;
+    private int delStep;
 
     private HorseState state;
     private Node position;
@@ -29,6 +30,7 @@ public class Horse {
         this.groupedHorses = new ArrayList<>();
         this.position = null;
         team.addHorse(this);
+        delStep = 0;
     }
 
     public String getId() { return id; }
@@ -58,64 +60,79 @@ public class Horse {
     }
 
     // 분기점에서 사용자에게 경로 선택 유도
-    private Node chooseNextNode(List<Node> candidates) {
-        String currentId = position.getId();  // position은 Node
+    private Node chooseNextNode(List<Node> candidates, boolean isLast) {
+        String currentId = position.getId();
+        System.out.println("[chooseNextNode] 현재 노드: " + currentId + ", isLast: " + isLast);
 
-        // center 노드인 경우
-        if (currentId.equals("00")) {
+        // 1. center → A 방향
+        if (position.isCenter()) {
+            System.out.println("[chooseNextNode] center → A 방향 선택");
             return candidates.stream()
                     .filter(n -> n.getId().startsWith("A"))
                     .findFirst()
                     .orElse(candidates.getFirst());
-        } // center노드일경우
-//        else if (currentId.endsWith("2") && !currentId.equals("A2")) {
-//            System.out.println("here!!!!!!!!!!!!!!!");
-//            String direction = position.getId().substring(0, 1);
-//            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
-//
-//            if (useShortcut) {
-//                int level = Character.getNumericValue(position.getId().charAt(1));
-//                return candidates.stream()
-//                        .filter(n -> n.getId().startsWith(direction))
-//                        .filter(n -> n.getId().length() >= 2 &&
-//                                Character.getNumericValue(n.getId().charAt(1)) == level - 1)
-//                        .findFirst()
-//                        .orElse(candidates.getFirst());
-//            } else {
-//                return candidates.stream()
-//                        .filter(n -> n.getId().startsWith("N"))
-//                        .findFirst()
-//                        .orElse(candidates.getFirst());
-//            }
-//        }
-        // 2. A2 노드인 경우 → 무조건 N0 선택
-        else if (currentId.equals("A2")) {
+        }
+
+        // 2. A2 → N0
+        if (currentId.equals("A2")) {
+            System.out.println("[chooseNextNode] A2 → N0로 강제 이동");
             return candidates.stream()
                     .filter(n -> n.getId().equals("N0"))
                     .findFirst()
                     .orElse(candidates.getFirst());
-
         }
-        // 3. 현재 노드가 N방향인 경우 → N방향 + 숫자 +1 노드로 이동
-        else if (currentId.startsWith("N")) {
-            try {
-                int currentNum = Integer.parseInt(currentId.substring(1)); // "N3" → 3
-                String targetId = "N" + (currentNum + 1);
+
+        // 3. 코너 노드 + 마지막 이동
+        if ((currentId.endsWith("2") && !currentId.equals("A2") && isLast && position.isCorner()) || delStep == 2) {
+            System.out.println("[chooseNextNode] 코너 노드에서 지름길 여부 확인");
+            delStep = 0;
+
+            String direction = currentId.substring(0, 1);
+            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
+
+            if (useShortcut) {
+                int currentLevel = Character.getNumericValue(currentId.charAt(1));
+                int targetLevel = currentLevel - 1;
+                String targetId = direction + targetLevel;
+
+                System.out.println("[chooseNextNode] 일반 경로 선택 → " + targetId);
+
                 return candidates.stream()
                         .filter(n -> n.getId().equals(targetId))
                         .findFirst()
                         .orElse(candidates.getFirst());
-            } catch (NumberFormatException e) {
-                // 잘못된 형식이면 fallback
-                return candidates.getFirst();
+            } else {
+                System.out.println("[chooseNextNode] 일반 경로 선택 → 외곽(N 방향)");
+//                return candidates.get(1) candidates.stream()
+//                        .filter(n -> n.getId().startsWith("N"))
+//                        .findFirst()
+//                        .orElse(candidates.getFirst());
             }
         }
+
+        // 4. N방향 → N+1
+        if (currentId.startsWith("N")) {
+            try {
+                if (position.getId().startsWith("N") && candidates.size() == 3)
+                    delStep = 1;
+                int n = Integer.parseInt(currentId.substring(1));
+                String nextId = "N" + (n + 1);
+                System.out.println("[chooseNextNode] N 노드 → 다음 노드: " + nextId);
+                return candidates.stream()
+                        .filter(nNode -> nNode.getId().equals(nextId))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            } catch (NumberFormatException e) {
+                System.out.println("[chooseNextNode] N 노드 번호 파싱 실패");
+            }
+        }
+
+        // fallback
+        System.out.println("[chooseNextNode] 기본 선택 (첫 번째 후보)");
         return candidates.getFirst();
     }
 
-
-
-    private void moveStep(boolean isRemain) {
+    private void moveStep(boolean isLast) { // == islast
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
         List<Node> nextList = position.getNextNodes();
@@ -124,12 +141,13 @@ public class Horse {
             return;
         }
 
-        Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
+        Node next = (isLast && position.getId().startsWith("N") && nextList.size() == 3) ?
                 nextList.get(2) : // 마지막칸이 남아있지않고, n이면서 sizerk가 3이라면
-                chooseNextNode (nextList);
+                chooseNextNode (nextList, isLast);
 
-        System.out.println("$$$$$$next: " + next.getId());
+        System.out.println("curr: " + position.getId());
         System.out.println("next: " + nextList.toString());
+        System.out.println("islast: " + isLast);
         setPosition(next);
 
         // 그룹 말도 함께 이동
@@ -165,7 +183,13 @@ public class Horse {
         }
 
         for (int i = 0; i < steps; i++) {
-            moveStep(steps == i+1); //마지막 노드일경우 참
+//            System.out.println(steps-1 == i);
+            moveStep(steps-1 == i); //마지막 노드일경우 참
+            if (delStep == 1) {
+                steps--;
+                delStep = 0;
+            }
+            if (position.isCorner()) delStep = 2;
             if (isFinished()) return;
         }
 
