@@ -20,8 +20,9 @@ public class GameManager {
     private int currentPlayerIndex;
     private final String boardType;
 
-    // 현재 남은 윷 결과 리스트
     private List<YutResult> remainingResults = new ArrayList<>();
+    private boolean capturedThisTurn = false;
+    private boolean bonusTurnRequested = false;
 
     public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams, String boardType) {
         this.mainFrame = mainFrame;
@@ -68,6 +69,13 @@ public class GameManager {
     }
 
     public void handleDiceRoll() {
+        System.out.println("🎯 handleDiceRoll() 시작");
+        capturedThisTurn = false;
+
+        // 새로운 턴 시작이므로 플래그 초기화
+        capturedThisTurn = false;
+        bonusTurnRequested = false;
+
         List<YutResult> results;
 
         if (mainFrame.getDicePanel().isRandomMode()) {
@@ -92,14 +100,21 @@ public class GameManager {
     private void promptNextMove() {
         if (remainingResults.isEmpty()) {
             checkWin();
-            nextTurn();
+            if (capturedThisTurn) {
+    System.out.println("🔥 보너스 턴 실행 중");
+                JOptionPane.showMessageDialog(mainFrame, "말을 잡았습니다! 한 번 더 던집니다.");
+                capturedThisTurn = false;
+                handleDiceRoll(); // 보너스 턴 재귀 호출 ← 안전하게 분리됨
+            } else {
+                System.out.println("➡️ 보너스 조건 없음, 턴 종료");
+                nextTurn();
+            }
             mainFrame.getDicePanel().setEnabled(true);
             return;
         }
 
         YutResult selected;
 
-        // 🎯 윷 결과 1개일 경우 자동 선택
         if (remainingResults.size() == 1) {
             selected = remainingResults.get(0);
         } else {
@@ -131,14 +146,19 @@ public class GameManager {
         Node to = horse.getPosition();
 
         for (Horse other : board.getAllHorses()) {
-            if (horse.isGroupable(other)) horse.groupWith(other);
-            else if (horse.isCaptured(other)) other.reset();
+            if (horse.isGroupable(other)) {
+                horse.groupWith(other);
+            } else if (horse.isCaptured(other)) {
+                other.reset();
+                capturedThisTurn = true; // 잡음 감지
+                System.out.println("💥 " + horse.getId() + " 이(가) " + other.getId() + " 을(를) 잡았습니다.");
+            }
         }
 
         mainFrame.getBoardPanel().updatePiecePosition(from, to, horse.getId(), horse.getTeamColor());
         remainingResults.remove(selected);
 
-        promptNextMove();  // 재귀적으로 다음 결과 처리
+        promptNextMove();
     }
 
     private YutResult promptYutSingleChoice(List<YutResult> options) {
