@@ -67,7 +67,7 @@ public class Horse {
      * 반환값: 다음에 이동할 Node
      * 지금 위치한 노드(position)의 nextNodes 목록(candidates) 중에서 어디로 이동할지를 결정해주는 함수
      * */
-    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep) {
+    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft) {
         // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
 
@@ -76,10 +76,26 @@ public class Horse {
         //"A" 방향으로 가는 지름길 선택 (우선순위) -> 도착지점에 가장 가까운게 A니까.
         //A방향 노드 (A1, A0 등)가 없다면 그냥 candidates의 첫 번째 노드 선택
         if (currentId.equals("00")) {
-            return candidates.stream()
-                    .filter(n -> n.getId().startsWith("A"))
-                    .findFirst()
-                    .orElse(candidates.getFirst());
+            if (isFirstStep) {
+                return candidates.stream()
+                        .filter(n -> n.getId().startsWith("A"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            }
+            else if (stepsLeft >= 1) {
+                // 👉 B 라인으로 이동
+                return candidates.stream()
+                        .filter(n -> n.getId().equals("B0"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            }
+            else {
+                // 👉 기본 A 라인으로 이동
+                return candidates.stream()
+                        .filter(n -> n.getId().startsWith("A"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            }
         }
 
         else if (currentId.startsWith("A") && !currentId.equals("A2")) {
@@ -90,6 +106,19 @@ public class Horse {
                         .filter(n -> n.getId().equals(targetId))
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("A" + level + " → " + targetId + " 경로가 없습니다."));
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("A 방향 노드 ID 형식이 잘못되었습니다: " + currentId);
+            }
+        }
+
+        else if (currentId.startsWith("B") && !currentId.equals("B2")) {
+            try {
+                int level = Character.getNumericValue(currentId.charAt(1));
+                String targetId = "B" + (level + 1);
+                return candidates.stream()
+                        .filter(n -> n.getId().equals(targetId))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("B" + level + " → " + targetId + " 경로가 없습니다."));
             } catch (NumberFormatException e) {
                 throw new IllegalStateException("A 방향 노드 ID 형식이 잘못되었습니다: " + currentId);
             }
@@ -123,7 +152,7 @@ public class Horse {
 
         else if (currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.startsWith("N")) {
             // 지름길 안 쓰는 경우 → 가장 숫자가 큰 N 노드로 이동
-                return candidates.stream()
+            return candidates.stream()
                     .filter(n -> n.getId().startsWith("N"))
                     .max(Comparator.comparingInt(n -> Integer.parseInt(n.getId().substring(1))))
                     .orElseThrow(() -> new IllegalStateException("기본 경로에서 이동 가능한 N 노드를 찾을 수 없습니다. 후보: "
@@ -200,9 +229,7 @@ public class Horse {
         return candidates.getFirst();
     }
 
-
-
-    private void moveStep(boolean isRemain, boolean isFirstStep) {
+    private void moveStep(boolean isRemain, boolean isFirstStep, int stepsLeft) {
         //현재 위치가 없으면 오류
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
@@ -222,7 +249,7 @@ public class Horse {
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
                 //⚠️이러면 사용자의 선택 없이 무조건 지름길로 감.
                 nextList.get(2) : // 마지막칸이 남아있지않고, n이면서 sizerk가 3이라면
-                chooseNextNode (nextList, isFirstStep);
+                chooseNextNode (nextList, isFirstStep, stepsLeft);
 
         System.out.println("$$$$$$next: " + next.getId());
         System.out.println("next: " + nextList.toString());
@@ -291,18 +318,41 @@ public class Horse {
         for (int i = 0; i < steps; i++) {
             boolean isFirst = (i == 0);
             boolean isLast = (i == steps - 1);
-            moveStep(isLast, isFirst);
+            int stepsLeft = steps - i;
+            moveStep(isLast, isFirst, stepsLeft);
+
+            // A2 도달 + 직전 노드가 N0가 아니면 완주 처리
+            if (position != null && position.getId().equals("A2")) {
+                String prevId = !positionHistory.isEmpty() ? positionHistory.peek().getId() : "없음";
+                if (!prevId.equals("N0")) {
+                    this.state = HorseState.FINISHED;
+                    System.out.println("[완주] " + id + "가 A2에 도달했으며, " + prevId + "를 통해 A2로 들어왔습니다.");
+                    return;
+                } else {
+                    System.out.println("[진입] " + id + "가 N0를 통해 A2로 들어왔습니다. 계속 진행합니다.");
+                }
+            }
         }
 
         // 도착 후 말 잡기
-        // List<Horse> others = position.getHorsesOnNode();
-        // for (Horse other : others) {
-        //     if (isCaptured(other)) {
-        //         other.reset();
-        //     }
-        // }
+        List<Horse> others = position.getHorsesOnNode();
+        for (Horse other : others) {
+            if (isCaptured(other)) {
+                other.reset();
+            }
+        }
 
         printStatus(); // 디버깅 로그 출력
+
+        //FINISHED 상태이면 버튼 텍스트 초기화
+        if (this.state == HorseState.FINISHED && this.position != null) {
+            JButton btn = MainFrame.getInstance().getBoardPanel().getNodeToButtonMap().get(this.position);
+            if (btn != null) {
+                btn.setText(this.position.getId());  // "A2"
+                btn.setForeground(Color.BLACK);      // 기본 색상으로
+            }
+        }
+
     }
 
     // 현재 상태 백업
