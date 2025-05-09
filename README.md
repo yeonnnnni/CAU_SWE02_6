@@ -1,45 +1,39 @@
 <h2 align="center"> 🎲윷놀이🎲 </h2>     
 <div align="center">
 
-![CAU SWE](https://img.shields.io/badge/CAU--blue) ![Pizza](https://img.shields.io/badge/Yut--yellow) ![Software-Engineering](https://img.shields.io/badge/SoftwareEngineering--red)
+![CAU SWE](https://img.shields.io/badge/CAU--blue) ![Yut](https://img.shields.io/badge/Yut--yellow) ![Software-Engineering](https://img.shields.io/badge/SoftwareEngineering--red) ![](https://img.shields.io/badge/Java-007396?style=flat&logo=OpenJDK&logoColor=white)
+<br>
+
+소프트웨어공학 2분반 6조 팀프로젝트의 `README.md`에 오신걸 환영합니다!  
+4, 5, 6각형 판을 지원하며, 플레이어당 5개 이하의 말을 지정하여 윷놀이 게임을 할 수 있습니다.  
+본 프로젝트는 **OOAD** 구조로 각 클래스가 명확하게 분리되어 유지보수 및 확장이 쉬운 구조로 설계되었습니다.
 
 <br>
 
-커스텀된 4, 5, 6각형 판으로 즐거운 윷놀이 게임을 할 수 있는 소프트웨어공학 2분반 6조 팀프로젝트의 `README.md`에 오신걸 환영합니다!  
-본 프로젝트는 OOAD 구조로 각 클래스가 명확하게 분리되어 유지보수 및 확장이 쉬운 구조로 설계되었습니다.
-
-<br>
-
+<img src="docs/images/execution.png" width="500"/>
 
 **Team Members**  
 | **김희서** | **박도연** |  **이정연** | **여지원** | **임정원** |
 |:-----:|:-----:|:------:|:-----:|:-----:|
-|                  <img src="docs/images/hs.png" width="100"/>                  | <img src="docs/images/dy.png" width="100"/> | <img src="docs/images/ejy.png" width="100"/> | <img src="docs/images/jw.png" width="100"/> |                     <img src="docs/images/mjy.png" width="100"/>                      | 
+|<img src="docs/images/hs.png" width="100"/>| <img src="docs/images/dy.png" width="100"/> | <img src="docs/images/ejy.png" width="100"/> | <img src="docs/images/jw.png" width="100"/> |                     <img src="docs/images/mjy.png" width="100"/>                      | 
 |[dearHS](https://github.com/hs03290811)|[dp44rk](https://github.com/dp44rk)|[yeonnnnni](https://github.com/yeonnnnni)|[yjione](https://github.com/yjione)|[jeongwon](https://github.com/garden0324)|
 
+
 </div>  
+
 
  <h2 align="center">  📁 프로젝트 구조  </h2>   
 
 ```
 .
-├── CAU_SWE02_6.iml
 ├── README.md
-├── README2.md
+├── caw1.iml
 ├── docs
+│   ├── *.md
 │   ├── Builder_images
 │   │   ├── hexagon_board.png
 │   │   ├── pentagon_board.png
 │   │   └── square_board.png
-│   ├── Builder_images.md
-│   ├── classusecase.md
-│   ├── gameflow.md
-│   ├── images
-│   │   ├── dpark.png
-│   │   ├── ejy.png
-│   │   ├── jw.png
-│   │   └── mjy.png
-│   └── sequence-diagram.md
 └── src
     ├── App.java
     ├── builder
@@ -64,8 +58,8 @@
     └── view
         ├── BoardPanel.java
         ├── DicePanel.java
-        └── MainFrame.java
-
+        ├── MainFrame.java
+        └── ScoreboardPanel.java
 ```
 
 #### 📁 builder - 윷놀이판 생성 관련
@@ -103,7 +97,13 @@
 | `DicePanel.java`  | 윷 던지기 UI 구성 (버튼, 결과 출력 등) |
 | `MainFrame.java`  | 메인 프레임, 전체 게임 UI를 담는 윈도우  |
 
-## 📂 관련 문서
+<h2 align="center">  📁 프로젝트 구조  </h2>   
+  <img src="docs/images/hexagon.png" width="30%" style="margin: 10px"/>
+  <img src="docs/images/pentagon.png" width="30%" style="margin: 10px"/>
+  <img src="docs/images/square.png" width="30%" style="margin: 10px"/>
+</p>
+
+### 📂 관련 문서
 *매서드들 구현되면 테스트 해보고 값 정리해서 업데이트 할게요*
 - 📄 [게임 전체 흐름도](docs/gameflow.md)
 - 📄 [시퀀스 다이어그램 초안](docs/sequence-diagram.md)
