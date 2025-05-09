@@ -4,18 +4,22 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 // Team 클래스는 팀의 ID, 이름, 색상, 보유한 말(Horse) 목록을 관리합니다.
 public class Team {
     private final int teamID;           // 팀 고유 ID
     private final List<Horse> horses;   // 팀이 보유한 말들
     private final Color color;          // 팀 색상
     private final String name;          // 팀 이름
+    private final String boardType;
 
     // 이름과 색상 모두 지정할 수 있는 생성자
-    public Team(int teamID, String name, Color color, int pieceCount) {
+    public Team(int teamID, String name, Color color, int pieceCount, String boardType) {
         this.teamID = teamID;
         this.name = name;
         this.color = color;
+        this.boardType = boardType;
         this.horses = new ArrayList<>();
         for (int i = 0; i < pieceCount; i++) {
             new Horse(i, this);
@@ -27,6 +31,7 @@ public class Team {
     public Team(int teamID) {
         this.teamID = teamID;
         this.name = "팀" + teamID;
+        this.boardType = "square";
         this.horses = new ArrayList<>();
         Color[] defaultColors = {Color.RED, Color.BLUE, Color.GREEN, Color.ORANGE};
         this.color = (teamID >= 0 && teamID < defaultColors.length) ? defaultColors[teamID] : Color.GRAY;
@@ -55,6 +60,10 @@ public class Team {
     // 팀 색상 반환
     public Color getColor() {
         return color;
+    }
+
+    public String getBoardType() {
+        return boardType;
     }
 
     // 모든 말이 FINISHED 상태인지 확인 (승리 조건)

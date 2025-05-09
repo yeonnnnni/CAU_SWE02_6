@@ -79,8 +79,8 @@ public class MainFrame extends JFrame {
         // 팀 구성 및 등록
         // MainFrame에서 팀 만들 때
         List<Team> teams = List.of(
-            new Team(0, "A", Color.BLUE, pieceCount),
-            new Team(1, "B", Color.RED, pieceCount)
+            new Team(0, "A", Color.BLUE, pieceCount, boardType),
+            new Team(1, "B", Color.RED, pieceCount, boardType)
         );
 
 
