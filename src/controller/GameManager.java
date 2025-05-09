@@ -106,8 +106,14 @@ public class GameManager {
                 return;
             }
 
+            // 이동 전 위치 기억
+            Node from=selected.getPosition();
+
             // 말 이동 수행
             selected.move(steps, board.getNodes(), boardType);
+
+            // 이동 후 위치
+            Node to=selected.getPosition();
 
             // 도착한 위치에서 잡기/그룹핑 처리
             for (Horse other : board.getAllHorses()) {
@@ -119,7 +125,7 @@ public class GameManager {
             }
 
             // UI 갱신
-            mainFrame.getBoardPanel().updatePiecePosition(null, selected.getPosition(), selected.getId(), selected.getTeamColor());
+            mainFrame.getBoardPanel().updatePiecePosition(from,to, selected.getId(), selected.getTeamColor());
         }
 
         checkWin();      // 승리 여부 확인
@@ -141,7 +147,13 @@ public class GameManager {
         Horse selected = mainFrame.promptHorseSelection(movable, steps);
         if (selected == null) return;
 
+        // 이동 전 위치
+        Node from=selected.getPosition();
+
         selected.move(steps, board.getNodes(), boardType);
+
+        // 이동 후 위치
+        Node to=selected.getPosition();
 
         // 잡기 및 그룹핑 처리
         for (Horse other : board.getAllHorses()) {
@@ -153,7 +165,7 @@ public class GameManager {
         }
 
         mainFrame.getBoardPanel().updatePiecePosition(
-                null, selected.getPosition(), selected.getId(), selected.getTeamColor()
+                from, to, selected.getId(), selected.getTeamColor()
         );
 
         checkWin();
