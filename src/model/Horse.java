@@ -262,15 +262,18 @@ public class Horse {
 
         if (steps == -1) {
             if (!positionHistory.isEmpty()) {
-                positionHistory.pop();
+                Node waste = positionHistory.pop();
                 Node previous = positionHistory.pop(); // 되돌아갈 위치
-                setPosition(previous);
-                System.out.println("[백도] " + id + "가 " + position.getId() + "로 되돌아감");
-
-                // 백도일 때도 그룹말 같이 움직여야 함
-                for (Horse grouped : groupedHorses) {
-                    grouped.setPosition(previous);
+                System.out.println("[백도] 푸시 직전 스택 상태:");
+                for (Node n : positionHistory) {
+                    System.out.println(" - " + n.getId());
                 }
+                setPosition(previous);
+                System.out.println("[백도] 푸시 직후 스택 상태:");
+                for (Node n : positionHistory) {
+                    System.out.println(" - " + n.getId());
+                }
+                System.out.println("[백도] " + id + "가 " + position.getId() + "로 되돌아감");
 
                 // 스택 전체 출력 (디버깅용)
                 System.out.println("[백도] 현재 스택 상태:");
