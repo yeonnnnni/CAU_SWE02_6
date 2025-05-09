@@ -67,7 +67,7 @@ public class Horse {
      * 반환값: 다음에 이동할 Node
      * 지금 위치한 노드(position)의 nextNodes 목록(candidates) 중에서 어디로 이동할지를 결정해주는 함수
      * */
-    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft) {
+    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft, String boardType) {
         // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
 
@@ -83,14 +83,22 @@ public class Horse {
                         .orElse(candidates.getFirst());
             }
             else if (stepsLeft >= 1) {
-                // 👉 B 라인으로 이동
-                return candidates.stream()
-                        .filter(n -> n.getId().equals("B0"))
-                        .findFirst()
-                        .orElse(candidates.getFirst());
+                if ("square".equalsIgnoreCase(boardType)) {
+                    // 사각형일 땐 A0 우선
+                    return candidates.stream()
+                            .filter(n -> n.getId().equals("A0"))
+                            .findFirst()
+                            .orElse(candidates.getFirst());
+                } else {
+                    // 오각형, 육각형은 B0
+                    return candidates.stream()
+                            .filter(n -> n.getId().equals("B0"))
+                            .findFirst()
+                            .orElse(candidates.getFirst());
+                }
             }
             else {
-                // 👉 기본 A 라인으로 이동
+                // 기본 A 라인으로 이동
                 return candidates.stream()
                         .filter(n -> n.getId().startsWith("A"))
                         .findFirst()
@@ -247,9 +255,9 @@ public class Horse {
          * nextList.size() == 3: 후보가 3개 있을 때 → 지름길 포함된 분기점이라는 뜻
          * */
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
-                //⚠️이러면 사용자의 선택 없이 무조건 지름길로 감.
-                nextList.get(2) : // 마지막칸이 남아있지않고, n이면서 sizerk가 3이라면
-                chooseNextNode (nextList, isFirstStep, stepsLeft);
+                nextList.get(2) :
+                chooseNextNode(nextList, isFirstStep, stepsLeft, team.getBoardType());
+
 
         System.out.println("$$$$$$next: " + next.getId());
         System.out.println("next: " + nextList.toString());
