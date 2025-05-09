@@ -83,10 +83,16 @@ public class Horse {
                         .orElse(candidates.getFirst());
             }
             else if (stepsLeft >= 1) {
-                if ("square".equalsIgnoreCase(boardType)) {
-                    // 사각형일 땐 A0 우선
+                String prevId = positionHistory.isEmpty() ? null : positionHistory.peek().getId();
+
+                if ("C0".equals(prevId)) {
                     return candidates.stream()
                             .filter(n -> n.getId().equals("A0"))
+                            .findFirst()
+                            .orElse(candidates.getFirst());
+                } else if ("D0".equals(prevId)) {
+                    return candidates.stream()
+                            .filter(n -> n.getId().equals("B0"))
                             .findFirst()
                             .orElse(candidates.getFirst());
                 } else {
@@ -100,7 +106,7 @@ public class Horse {
             else {
                 // 기본 A 라인으로 이동
                 return candidates.stream()
-                        .filter(n -> n.getId().startsWith("A"))
+                        .filter(n -> n         .getId().startsWith("A"))
                         .findFirst()
                         .orElse(candidates.getFirst());
             }
