@@ -68,8 +68,8 @@ public class BoardPanel extends JPanel {
 
             JButton btn = new JButton();
             btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2,
-                          pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
-                          buttonSize, buttonSize);
+                    pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
+                    buttonSize, buttonSize);
             btn.setFont(new Font("Arial", Font.BOLD, 8));
             btn.setText(node.getId());
             btn.setBackground(Color.WHITE);
@@ -103,15 +103,27 @@ public class BoardPanel extends JPanel {
             List<Horse> horses = to.getHorsesOnNode();
 
             StringBuilder sb = new StringBuilder();
-            sb.append(to.getId()).append("\n");
-            for (Horse h : horses) {
-                sb.append(h.getId()).append("<br>");
-            }
-            if (!horses.isEmpty()) sb.setLength(sb.length() - 1);  // 마지막 + 제거
+            sb.append(to.getId()).append("<br>");
 
-            btn.setText("<html><center>"+sb.toString()+"</center></html>");
-            //btn.setText("<html><center>" + sb.toString().replace("\n", "<br>") + "</html>");
-            btn.setForeground(color);
+            boolean hasVisibleHorse = false;
+
+            for (Horse h : horses) {
+                if (h.isFinished()) continue;
+                hasVisibleHorse = true;
+                sb.append(h.toString2()).append("<br>");
+            }
+
+            if (sb.toString().endsWith("<br>")) {
+                sb.setLength(sb.length() - 4);
+            }
+
+            btn.setText("<html><center>" + sb + "</center></html>");
+
+            if (hasVisibleHorse) {
+                btn.setForeground(color); // 말 있으면 말 색상
+            } else {
+                btn.setForeground(Color.BLACK); // 말 없으면 기본 색상
+            }
         }
     }
 
