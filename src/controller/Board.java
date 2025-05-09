@@ -17,16 +17,16 @@ public class Board {
     // 게임판에 존재하는 모든 노드 리스트
     private final List<Node> nodes = new ArrayList<>();
 
-    // 플레이어 등록 시 Team과 말 4개 생성
-    public void registerPlayer(String playerId) {
-        int teamID = Integer.parseInt(playerId);       // 예: "0", "1" → 0, 1
-        Team team = new Team(teamID);
-        for (int i = 0; i < 4; i++) {
-            Horse h = new Horse(i, team);    // Horse 생성 시 team에 자동 등록됨
-            allHorses.add(h);   // 전체 말 리스트에 추가
-        }
-        playerToTeam.put(playerId, team);
-    }
+    // // 플레이어 등록 시 Team과 말 4개 생성
+    // public void registerPlayer(String playerId) {
+    //     int teamID = Integer.parseInt(playerId);       // 예: "0", "1" → 0, 1
+    //     Team team = new Team(teamID);
+    //     for (int i = 0; i < 4; i++) {
+    //         Horse h = new Horse(i, team);    // Horse 생성 시 team에 자동 등록됨
+    //         allHorses.add(h);   // 전체 말 리스트에 추가
+    //     }
+    //     playerToTeam.put(playerId, team);
+    // }
 
     // 플레이어 ID를 기준으로 말 리스트 반환
     public List<Horse> getHorsesForPlayer(String playerId) {
@@ -81,16 +81,16 @@ public class Board {
                 .orElseThrow(() -> new IllegalStateException("A2 노드를 찾을 수 없습니다."));
     }
 
-    // Board.java 내부에 아래 메서드 추가
-    public void registerTeam(Team team) {
-        String teamIdAsString = String.valueOf(team.getTeamID());
-        if (playerToTeam.containsKey(teamIdAsString)) return;
+    // // Board.java 내부에 아래 메서드 추가
+    // public void registerTeam(Team team) {
+    //     String teamIdAsString = String.valueOf(team.getTeamID());
+    //     if (playerToTeam.containsKey(teamIdAsString)) return;
 
-        for (int i = 0; i < 4; i++) {
-            Horse h = new Horse(i, team);   // 팀에 자동 등록
-            allHorses.add(h);               // 전체 말 목록에도 추가
-        }
+    //     for (int i = 0; i < 4; i++) {
+    //         Horse h = new Horse(i, team);   // 팀에 자동 등록
+    //         allHorses.add(h);               // 전체 말 목록에도 추가
+    //     }
 
-        playerToTeam.put(teamIdAsString, team);  // 팀 등록
-    }
+    //     playerToTeam.put(teamIdAsString, team);  // 팀 등록
+    // }
 }

@@ -32,6 +32,17 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        int pieceCount = 2; // 기본값
+        try {
+            String input = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            pieceCount = Integer.parseInt(input);
+            if (pieceCount < 2 || pieceCount > 5) throw new NumberFormatException();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
+        }
+
+
+
         // 보드 생성
         String[] types = {"square", "pentagon", "hexagon"};
         String boardType = (String) JOptionPane.showInputDialog(
@@ -62,13 +73,16 @@ public class MainFrame extends JFrame {
         add(currentPlayerLabel, BorderLayout.SOUTH);
 
         // 팀 구성 및 등록
+        // MainFrame에서 팀 만들 때
         List<Team> teams = List.of(
-                new Team(0, "A", Color.BLUE),
-                new Team(1, "B", Color.RED)
+            new Team(0, "A", Color.BLUE, pieceCount),
+            new Team(1, "B", Color.RED, pieceCount)
         );
+
+
         Board board = new Board();
         board.setNodes(nodeList);
-        for (Team t : teams) board.registerTeam(t);
+        //for (Team t : teams) board.registerTeam(t);
 
         // 게임 매니저 연결
         gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);

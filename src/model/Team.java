@@ -12,12 +12,16 @@ public class Team {
     private final String name;          // 팀 이름
 
     // 이름과 색상 모두 지정할 수 있는 생성자
-    public Team(int teamID, String name, Color color) {
+    public Team(int teamID, String name, Color color, int pieceCount) {
         this.teamID = teamID;
         this.name = name;
         this.color = color;
         this.horses = new ArrayList<>();
+        for (int i = 0; i < pieceCount; i++) {
+            new Horse(i, this);
+        }
     }
+
 
     // 팀 ID만 전달받을 경우: 이름과 색상은 자동으로 지정됨
     public Team(int teamID) {
