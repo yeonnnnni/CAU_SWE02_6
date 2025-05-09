@@ -357,13 +357,7 @@ public class Horse {
             }
         }
 
-        // 도착 후 말 잡기
-        List<Horse> others = position.getHorsesOnNode();
-        for (Horse other : others) {
-            if (isCaptured(other)) {
-                other.reset();
-            }
-        }
+     
 
         printStatus(); // 디버깅 로그 출력
 
@@ -444,7 +438,7 @@ public class Horse {
             } else {
                 coord = "(버튼 없음)";
             }
-        }
+        }   
 
         System.out.printf(
                 "[말 상태] %s | 상태: %s | 위치: %s | 좌표: %s\n",

@@ -46,7 +46,6 @@ public class MainFrame extends JFrame {
         }
 
 
-
         // 보드 생성
         String[] types = {"square", "pentagon", "hexagon"};
         String boardType = (String) JOptionPane.showInputDialog(
@@ -86,10 +85,11 @@ public class MainFrame extends JFrame {
 
         Board board = new Board();
         board.setNodes(nodeList);
-        //for (Team t : teams) board.registerTeam(t);
+        // ✅ 이 위치에서 teams와 board 모두 선언되어 있으므로 문제 없음
+for (Team t : teams) board.registerTeam(t);
 
-        // 게임 매니저 연결
-        gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
+// 게임 매니저 연결
+gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
         gameManager.startGame();
 
         // 윷 이벤트
