@@ -428,9 +428,13 @@ public class Horse {
                 this.id, this.state, positionId, coord
         );
     }
+    public String toString2() {
+        char teamChar = (char) ('A' + teamID);
+        return teamChar + ",H" + horseIdx;
+    }
 
     @Override
     public String toString() {
-        return "T" + teamID + "-H" + horseIdx;
-    }
-}
+        char teamChar = (char) ('A' + teamID);
+        return "Team " + teamChar + ", H" + horseIdx;
+    }}
