@@ -23,6 +23,7 @@ public class MainFrame extends JFrame {
     private GameManager gameManager;
     private List<Node> nodeList;
     private static MainFrame instance;
+    private ScoreboardPanel scoreboardPanel;
 
     public MainFrame() {
         instance = this;
@@ -31,6 +32,9 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        scoreboardPanel = new ScoreboardPanel();
+        add(scoreboardPanel, BorderLayout.EAST);
 
         int pieceCount = 2; // 기본값
         try {
@@ -117,7 +121,10 @@ public class MainFrame extends JFrame {
         return selected;
     }
 
-    
+    // getter 추가
+    public ScoreboardPanel getScoreboardPanel() {
+        return scoreboardPanel;
+    }
 
     public void setCurrentPlayer(String name) {
         currentPlayerLabel.setText("현재: " + name);

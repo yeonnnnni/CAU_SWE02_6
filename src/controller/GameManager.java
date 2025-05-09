@@ -39,12 +39,14 @@ public class GameManager {
         board.resetAll();
         mainFrame.getBoardPanel().resetBoardUI();
         mainFrame.getDicePanel().showResult(new ArrayList<>());
+        updateScoreboard();
     }
 
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % teams.size();
         updateCurrentPlayerLabel();
         mainFrame.getDicePanel().showResult(new ArrayList<>());
+        updateScoreboard();
     }
 
     public void checkWin() {
@@ -156,6 +158,9 @@ public class GameManager {
         }
 
         mainFrame.getBoardPanel().updatePiecePosition(from, to, horse.getId(), horse.getTeamColor());
+
+        updateScoreboard();
+
         remainingResults.remove(selected);
 
         promptNextMove();
@@ -200,4 +205,9 @@ public class GameManager {
     private void updateCurrentPlayerLabel() {
         mainFrame.setCurrentPlayer(getCurrentTeam().getName());
     }
+
+    private void updateScoreboard() {
+        mainFrame.getScoreboardPanel().updateScoreboard(teams);
+    }
+
 }
