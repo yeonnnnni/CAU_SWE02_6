@@ -8,6 +8,7 @@ import controller.GameManager;
 import model.DiceManager;
 import model.Node;
 import model.Team;
+import model.YutResult;
 import model.Horse;
 
 import javax.swing.*;
@@ -78,6 +79,31 @@ public class MainFrame extends JFrame {
 
         setVisible(true);
     }
+
+    public List<YutResult> promptYutOrder(List<YutResult> results) {
+        DefaultListModel<YutResult> listModel = new DefaultListModel<>();
+        for (YutResult r : results) listModel.addElement(r);
+
+        JList<YutResult> resultList = new JList<>(listModel);
+        resultList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+        JOptionPane.showMessageDialog(
+                this,
+                new JScrollPane(resultList),
+                "사용할 윷 결과의 순서를 선택하세요 (위→아래 순서)",
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        List<YutResult> selected = resultList.getSelectedValuesList();
+        if (selected.size() != results.size()) {
+            JOptionPane.showMessageDialog(this, "모든 결과를 선택해야 합니다. 기본 순서로 진행합니다.");
+            return results;
+        }
+
+        return selected;
+    }
+
+    
 
     public void setCurrentPlayer(String name) {
         currentPlayerLabel.setText("현재: " + name);

@@ -67,7 +67,7 @@ public class Horse {
      * 반환값: 다음에 이동할 Node
      * 지금 위치한 노드(position)의 nextNodes 목록(candidates) 중에서 어디로 이동할지를 결정해주는 함수
      * */
-    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft) {
+    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep) {
         // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
 
@@ -105,19 +105,6 @@ public class Horse {
                         .filter(n -> n.getId().equals(targetId))
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("A" + level + " → " + targetId + " 경로가 없습니다."));
-            } catch (NumberFormatException e) {
-                throw new IllegalStateException("A 방향 노드 ID 형식이 잘못되었습니다: " + currentId);
-            }
-        }
-
-        else if (currentId.startsWith("B") && !currentId.equals("B2")) {
-            try {
-                int level = Character.getNumericValue(currentId.charAt(1));
-                String targetId = "B" + (level + 1);
-                return candidates.stream()
-                        .filter(n -> n.getId().equals(targetId))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("B" + level + " → " + targetId + " 경로가 없습니다."));
             } catch (NumberFormatException e) {
                 throw new IllegalStateException("A 방향 노드 ID 형식이 잘못되었습니다: " + currentId);
             }
@@ -248,7 +235,7 @@ public class Horse {
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
                 //⚠️이러면 사용자의 선택 없이 무조건 지름길로 감.
                 nextList.get(2) : // 마지막칸이 남아있지않고, n이면서 sizerk가 3이라면
-                chooseNextNode (nextList, isFirstStep, stepsLeft);
+                chooseNextNode (nextList, isFirstStep);
 
         System.out.println("$$$$$$next: " + next.getId());
         System.out.println("next: " + nextList.toString());
@@ -317,8 +304,7 @@ public class Horse {
         for (int i = 0; i < steps; i++) {
             boolean isFirst = (i == 0);
             boolean isLast = (i == steps - 1);
-            int stepsLeft = steps - i;
-            moveStep(isLast, isFirst, stepsLeft);
+            moveStep(isLast, isFirst);
         }
 
         // 도착 후 말 잡기

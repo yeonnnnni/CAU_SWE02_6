@@ -19,4 +19,9 @@ public enum YutResult {
     public int getSteps() {
         return steps;
     }
+
+    @Override
+    public String toString() {
+        return name() + " (" + steps + ")";
+    }
 }
