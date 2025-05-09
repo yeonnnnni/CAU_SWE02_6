@@ -76,13 +76,20 @@ public class Horse {
         //"A" 방향으로 가는 지름길 선택 (우선순위) -> 도착지점에 가장 가까운게 A니까.
         //A방향 노드 (A1, A0 등)가 없다면 그냥 candidates의 첫 번째 노드 선택
         if (currentId.equals("00")) {
-            if (stepsLeft >= 1) {
+            if (isFirstStep) {
+                return candidates.stream()
+                        .filter(n -> n.getId().startsWith("A"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            }
+            else if (stepsLeft >= 1) {
                 // 👉 B 라인으로 이동
                 return candidates.stream()
                         .filter(n -> n.getId().equals("B0"))
                         .findFirst()
                         .orElse(candidates.getFirst());
-            } else {
+            }
+            else {
                 // 👉 기본 A 라인으로 이동
                 return candidates.stream()
                         .filter(n -> n.getId().startsWith("A"))
@@ -221,8 +228,6 @@ public class Horse {
         //위 조건 모두 해당 안 되는 경우는 그냥 첫 번째 후보 노드로 이동
         return candidates.getFirst();
     }
-
-
 
     private void moveStep(boolean isRemain, boolean isFirstStep, int stepsLeft) {
         //현재 위치가 없으면 오류
