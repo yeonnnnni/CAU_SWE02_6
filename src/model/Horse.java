@@ -88,8 +88,7 @@ public class Horse {
                         .filter(n -> n.getId().equals("B0"))
                         .findFirst()
                         .orElse(candidates.getFirst());
-            }
-            else {
+            } else {
                 // 👉 기본 A 라인으로 이동
                 return candidates.stream()
                         .filter(n -> n.getId().startsWith("A"))
