@@ -4,9 +4,7 @@ import builder.BoardFactory;
 import view.MainFrame;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import javax.swing.JButton;
 import java.awt.Point;
 
@@ -20,6 +18,10 @@ public class Horse {
     private Node position;
     private List<Horse> groupedHorses;
     private HorseBackup backup;
+
+    //빽도를 위한 경로 스택 생성
+    private final Deque<Node> positionHistory = new ArrayDeque<>();
+
 
     public Horse(int horseIdx, Team team) {
         this.horseIdx = horseIdx;
@@ -51,6 +53,7 @@ public class Horse {
     public void setPosition(Node position) {
         if (this.position != null) {
             this.position.removeHorse(this);
+            positionHistory.push(this.position);
         }
         this.position = position;
         if (position != null) {
@@ -257,6 +260,31 @@ public class Horse {
             if (steps < 0) return;
         }
 
+        if (steps == -1) {
+            if (!positionHistory.isEmpty()) {
+                positionHistory.pop();
+                Node previous = positionHistory.pop(); // 되돌아갈 위치
+                setPosition(previous);
+                System.out.println("[백도] " + id + "가 " + position.getId() + "로 되돌아감");
+
+                // 백도일 때도 그룹말 같이 움직여야 함
+                for (Horse grouped : groupedHorses) {
+                    grouped.setPosition(previous);
+                }
+
+                // 스택 전체 출력 (디버깅용)
+                System.out.println("[백도] 현재 스택 상태:");
+                for (Node n : positionHistory) {
+                    System.out.println(" - " + n.getId());
+                }
+
+            } else {
+                System.out.println("[백도] 더 이상 되돌아갈 위치가 없습니다.");
+            }
+            printStatus();
+            return;
+        }
+
         for (int i = 0; i < steps; i++) {
             boolean isFirst = (i == 0);
             boolean isLast = (i == steps - 1);
@@ -296,6 +324,7 @@ public class Horse {
         position = null;
         state = HorseState.WAITING;
         groupedHorses.clear();
+        positionHistory.clear();
     }
 
     public boolean isCaptured(Horse other) {
