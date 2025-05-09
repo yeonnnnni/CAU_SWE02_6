@@ -61,6 +61,17 @@ public class Horse {
         }
     }
 
+    private void setPositionWithoutHistory(Node newPos) {
+        if (this.position != null) {
+            this.position.removeHorse(this);
+        }
+        this.position = newPos;
+        if (newPos != null) {
+            newPos.addHorse(this);
+        }
+    }
+
+
     // 분기점에서 사용자에게 경로 선택 유도
     /*
      * candidates: 현재 위치에서 갈 수 있는 노드들 → position.getNextNodes()가 넘겨주는 리스트
@@ -303,13 +314,12 @@ public class Horse {
 
         if (steps == -1) {
             if (!positionHistory.isEmpty()) {
-                Node waste = positionHistory.pop();
                 Node previous = positionHistory.pop(); // 되돌아갈 위치
+                setPositionWithoutHistory(previous);
                 System.out.println("[백도] 푸시 직전 스택 상태:");
                 for (Node n : positionHistory) {
                     System.out.println(" - " + n.getId());
                 }
-                setPosition(previous);
                 System.out.println("[백도] 푸시 직후 스택 상태:");
                 for (Node n : positionHistory) {
                     System.out.println(" - " + n.getId());
@@ -321,7 +331,6 @@ public class Horse {
                 for (Node n : positionHistory) {
                     System.out.println(" - " + n.getId());
                 }
-
             } else {
                 System.out.println("[백도] 더 이상 되돌아갈 위치가 없습니다.");
             }
