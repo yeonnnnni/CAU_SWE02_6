@@ -63,7 +63,8 @@ public class GameManager {
                     "다시 시작"
             );
             if (choice == JOptionPane.YES_OPTION) {
-                startGame();
+                // 전체 상태를 완전히 초기화하도록 restartGame() 호출
+                restartGame();
             } else {
                 System.exit(0);
             }
@@ -182,9 +183,18 @@ public class GameManager {
     public void restartGame() {
         board.resetAll();
         currentPlayerIndex = 0;
+        remainingResults.clear();
+        capturedThisTurn = false;
+        bonusTurnRequested = false;
+
+        for (Team team : teams) {
+            team.resetTeam(); // 각 팀의 말 상태 초기화
+        }
+
         updateCurrentPlayerLabel();
         mainFrame.getBoardPanel().resetBoardUI();
         mainFrame.getDicePanel().showResult(new ArrayList<>());
+        updateScoreboard();
     }
 
     public Team getCurrentTeam() {
