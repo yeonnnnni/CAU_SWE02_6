@@ -76,10 +76,25 @@ public class Horse {
         //"A" 방향으로 가는 지름길 선택 (우선순위) -> 도착지점에 가장 가까운게 A니까.
         //A방향 노드 (A1, A0 등)가 없다면 그냥 candidates의 첫 번째 노드 선택
         if (currentId.equals("00")) {
-            return candidates.stream()
-                    .filter(n -> n.getId().startsWith("A"))
-                    .findFirst()
-                    .orElse(candidates.getFirst());
+            if (isFirstStep) {
+                return candidates.stream()
+                        .filter(n -> n.getId().startsWith("A"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            }
+            else if (stepsLeft >= 1) {
+                // 👉 B 라인으로 이동
+                return candidates.stream()
+                        .filter(n -> n.getId().equals("B0"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            } else {
+                // 👉 기본 A 라인으로 이동
+                return candidates.stream()
+                        .filter(n -> n.getId().startsWith("A"))
+                        .findFirst()
+                        .orElse(candidates.getFirst());
+            }
         }
 
         else if (currentId.startsWith("A") && !currentId.equals("A2")) {
@@ -200,9 +215,7 @@ public class Horse {
         return candidates.getFirst();
     }
 
-
-
-    private void moveStep(boolean isRemain, boolean isFirstStep) {
+    private void moveStep(boolean isRemain, boolean isFirstStep, int stepsLeft) {
         //현재 위치가 없으면 오류
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
