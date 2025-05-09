@@ -44,27 +44,15 @@ public class HexagonBoardBuilder implements BoardBuilder {
 
     private void connectNodes() {
         for (int i = 0; i < 24; i++) {
-            connect("N" + i, "N" + ((i + 1) % 24));
+            if (i!=3 && i!=7 && i!=11 && i!=15 && i!=19 && i!=23) {
+                connect("N" + i, "N" + (i + 1));
+            }
         }
 
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
             connect(dir + "0", dir + "1");
             connect(dir + "1", dir + "2");
-            connect(dir + "2", "00");
-            connect("00", dir + "1");
-        }
-
-        Map<String, String> invalidLinks = Map.of(
-            "F0", "N20", "E0", "N16", "C0", "N8", "B0", "N4"
-        );
-
-        for (char dir : new char[]{'A', 'B', 'C', 'D', 'E', 'F'}) {
-            String end = dir + "0";
-            int targetIdx = "ABCDEF".indexOf(dir) * 4;
-            String target = "N" + targetIdx;
-            if (!invalidLinks.getOrDefault(end, "").equals(target)) {
-                connect(end, target);
-            }
+            connect("00", dir + "0");
         }
 
         connect("F2", "N3"); connect("F2", "N4");

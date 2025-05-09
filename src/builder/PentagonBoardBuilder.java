@@ -63,7 +63,9 @@ public class PentagonBoardBuilder implements BoardBuilder {
         // 외곽 연결 (A2 → N19 → ... → N0 → A2)
         connect("A2", "N19");
         for (int i = 19; i > 0; i--) {
-            connect("N" + i, "N" + (i - 1));
+            if (i!=16 && i!=12 && i!=8 && i!=4) {
+                connect("N" + i, "N" + (i - 1));
+            }
         }
         connect("N0", "A2");
 
