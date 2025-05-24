@@ -72,7 +72,7 @@ public class GameManager {
     }
 
     public void handleDiceRoll() {
-        System.out.println("🎯 handleDiceRoll() 시작");
+        System.out.println("handleDiceRoll() 시작");
         capturedThisTurn = false;
 
         // 새로운 턴 시작이므로 플래그 초기화
@@ -104,12 +104,12 @@ public class GameManager {
         if (remainingResults.isEmpty()) {
             checkWin();
             if (capturedThisTurn) {
-                System.out.println("🔥 보너스 턴 실행 중");
+                System.out.println("보너스 턴 실행 중");
                 JOptionPane.showMessageDialog(mainFrame, "말을 잡았습니다! 한 번 더 던집니다.");
                 capturedThisTurn = false;
                 handleDiceRoll(); // 보너스 턴
             } else {
-                System.out.println("➡️ 보너스 조건 없음, 턴 종료");
+                System.out.println("보너스 조건 없음, 턴 종료");
                 nextTurn();
             }
             mainFrame.getDicePanel().setEnabled(true);
@@ -150,7 +150,7 @@ public class GameManager {
 
         if (captured) {
             capturedThisTurn = true;
-            System.out.println("💥 " + horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
+            System.out.println(horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
         }
 
         mainFrame.getBoardPanel().updatePiecePosition(from, to, horse.getId(), horse.getTeamColor());
