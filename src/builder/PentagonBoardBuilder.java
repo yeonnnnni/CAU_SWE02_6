@@ -7,6 +7,10 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * PentagonBoardBuilder는 오각형 형태의 윷놀이 보드를 구성하는 클래스입니다.
+ * BoardBuilder 인터페이스를 구현하며, 노드 생성, 노드 간 연결, 좌표 배치를 담당합니다.
+ */
 public class PentagonBoardBuilder implements BoardBuilder {
 
     private final Map<String, Node> nodeMap = new LinkedHashMap<>();
@@ -16,6 +20,10 @@ public class PentagonBoardBuilder implements BoardBuilder {
         return nodeMap.computeIfAbsent(id, Node::new);
     }
 
+    /**
+     * 보드의 노드들을 생성하고 연결하며, 각 노드의 위치를 설정하여 보드를 구성합니다.
+     * @return 생성된 노드들의 리스트
+     */
     @Override
     public List<Node> buildBoard() {
         createNodes();
@@ -24,11 +32,20 @@ public class PentagonBoardBuilder implements BoardBuilder {
         return new ArrayList<>(nodeMap.values());
     }
 
+    /**
+     * 노드들의 좌표 정보를 반환합니다.
+     * @return 노드 ID와 위치를 매핑한 맵
+     */
     @Override
     public Map<String, Point> getNodePositions() {
         return positions;
     }
 
+    /**
+     * 두 노드를 상호 연결합니다.
+     * @param fromId 출발 노드 ID
+     * @param toId 도착 노드 ID
+     */
     private void connect(String fromId, String toId) {
         Node from = node(fromId);
         Node to = node(toId);
@@ -36,6 +53,9 @@ public class PentagonBoardBuilder implements BoardBuilder {
         to.addNextNode(from);
     }
 
+    /**
+     * 보드에 사용될 노드들을 생성하고 초기 설정을 합니다.
+     */
     private void createNodes() {
         node("00").setCenter(true);
 
@@ -52,6 +72,9 @@ public class PentagonBoardBuilder implements BoardBuilder {
         node("A2").setGoal(true);
     }
 
+    /**
+     * 생성된 노드들 간의 연결 관계를 설정합니다.
+     */
     private void connectNodes() {
         // 지름길 연결
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E'}) {
@@ -80,6 +103,9 @@ public class PentagonBoardBuilder implements BoardBuilder {
         connect("B2", "N16");
     }
 
+    /**
+     * 각 노드의 화면 내 위치를 계산하여 설정합니다.
+     */
     private void createPositions() {
         double outerR = 6.0;  // 바깥 반지름
         double step = 1.0;    // 안쪽 말까지 거리 간격
