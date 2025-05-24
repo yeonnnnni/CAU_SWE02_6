@@ -13,6 +13,7 @@ import model.Horse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainFrame extends JFrame {
@@ -73,11 +74,12 @@ public class MainFrame extends JFrame {
 
         // 팀 구성 및 등록
         // MainFrame에서 팀 만들 때
-        List<Team> teams = List.of(
-            new Team(0, "A", Color.BLUE, pieceCount, boardType),
-            new Team(1, "B", Color.RED, pieceCount, boardType)
-        );
-
+        List<Color> colors = List.of(Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.PINK);
+        List<Team> teams = new ArrayList<>();
+        for (int i = 0; i < playerCount; i++) {
+            char name = (char)('A' + i);
+            teams.add(new Team(i, String.valueOf(name), colors.get(i), pieceCount, boardType));
+        }
 
         Board board = new Board();
         board.setNodes(nodeList);
