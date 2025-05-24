@@ -4,6 +4,10 @@ import model.Node;
 import java.awt.Point;
 import java.util.*;
 
+/**
+ * HexagonBoardBuilder는 육각형 형태의 윷놀이 보드를 구성하는 클래스입니다.
+ * BoardBuilder 인터페이스를 구현하여, 노드 생성, 연결, 좌표 배치를 수행합니다.
+ */
 public class HexagonBoardBuilder implements BoardBuilder {
 
     private final Map<String, Node> nodeMap = new LinkedHashMap<>();
@@ -13,6 +17,12 @@ public class HexagonBoardBuilder implements BoardBuilder {
         return nodeMap.computeIfAbsent(id, Node::new);
     }
 
+    /**
+     * 보드를 구성하는 노드들을 생성하고 연결하며, 노드들의 위치를 설정합니다.
+     * 최종적으로 생성된 노드 리스트를 반환합니다.
+     *
+     * @return 생성된 노드들의 리스트
+     */
     @Override
     public List<Node> buildBoard() {
         createNodes();
@@ -21,11 +31,19 @@ public class HexagonBoardBuilder implements BoardBuilder {
         return new ArrayList<>(nodeMap.values());
     }
 
+    /**
+     * 노드들의 좌표 정보를 포함하는 맵을 반환합니다.
+     *
+     * @return 노드 ID와 위치를 매핑한 맵
+     */
     @Override
     public Map<String, Point> getNodePositions() {
         return positions;
     }
 
+    /**
+     * 보드에 필요한 노드들을 생성하고, 특정 노드에 중심 및 목표 설정을 합니다.
+     */
     private void createNodes() {
         node("00").setCenter(true);
 
@@ -42,6 +60,9 @@ public class HexagonBoardBuilder implements BoardBuilder {
         node("A2").setGoal(true);  // ✅ A2만 goal
     }
 
+    /**
+     * 생성된 노드들을 서로 연결하여 보드의 경로를 구성합니다.
+     */
     private void connectNodes() {
         for (int i = 0; i < 24; i++) {
             if (i!=3 && i!=7 && i!=11 && i!=15 && i!=19 && i!=23) {
@@ -63,6 +84,10 @@ public class HexagonBoardBuilder implements BoardBuilder {
         connect("A2", "N23"); connect("A2", "N0");
     }
 
+    /**
+     * 노드들의 실제 위치 좌표를 계산하여 positions 맵에 저장합니다.
+     * 육각형 모양의 보드 구조에 맞게 좌표를 배치합니다.
+     */
     private void createPositions() {
         double radius = 6.0;
 
@@ -110,7 +135,12 @@ public class HexagonBoardBuilder implements BoardBuilder {
         }
     }
 
-    // ✅ 양방향 연결 메서드
+    /**
+     * 두 노드를 양방향으로 연결합니다.
+     *
+     * @param fromId 연결 시작 노드 ID
+     * @param toId 연결 대상 노드 ID
+     */
     private void connect(String fromId, String toId) {
         Node from = nodeMap.get(fromId);
         Node to = nodeMap.get(toId);
