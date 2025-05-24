@@ -24,11 +24,12 @@ public class MainFrame extends JFrame {
     private List<Node> nodeList;
     private static MainFrame instance;
     private ScoreboardPanel scoreboardPanel;
+    private int pieceCount = 2;
 
     public MainFrame() {
         instance = this;
         setTitle("윷놀이 게임");
-        setSize(800, 800);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // 추가
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -36,14 +37,7 @@ public class MainFrame extends JFrame {
         scoreboardPanel = new ScoreboardPanel();
         add(scoreboardPanel, BorderLayout.EAST);
 
-        int pieceCount = 2; // 기본값
-        try {
-            String input = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
-            pieceCount = Integer.parseInt(input);
-            if (pieceCount < 2 || pieceCount > 5) throw new NumberFormatException();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
-        }
+        initCount();
 
 
 
@@ -164,5 +158,22 @@ public class MainFrame extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new);
+    }
+
+
+    // 말 개수 설정: 2~5개 입력, 그 외는 2로 설정
+    private void initCount() {
+        try {
+            String pieceInput = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            int input = Integer.parseInt(pieceInput);
+            if (input >= 2 && input <= 5) {
+                pieceCount = input;
+            } else {
+                throw new NumberFormatException();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력입니다. 말 개수를 2개로 설정합니다.");
+            pieceCount = 2;
+        }
     }
 }
