@@ -24,6 +24,8 @@ public class MainFrame extends JFrame {
     private List<Node> nodeList;
     private static MainFrame instance;
     private ScoreboardPanel scoreboardPanel;
+    private int pieceCount = 2;
+    private int playerCount = 2;
 
     public MainFrame() {
         instance = this;
@@ -147,6 +149,28 @@ gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
                 "예"
         );
         return choice == JOptionPane.YES_OPTION;
+    }
+
+    private void initCount(){
+        // piece init
+        try {
+            String pieceInput = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            pieceCount = Integer.parseInt(pieceInput);
+            if (pieceCount < 2 || pieceCount > 5) throw new NumberFormatException();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
+            pieceCount = 2;
+        }
+
+        // player init
+        try {
+            String playerInput = JOptionPane.showInputDialog(null, "플레이어 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            playerCount = Integer.parseInt(playerInput);
+            if (playerCount < 2 || playerCount > 5) throw new NumberFormatException();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
+            playerCount = 2;
+        }
     }
 
     public Horse promptHorseSelection(List<Horse> candidates, int steps) {
