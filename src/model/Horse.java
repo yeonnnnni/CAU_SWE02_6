@@ -150,7 +150,7 @@ public class Horse {
         }
 
         //각 방향의 "2"번 노드이면서 A2는 아니면서 N2는 아니면서 시작이 vertex인 경우.
-        else if (isFirstStep && currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.startsWith("N")) {
+        else if (isFirstStep && currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.equals("B2") && !currentId.startsWith("N")) {
             System.out.println("vertex!!");
             //사용자가 지름길을 쓸지 물어보고, 사용하면 "D1"로, 아니면 "N*"으로 감.
             String direction = position.getId().substring(0, 1);    // D2 → "D" : 현재 노드의 맨 앞 알파벳 따옴.
