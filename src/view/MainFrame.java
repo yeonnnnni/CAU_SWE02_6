@@ -41,8 +41,6 @@ public class MainFrame extends JFrame {
 
         initCount();
 
-
-
         // 보드 생성
         String[] types = {"square", "pentagon", "hexagon"};
         String boardType = (String) JOptionPane.showInputDialog(
@@ -81,12 +79,14 @@ public class MainFrame extends JFrame {
             teams.add(new Team(i, String.valueOf(name), colors.get(i), pieceCount, boardType));
         }
 
+
         Board board = new Board();
         board.setNodes(nodeList);
-        //for (Team t : teams) board.registerTeam(t);
+        // ✅ 이 위치에서 teams와 board 모두 선언되어 있으므로 문제 없음
+for (Team t : teams) board.registerTeam(t);
 
-        // 게임 매니저 연결
-        gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
+// 게임 매니저 연결
+gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
         gameManager.startGame();
 
         // 윷 이벤트
@@ -144,6 +144,28 @@ public class MainFrame extends JFrame {
                 "예"
         );
         return choice == JOptionPane.YES_OPTION;
+    }
+
+    private void initCount(){
+        // piece init
+        try {
+            String pieceInput = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            pieceCount = Integer.parseInt(pieceInput);
+            if (pieceCount < 2 || pieceCount > 5) throw new NumberFormatException();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
+            pieceCount = 2;
+        }
+
+        // player init
+        try {
+            String playerInput = JOptionPane.showInputDialog(null, "플레이어 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            playerCount = Integer.parseInt(playerInput);
+            if (playerCount < 2 || playerCount > 5) throw new NumberFormatException();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
+            playerCount = 2;
+        }
     }
 
     public Horse promptHorseSelection(List<Horse> candidates, int steps) {
