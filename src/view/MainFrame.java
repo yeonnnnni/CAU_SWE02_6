@@ -13,6 +13,7 @@ import model.Horse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainFrame extends JFrame {
@@ -25,6 +26,7 @@ public class MainFrame extends JFrame {
     private static MainFrame instance;
     private ScoreboardPanel scoreboardPanel;
     private int pieceCount = 2;
+    private int playerCount = 2;
 
     public MainFrame() {
         instance = this;
@@ -38,8 +40,6 @@ public class MainFrame extends JFrame {
         add(scoreboardPanel, BorderLayout.EAST);
 
         initCount();
-
-
 
         // 보드 생성
         String[] types = {"square", "pentagon", "hexagon"};
@@ -72,10 +72,12 @@ public class MainFrame extends JFrame {
 
         // 팀 구성 및 등록
         // MainFrame에서 팀 만들 때
-        List<Team> teams = List.of(
-            new Team(0, "A", Color.BLUE, pieceCount, boardType),
-            new Team(1, "B", Color.RED, pieceCount, boardType)
-        );
+        List<Color> colors = List.of(Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.PINK);
+        List<Team> teams = new ArrayList<>();
+        for (int i = 0; i < playerCount; i++) {
+            char name = (char)('A' + i);
+            teams.add(new Team(i, String.valueOf(name), colors.get(i), pieceCount, boardType));
+        }
 
 
         Board board = new Board();
@@ -162,18 +164,25 @@ public class MainFrame extends JFrame {
 
 
     // 말 개수 설정: 2~5개 입력, 그 외는 2로 설정
-    private void initCount() {
+    private void initCount(){
+        // piece init
         try {
             String pieceInput = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
-            int input = Integer.parseInt(pieceInput);
-            if (input >= 2 && input <= 5) {
-                pieceCount = input;
-            } else {
-                throw new NumberFormatException();
-            }
+            pieceCount = Integer.parseInt(pieceInput);
+            if (pieceCount < 2 || pieceCount > 5) throw new NumberFormatException();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "잘못된 입력입니다. 말 개수를 2개로 설정합니다.");
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
             pieceCount = 2;
+        }
+
+        // player init
+        try {
+            String playerInput = JOptionPane.showInputDialog(null, "플레이어 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            playerCount = Integer.parseInt(playerInput);
+            if (playerCount < 2 || playerCount > 5) throw new NumberFormatException();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
+            playerCount = 2;
         }
     }
 }

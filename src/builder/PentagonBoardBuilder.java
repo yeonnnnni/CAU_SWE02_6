@@ -7,15 +7,23 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * PentagonBoardBuilder는 오각형 형태의 윷놀이 보드를 구성하는 클래스입니다.
+ * BoardBuilder 인터페이스를 구현하며, 노드 생성, 연결, 좌표 배치를 담당합니다.
+ */
 public class PentagonBoardBuilder implements BoardBuilder {
 
     private final Map<String, Node> nodeMap = new LinkedHashMap<>();
     private final Map<String, Point> positions = new HashMap<>();
 
+    // 노드 ID를 기준으로 중복 없이 생성하거나 기존 노드 반환
     private Node node(String id) {
         return nodeMap.computeIfAbsent(id, Node::new);
     }
 
+    /**
+     * 보드를 구성하는 전체 노드를 생성하고 연결한 후 리스트로 반환합니다.
+     */
     @Override
     public List<Node> buildBoard() {
         createNodes();
@@ -24,11 +32,17 @@ public class PentagonBoardBuilder implements BoardBuilder {
         return new ArrayList<>(nodeMap.values());
     }
 
+    /**
+     * 각 노드의 화면상 위치 정보를 반환합니다.
+     */
     @Override
     public Map<String, Point> getNodePositions() {
         return positions;
     }
 
+    /**
+     * 두 노드를 양방향으로 연결합니다.
+     */
     private void connect(String fromId, String toId) {
         Node from = node(fromId);
         Node to = node(toId);
@@ -36,31 +50,40 @@ public class PentagonBoardBuilder implements BoardBuilder {
         to.addNextNode(from);
     }
 
+    /**
+     * 중심, 지선, 외곽 노드를 생성합니다.
+     */
     private void createNodes() {
-        node("00").setCenter(true);
+        node("00").setCenter(true); // 중심 노드
 
+        // A0~E2 방향 노드 생성 (지선)
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E'}) {
             for (int i = 0; i <= 2; i++) {
                 node("" + dir + i);
             }
         }
 
+        // 외곽 노드 N0 ~ N19 생성
         for (int i = 0; i < 20; i++) {
             node("N" + i);
         }
 
-        node("A2").setGoal(true);
+        node("A2").setGoal(true); // 도착 노드
     }
 
+    /**
+     * 노드 간 연결 관계를 설정합니다.
+     * 지름길, 외곽 루프, 분기 경로 포함.
+     */
     private void connectNodes() {
-        // 지름길 연결
+        // 중심과 지선 노드 연결
         for (char dir : new char[]{'A', 'B', 'C', 'D', 'E'}) {
             connect(dir + "0", "00");
             connect(dir + "0", dir + "1");
             connect(dir + "1", dir + "2");
         }
 
-        // 외곽 연결 (A2 → N19 → ... → N0 → A2)
+        // 외곽 순환 연결 (A2 → N19 → ... → N0 → A2)
         connect("A2", "N19");
         for (int i = 19; i > 0; i--) {
             if (i!=16 && i!=12 && i!=8 && i!=4) {
@@ -69,7 +92,7 @@ public class PentagonBoardBuilder implements BoardBuilder {
         }
         connect("N0", "A2");
 
-        // 분기 연결
+        // 각 지선 끝 노드에서 외곽으로 분기 연결
         connect("E2", "N3");
         connect("E2", "N4");
         connect("D2", "N7");
@@ -80,20 +103,24 @@ public class PentagonBoardBuilder implements BoardBuilder {
         connect("B2", "N16");
     }
 
+    /**
+     * 노드의 화면 좌표를 설정합니다.
+     * 오각형 꼭짓점을 기준으로 위치를 선형 보간하여 배치합니다.
+     */
     private void createPositions() {
-        double outerR = 6.0;  // 바깥 반지름
-        double step = 1.0;    // 안쪽 말까지 거리 간격
+        double outerR = 6.0;
         positions.put("00", new Point(0, 0));
 
-        // A2, B2, ..., E2가 꼭짓점이 되도록 각도 지정 (반시계 방향)
-        int[] angles = {-162, -90, -18, 54, 126}; // A, B, C, D, E
+        // 오각형 꼭짓점 방향 설정 (반시계 방향)
+        int[] angles = {-162, -90, -18, 54, 126}; // A~E
         String[] dirs = {"A", "B", "C", "D", "E"};
 
+        // 중심에서 방향별 지선 좌표 계산
         for (int i = 0; i < dirs.length; i++) {
             double angle = Math.toRadians(angles[i]);
             double dx = Math.cos(angle);
             double dy = Math.sin(angle);
-            double[] radii = {2, 4, 6.0};  // A0 ~ A2: progressively farther from center
+            double[] radii = {2, 4, 6.0};  // 거리 증가
             for (int j = 0; j <= 2; j++) {
                 double r = radii[j];
                 int x = (int)(dx * r * 40);
@@ -102,26 +129,20 @@ public class PentagonBoardBuilder implements BoardBuilder {
             }
         }
 
-        // 외곽 N0~N19: 정오각형 꼭짓점을 기준으로 선형 분포
+        // 오각형 꼭짓점 위치 저장
         Point[] vertices = new Point[5];
         int[] vertexAngles = {-162, -90, -18, 54, 126};
-
-        // 꼭짓점 위치 저장 (A2 ~ E2와 동일)
         for (int i = 0; i < 5; i++) {
             double angle = Math.toRadians(vertexAngles[i]);
             int x = (int)(Math.cos(angle) * outerR * 40);
             int y = (int)(Math.sin(angle) * outerR * 40);
-            vertices[i] = new Point(x, -y);  // Java 좌표계 반영
+            vertices[i] = new Point(x, -y); // Java 좌표계 기준
         }
 
-        // 외곽 노드 20개를 지정된 순서로 배치 (A2 → N0, N1, N2, N3 → E2 → N4, N5, N6, N7 → D2 → N8, N9, N10, N11 → C2 → N12, N13, N14, N15 → B2 → N16, N17, N18, N19 → A2)
+        // 꼭짓점 사이 4개씩 외곽 노드 배치 (총 20개)
         int idx = 0;
         int[][] connectionOrder = {
-            {0, 4}, // A2 → E2
-            {4, 3}, // E2 → D2
-            {3, 2}, // D2 → C2
-            {2, 1}, // C2 → B2
-            {1, 0}  // B2 → A2
+            {0, 4}, {4, 3}, {3, 2}, {2, 1}, {1, 0}
         };
 
         for (int[] pair : connectionOrder) {
@@ -135,6 +156,7 @@ public class PentagonBoardBuilder implements BoardBuilder {
             }
         }
 
+        // Y좌표 반전 보정
         for (Map.Entry<String, Point> entry : positions.entrySet()) {
             Point p = entry.getValue();
             positions.put(entry.getKey(), new Point(p.x, -p.y));
