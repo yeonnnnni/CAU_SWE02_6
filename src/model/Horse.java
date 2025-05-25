@@ -149,8 +149,8 @@ public class Horse {
             }
         }
 
-        //각 방향의 "2"번 노드이면서 A2는 아니면서 N2는 아니면서 시작이 vertex인 경우.
-        else if (isFirstStep && currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.startsWith("N")) {
+        //각 방향의 "2"번 노드이면서 A2, B2는 아니면서 N2는 아니면서 시작이 vertex인 경우.
+        else if (isFirstStep && currentId.endsWith("2") && !currentId.equals("A2")&& !currentId.equals("B2") && !currentId.startsWith("N")) {
             System.out.println("vertex!!");
             //사용자가 지름길을 쓸지 물어보고, 사용하면 "D1"로, 아니면 "N*"으로 감.
             String direction = position.getId().substring(0, 1);    // D2 → "D" : 현재 노드의 맨 앞 알파벳 따옴.
@@ -301,15 +301,16 @@ public class Horse {
     }
 
     // n칸 이동
-    public void move(int steps, List<Node> board, String boardType) {
-        if (isFinished()) return;
+    public boolean move(int steps, List<Node> board, String boardType) {
+        if (isFinished()) return false;
 
         backupState();
+        boolean capturedSomeone = false;
 
         if (position == null) {
             position = BoardFactory.getStartNode(board, boardType);
             state = HorseState.MOVING;
-            if (steps < 0) return;
+            if (steps < 0) return false;
         }
 
         if (steps == -1) {
@@ -335,7 +336,7 @@ public class Horse {
                 System.out.println("[백도] 더 이상 되돌아갈 위치가 없습니다.");
             }
             printStatus();
-            return;
+            return false;
         }
 
         for (int i = 0; i < steps; i++) {
@@ -350,7 +351,7 @@ public class Horse {
                 if (!prevId.equals("N0")) {
                     this.state = HorseState.FINISHED;
                     System.out.println("[완주] " + id + "가 A2에 도달했으며, " + prevId + "를 통해 A2로 들어왔습니다.");
-                    return;
+                    return false;
                 } else {
                     System.out.println("[진입] " + id + "가 N0를 통해 A2로 들어왔습니다. 계속 진행합니다.");
                 }
@@ -362,6 +363,7 @@ public class Horse {
         for (Horse other : others) {
             if (isCaptured(other)) {
                 other.reset();
+                capturedSomeone = true;
             }
         }
 
@@ -375,7 +377,7 @@ public class Horse {
                 btn.setForeground(Color.BLACK);      // 기본 색상으로
             }
         }
-
+        return capturedSomeone;
     }
 
     // 현재 상태 백업
