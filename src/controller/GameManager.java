@@ -3,92 +3,223 @@ package controller;
 import model.YutResult;
 import model.DiceManager;
 import model.Horse;
+import model.Team;
+import model.Node;
 import view.MainFrame;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-
-import java.util.LinkedList;
-import javax.swing.JOptionPane;
-
 
 public class GameManager {
-    private MainFrame mainFrame;
-    private Board board;
-    private DiceManager diceManager;
-
-    private List<String> players;
+    private final MainFrame mainFrame;
+    private final Board board;
+    private final DiceManager diceManager;
+    private final List<Team> teams;
     private int currentPlayerIndex;
+    private final String boardType;
 
-    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<String> players) {
+    private List<YutResult> remainingResults = new ArrayList<>();
+    private boolean capturedThisTurn = false;
+    private boolean bonusTurnRequested = false;
+
+    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams, String boardType) {
         this.mainFrame = mainFrame;
         this.board = board;
         this.diceManager = diceManager;
-        this.players = players;
+        this.teams = teams;
+        this.boardType = boardType;
         this.currentPlayerIndex = 0;
     }
 
-    /** 게임 시작 시 호출 */
+    /**
+    * 게임을 새로 시작할 때 호출되는 메서드
+    * - 플레이어 인덱스를 0으로 초기화
+    * - UI 및 보드 상태 초기화
+     */
+
     public void startGame() {
-        // 초기화 및 시작 알림
+        currentPlayerIndex = 0;                         // 첫 번째 플레이어로 설정
+        updateCurrentPlayerLabel();                     // 상단에 현재 플레이어 표시
+        board.resetAll();                               // 모든 말과 노드 상태 초기화
+        mainFrame.getBoardPanel().resetBoardUI();       // 보드 UI 초기화 (말, 색상 등 리셋)
+        mainFrame.getDicePanel().showResult(new ArrayList<>()); // 주사위 패널 초기화
+        updateScoreboard();                             // 점수판 초기화
     }
 
-    /** 현재 플레이어가 윷을 던질 때 호출 */
-    public void startTurn() {
-        // DiceManager를 이용해 결과 받고 → 큐에 저장
-    }
-
-    /** 윷 결과 큐를 처리하여 말 이동 */
-    public void handleMoveQueue(Queue<YutResult> resultQueue) {
-        while (!resultQueue.isEmpty()) {
-            YutResult result = resultQueue.poll();
-            int steps = diceManager.convertToSteps(result);
-            
-            List<Horse> movable = getMovableHorses(steps);
-            if (movable.isEmpty()) {
-                System.out.println("이동 가능한 말 없음. 턴 넘김.");
-                continue;
-            }
-        
-            // 👉 사용자에게 movable 리스트를 넘겨서 선택하게 하기
-            mainFrame.promptHorseSelection(movable, steps);
-            return; // 선택 후 다시 이어지도록 흐름 잠시 멈춤
-        }
-    
-        checkWin();
-        nextTurn();
-    }
-    
-
-    /** 턴 종료 후 다음 플레이어로 넘김 */
+    /**
+     * 현재 턴을 다음 플레이어에게 넘기는 메서드
+     * - 플레이어 인덱스를 하나 증가시켜 순환
+     * - UI 업데이트
+     */
     public void nextTurn() {
-        // currentPlayerIndex 증가 및 UI 갱신
+        currentPlayerIndex = (currentPlayerIndex + 1) % teams.size(); // 다음 플레이어 순환
+        updateCurrentPlayerLabel();                     // 현재 플레이어 UI 갱신
+        mainFrame.getDicePanel().showResult(new ArrayList<>()); // 주사위 결과 초기화
+        updateScoreboard();                             // 점수판 갱신
     }
 
-    /** 플레이어가 승리 조건을 만족했는지 체크 */
+    /**
+     * 현재 플레이어가 게임에서 승리했는지 확인하는 메서드
+     * - 승리 시 메시지 표시 및 사용자에게 다음 행동 선택 요청
+     */
     public void checkWin() {
-        // 말 4개 모두 도착했는지 등
+        Team team = getCurrentTeam();                   // 현재 턴의 팀 확인
+        if (team.isWin()) {                             // 승리 조건 충족 여부 확인
+            int choice = JOptionPane.showOptionDialog(
+                    mainFrame,
+                    team.getName() + " 팀이 승리했습니다!", // 승리 메시지
+                    "게임 종료",
+                    JOptionPane.YES_NO_OPTION,           // 선택지: 다시 시작 / 종료
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    new Object[]{"다시 시작", "종료"},
+                    "다시 시작"
+            );
+            if (choice == JOptionPane.YES_OPTION) {
+                restartGame(); // 전체 게임 상태 초기화 후 새 게임 시작
+            } else {
+                System.exit(0); // 프로그램 종료
+            }
+        }
     }
 
-    /** 게임을 완전히 초기화하고 새로 시작 */
+    public void handleDiceRoll() {
+        System.out.println("handleDiceRoll() 시작");
+        capturedThisTurn = false;
+
+        // 새로운 턴 시작이므로 플래그 초기화
+        capturedThisTurn = false;
+        bonusTurnRequested = false;
+
+        List<YutResult> results;
+
+        if (mainFrame.getDicePanel().isRandomMode()) {
+            results = diceManager.rollRandomSequence();
+        } else {
+            try {
+                int val = Integer.parseInt(mainFrame.getDicePanel().getManualInputText());
+                results = List.of(diceManager.rollManual(val));
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(mainFrame, "유효한 숫자를 입력해주세요.");
+                return;
+            }
+        }
+
+        remainingResults.clear();
+        remainingResults.addAll(results);
+        mainFrame.getDicePanel().showResult(results);
+
+        promptNextMove();
+    }
+
+    private void promptNextMove() {
+        // 모든 윷 결과를 소진한 경우
+        if (remainingResults.isEmpty()) {
+            checkWin(); // 승리 조건 확인
+
+            // 말 잡은 경우 -> 보너스 턴
+            if (capturedThisTurn) {
+                System.out.println("보너스 턴 실행 중");
+                JOptionPane.showMessageDialog(mainFrame, "말을 잡았습니다! 한 번 더 던집니다.");
+                capturedThisTurn = false; // 보너스 턴 플래기 초기화
+                handleDiceRoll(); // 보너스 턴
+            } else {
+                System.out.println("보너스 조건 없음, 턴 종료");
+                nextTurn(); // 다음 플레이어로 턴 넘김
+            }
+            mainFrame.getDicePanel().setEnabled(true);
+            return;
+        }
+
+        // 사용자에게 사용할 윷 결과 선택 요청
+        YutResult selected;
+        if (remainingResults.size() == 1) {
+            selected = remainingResults.get(0);
+        } else {
+            selected = promptYutSingleChoice(remainingResults);
+            if (selected == null) {
+                mainFrame.getDicePanel().setEnabled(true);
+                return;
+            }
+        }
+
+        // 윷 결과를 이동 칸 수로 변환
+        int steps = diceManager.convertToSteps(selected);
+
+        // 이동 가능한 말 목록을 계산
+        List<Horse> movable = getMovableHorses(steps);
+        if (movable.isEmpty()) {
+            JOptionPane.showMessageDialog(mainFrame, "이동 가능한 말이 없습니다.");
+            remainingResults.remove(selected);
+            promptNextMove(); // 다음 윷 결과로 이동
+            return;
+        }
+
+        // 사용자에게 말 선택하도록 요청
+        Horse horse = mainFrame.promptHorseSelection(movable, steps);
+        if (horse == null) {
+            mainFrame.getDicePanel().setEnabled(true);
+            return;
+        }
+
+        Node from = horse.getPosition();
+        boolean captured = horse.move(steps, board.getNodes(), boardType);
+        Node to = horse.getPosition();
+
+        //말 잡았을 때 보너스 턴 플래그 설정
+        if (captured) {
+            capturedThisTurn = true;
+            System.out.println(horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
+        }
+
+        mainFrame.getBoardPanel().updatePiecePosition(from, to, horse.getId(), horse.getTeamColor());
+
+        updateScoreboard();
+
+        remainingResults.remove(selected);
+
+        promptNextMove();
+    }
+
+
+    private YutResult promptYutSingleChoice(List<YutResult> options) {
+        Object[] choices = options.toArray();
+        return (YutResult) JOptionPane.showInputDialog(
+                mainFrame,
+                "사용할 윷 결과를 선택하세요:",
+                "결과 선택",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                choices,
+                choices[0]
+        );
+    }
+
     public void restartGame() {
-        // 말 위치 초기화, 턴 초기화 등
+        board.resetAll();
+        currentPlayerIndex = 0;
+        remainingResults.clear();
+        capturedThisTurn = false;
+        bonusTurnRequested = false;
+
+        for (Team team : teams) {
+            team.resetTeam(); // 각 팀의 말 상태 초기화
+        }
+
+        updateCurrentPlayerLabel();
+        mainFrame.getBoardPanel().resetBoardUI();
+        mainFrame.getDicePanel().showResult(new ArrayList<>());
+        updateScoreboard();
     }
 
-    /** 현재 플레이어 이름 반환 */
-    public String getCurrentPlayer() {
-        return players.get(currentPlayerIndex);
+    public Team getCurrentTeam() {
+        return teams.get(currentPlayerIndex);
     }
 
-    /** 윷 결과를 받아 처리 (GameController에서 호출) */
-    public void processRollResult(YutResult result) {
-        // TODO: 한 결과에 대해 칸 수 계산 → 이동 처리 (예: moveHorse)
-    }
-
-    //이동 가능 말 필터 메서드
     public List<Horse> getMovableHorses(int steps) {
-        List<Horse> horses = board.getHorsesForPlayer(getCurrentPlayer());
+        List<Horse> horses = board.getHorsesForTeam(getCurrentTeam());
         List<Horse> movable = new ArrayList<>();
         for (Horse h : horses) {
             if (board.canMove(h, steps)) {
@@ -98,66 +229,12 @@ public class GameManager {
         return movable;
     }
 
-    /** 윷 버튼 클릭 시 호출됨: 윷 결과 생성 + 처리 시작 */
-    public void handleDiceRoll() {
-        if (mainFrame.getDicePanel().isRandomMode()) {
-            Queue<YutResult> resultQueue = diceManager.rollRandomQueue();
-            mainFrame.getDicePanel().showResult(List.copyOf(resultQueue));
-            handleMoveQueue(resultQueue);
-        } else {
-            // 👉 수동 모드
-            try {
-                int input = Integer.parseInt(mainFrame.getDicePanel().getManualInputText().trim());
-                YutResult result = diceManager.rollManual(input);
-                Queue<YutResult> resultQueue = new LinkedList<>();
-                resultQueue.add(result);
-                mainFrame.getDicePanel().showResult(List.of(result));
-                handleMoveQueue(resultQueue);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(mainFrame, "수동 입력은 -1부터 5 사이의 정수를 입력해야 합니다.", "입력 오류", JOptionPane.ERROR_MESSAGE);
-            } catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(mainFrame, "잘못된 수치입니다: " + e.getMessage(), "입력 오류", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+    private void updateCurrentPlayerLabel() {
+        mainFrame.setCurrentPlayer(getCurrentTeam().getName());
     }
 
-
-
-}
-
-//GameManager.handleDiceRoll() 또는 startTurn() 같은 함수 안에서
-//List<YutResult> results = diceManager.rollRandomSequence();
-//이런 식으로 처리할 수 있도록 만들어야 함.
-//YutResult 리스트는 반드시 순서대로 처리해야 함. (윷/모 보너스 포함된 상태니까!)
-
-/*
-(예시본)
-List<YutResult> results = diceManager.rollRandomSequence();
-
-for (YutResult result : results) {
-    int steps = diceManager.convertToSteps(result);
-    // → 여기서 이동 처리
-    game.moveCurrentHorse(steps); // 예시 함수
-}
-
-(예시본)
-public void startTurn(DiceManager diceManager) {
-    List<YutResult> results = diceManager.rollRandomSequence();
-
-    for (YutResult result : results) {
-        int steps = diceManager.convertToSteps(result);
-        System.out.println("말 이동 거리: " + steps);
-        // TODO: 이동 처리 → game.moveCurrentHorse(steps);
+    private void updateScoreboard() {
+        mainFrame.getScoreboardPanel().updateScoreboard(teams);
     }
-}
 
-메서드 역할
-startGame() 전체 초기화 및 첫 턴 준비
-startTurn() 윷 던지고 큐 준비
-handleMoveQueue()   YutResult 큐를 순서대로 처리
-processRollResult() 단일 결과 처리용 (직접 호출 시)
-checkWin()  말 4개 도착 등 조건 검사
-nextTurn()  다음 플레이어로 전환
-restartGame()   판 전체 리셋
-getCurrentPlayer()  UI에서 현재 사용자 표시용
-*/
+}

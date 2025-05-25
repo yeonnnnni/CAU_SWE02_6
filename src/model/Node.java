@@ -3,51 +3,64 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+//Node 클래스는 게임 보드의 각 지점(칸)을 나타냅니다.
 public class Node {
-    private final String        id; // 위치 식별자 (e.g., "S", "A1", "C", "E")
-    private final List<Node>    nextNodes;
-    private boolean             isGoal;
-    private boolean             isCenter;
-    private List<Horse>         horsesOnNode = new ArrayList<>();
+    private final String id;  // 예: "N0", "A1", "OO"
+    private final List<Node> nextNodes = new ArrayList<>();
+    private boolean isGoal = false;
+    private boolean isCenter = false;
+    private final List<Horse> horsesOnNode = new ArrayList<>();
 
     public Node(String id) {
         this.id = id;
-        this.nextNodes = new ArrayList<>();
-        this.isGoal = false;
-        this.isCenter = false;
     }
 
-    // 다음 노드 연결
-    public void addNextNode(Node next) {
-        nextNodes.add(next);
+    public String getId() {
+        return id;
     }
 
-    // Getter/Setter
-    public String getId() { return id; }
+    public List<Node> getNextNodes() {
+        return nextNodes;
+    }
 
-    public List<Node> getNextNodes() { return nextNodes; }
+    public void addNextNode(Node node) {
+        nextNodes.add(node);
+    }
 
-    public boolean isGoal() { return isGoal; }
+    public boolean isGoal() {
+        return isGoal;
+    }
 
-    public void setGoal(boolean goal) { isGoal = goal; }
+    public void setGoal(boolean goal) {
+        isGoal = goal;
+    }
 
-    public boolean isCenter() { return isCenter; }
+    public boolean isCenter() {
+        return isCenter;
+    }
 
-    public void setCenter(boolean center) { isCenter = center; }
-
-    public void addHorse(Horse horse) { horsesOnNode.add(horse); }
-
-    public void removeHorse(Horse horse) { horsesOnNode.remove(horse); }
-
-    public List<Horse> getHorsesOnNode() { return new ArrayList<>(horsesOnNode); }
+    public void setCenter(boolean center) {
+        isCenter = center;
+    }
 
     public boolean isCorner() {
-        if (id == null || id.startsWith("N")) return false; // N 노드는 제외
-
-        return id.charAt(1) == '2';
+        if (id == null || id.startsWith("N")) return false;
+        return id.length() >= 2 && id.charAt(1) == '2';
     }
 
-    // toString() for Debugging
+    public void addHorse(Horse horse) {
+        horsesOnNode.add(horse);
+    }
+
+    public void removeHorse(Horse horse) {
+        horsesOnNode.remove(horse);
+    }
+
+    public List<Horse> getHorsesOnNode() {
+        return new ArrayList<>(horsesOnNode);
+    }
+
+    // 디버깅용 toString
     @Override
     public String toString() {
         return "Node{" +
