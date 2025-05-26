@@ -8,40 +8,90 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.awt.image.BufferedImage;
 
-/**
- * BoardPanel 클래스는 게임판을 시각적으로 구성하며,
- * 각 Node에 해당하는 JButton을 위치 좌표와 함께 표시합니다.
- * 말의 이동에 따라 버튼 텍스트와 색상을 동적으로 업데이트합니다.
- */
 public class BoardPanel extends JPanel {
 
+    //노드와 버튼을 매핑하는 맵
     private final Map<Node, JButton> nodeToButton = new HashMap<>();
     private final Map<JButton, Node> buttonToNode = new HashMap<>();
-    private final int buttonSize = 50;
+    private final int buttonSize = 50; //각 노드 버튼의 크기
 
-    /**
-     * 생성자: 절대 위치 배치 및 패널 기본 크기 설정
-     */
+    private BufferedImage backgroundImage;  // 배경 이미지
+    private String boardType = "square";    // 현재 보드 타입 저장
+
+    //생성자:레이아웃을 절대위치로 설정하고 패널 크기를 고정함
     public BoardPanel() {
         setLayout(null);
         setPreferredSize(new Dimension(800, 800));
     }
 
     /**
-     * 노드와 좌표 정보를 받아 버튼 생성 및 배치
-     * @param nodes 노드 리스트
-     * @param nodePositions 노드 ID별 위치 정보 (Point)
+     * 보드 타입을 설정하고 그에 맞는 배경 이미지를 로딩함
+     * @param boardType 선택한 보드 타입 문자열
      */
-    public void renderBoard(List<Node> nodes, Map<String, Point> nodePositions) {
+    public void setBoardType(String boardType) {
+        this.boardType = boardType;
+        loadBackgroundImage();
+    }
+
+    /**
+     * boardType에 따라 리소스 경로에서 배경 이미지를 불러옵니다
+     */
+    private void loadBackgroundImage() {
+        try {
+            switch (boardType.toLowerCase()) {
+                case "square":
+                    backgroundImage = ImageIO.read(getClass().getResource("/square_board).png"));
+                    break;
+                case "pentagon":
+                    backgroundImage = ImageIO.read(getClass().getResource("/pentagon_board.png"));
+                    break;
+                case "hexagon":
+                    backgroundImage = ImageIO.read(getClass().getResource("/hexagon_board.png"));
+                    break;
+                default:
+                    backgroundImage = null;
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
+            backgroundImage = null;
+        }
+    }
+
+    /**
+     * 배경 이미지를 직접 그리고 버튼 위에 표시함
+     * 이미지 크기: 350x350
+     * 위치: 중심 기준 -100px 위쪽
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            // 노드 중심 기준 (7x7, 50px spacing → 350x350)
+            int imageSize = 350;
+            int drawX = getWidth() / 2 - imageSize / 2;
+            int drawY = getHeight() / 2 - imageSize / 2 - 100;
+
+            g.drawImage(backgroundImage, drawX, drawY, imageSize, imageSize, this);
+        }
+    }
+
+    /**
+     * 보드 노드(Button)들을 생성하고 배치
+     * @param nodes         생성된 노드 리스트
+     * @param nodePositions 각 노드 ID에 대한 좌표 정보
+     * @param boardType     현재 선택된 보드 타입
+     */
+    public void renderBoard(List<Node> nodes, Map<String, Point> nodePositions, String boardType) {
+        setBoardType(boardType); // 🆕 이미지와 타입 설정
         removeAll();
         revalidate();
         nodeToButton.clear();
         buttonToNode.clear();
 
-        int gridSize = buttonSize + 20;
-
-        // Calculate bounding box and center offset
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
 
@@ -84,13 +134,6 @@ public class BoardPanel extends JPanel {
         System.out.println("[BoardPanel] 총 노드 수: " + nodes.size());
     }
 
-    /**
-     * 특정 말의 이동에 따른 버튼 텍스트 및 색상 업데이트
-     * @param from 이전 위치 노드
-     * @param to 새로운 위치 노드
-     * @param pieceText 표시할 말 텍스트
-     * @param color 말의 색상
-     */
     public void updatePiecePosition(Node from, Node to, String pieceText, Color color) {
         if (from != null && nodeToButton.containsKey(from)) {
             JButton btn = nodeToButton.get(from);
@@ -120,16 +163,14 @@ public class BoardPanel extends JPanel {
             btn.setText("<html><center>" + sb + "</center></html>");
 
             if (hasVisibleHorse) {
-                btn.setForeground(color); // 말 있으면 말 색상
+                btn.setForeground(color);
             } else {
-                btn.setForeground(Color.BLACK); // 말 없으면 기본 색상
+                btn.setForeground(Color.BLACK);
             }
         }
     }
 
-    /**
-     * 보드 초기화 시 모든 버튼을 기본 상태로 되돌림
-     */
+    //모든 버튼을 초기 텍스트 및 색상으로 되돌림
     public void resetButtons() {
         for (Map.Entry<Node, JButton> entry : nodeToButton.entrySet()) {
             Node node = entry.getKey();
@@ -139,6 +180,7 @@ public class BoardPanel extends JPanel {
         }
     }
 
+    //getter
     public Map<Node, JButton> getNodeToButtonMap() {
         return nodeToButton;
     }
@@ -147,14 +189,15 @@ public class BoardPanel extends JPanel {
         return buttonToNode;
     }
 
-    // 말 위치 초기화 (버튼 텍스트 초기화)
+    /**
+     * 보드 리셋 시 모든 말 표시 제거 (텍스트 원상복귀)
+     */
     public void resetBoardUI() {
         for (Map.Entry<Node, JButton> entry : nodeToButton.entrySet()) {
             Node node = entry.getKey();
             JButton btn = entry.getValue();
-            btn.setText(node.getId()); // 또는 공백으로 초기화하려면: btn.setText(" ");
+            btn.setText(node.getId());
             btn.setForeground(Color.BLACK);
         }
     }
-
 }

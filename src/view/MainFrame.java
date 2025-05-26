@@ -49,7 +49,7 @@ public class MainFrame extends JFrame {
                 "판 설정",
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                types,
+               types,
                 types[0]
         );
         if (boardType == null) boardType = "square";
@@ -59,8 +59,10 @@ public class MainFrame extends JFrame {
 
         // 보드 패널
         boardPanel = new BoardPanel();
-        boardPanel.renderBoard(nodeList, builder.getNodePositions());
+        boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
         add(boardPanel, BorderLayout.CENTER);
+        //pack();
+        setResizable(false);
 
         // 윷 패널
         dicePanel = new DicePanel();
