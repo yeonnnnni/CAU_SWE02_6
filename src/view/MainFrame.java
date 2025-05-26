@@ -62,7 +62,7 @@ public class MainFrame extends JFrame {
         boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
         add(boardPanel, BorderLayout.CENTER);
         //pack();
-        setResizable(false);
+        setResizable(true);
 
         // 윷 패널
         dicePanel = new DicePanel();

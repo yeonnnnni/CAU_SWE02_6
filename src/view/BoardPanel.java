@@ -44,13 +44,13 @@ public class BoardPanel extends JPanel {
         try {
             switch (boardType.toLowerCase()) {
                 case "square":
-                    backgroundImage = ImageIO.read(getClass().getResource("/square_board.png"));
+                    backgroundImage = ImageIO.read(getClass().getResource("/square_good.png"));
                     break;
                 case "pentagon":
-                    backgroundImage = ImageIO.read(getClass().getResource("/pentagon_board.png"));
+                    backgroundImage = ImageIO.read(getClass().getResource("/pentagon.png"));
                     break;
                 case "hexagon":
-                    backgroundImage = ImageIO.read(getClass().getResource("/hexagon_board.png"));
+                    backgroundImage = ImageIO.read(getClass().getResource("/hexagon.png"));
                     break;
                 default:
                     backgroundImage = null;
@@ -63,17 +63,23 @@ public class BoardPanel extends JPanel {
 
     /**
      * 배경 이미지를 직접 그리고 버튼 위에 표시함
-     * 이미지 크기: 350x350
+     * 이미지 크기:
+     * square:350x350, pentagon:480x480, hexagon:960x960
      * 위치: 중심 기준 -100px 위쪽
      */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            // 노드 중심 기준 (7x7, 50px spacing → 350x350)
-            int imageSize = 350;
+            int imageSize;
+            switch (boardType.toLowerCase()){
+                case "square": imageSize=350; break;
+                case "pentagon":imageSize=600; break;
+                case "hexagon": imageSize=700; break;
+                default:imageSize=350;
+            }
             int drawX = getWidth() / 2 - imageSize / 2;
-            int drawY = getHeight() / 2 - imageSize / 2 - 100;
+            int drawY = getHeight() / 2 - imageSize / 2+50;
 
             g.drawImage(backgroundImage, drawX, drawY, imageSize, imageSize, this);
         }
@@ -120,9 +126,13 @@ public class BoardPanel extends JPanel {
             btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2,
                     pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
                     buttonSize, buttonSize);
-            btn.setFont(new Font("Arial", Font.BOLD, 8));
-            btn.setText(node.getId());
-            btn.setBackground(Color.WHITE);
+            //btn.setFont(new Font("Arial", Font.BOLD, 8));
+            //btn.setText(node.getId());
+            btn.setText("");
+            btn.setContentAreaFilled(false);
+            btn.setBorderPainted(false);
+            btn.setOpaque(false);
+            //btn.setBackground(Color.WHITE);
 
             add(btn);
             nodeToButton.put(node, btn);
@@ -137,7 +147,8 @@ public class BoardPanel extends JPanel {
     public void updatePiecePosition(Node from, Node to, String pieceText, Color color) {
         if (from != null && nodeToButton.containsKey(from)) {
             JButton btn = nodeToButton.get(from);
-            btn.setText(from.getId());
+            //btn.setText(from.getId());
+            btn.setText("");
             btn.setForeground(Color.BLACK);
         }
 
@@ -175,7 +186,8 @@ public class BoardPanel extends JPanel {
         for (Map.Entry<Node, JButton> entry : nodeToButton.entrySet()) {
             Node node = entry.getKey();
             JButton btn = entry.getValue();
-            btn.setText(node.getId());
+            //btn.setText(node.getId());
+            btn.setText("");
             btn.setForeground(Color.BLACK);
         }
     }
@@ -196,7 +208,8 @@ public class BoardPanel extends JPanel {
         for (Map.Entry<Node, JButton> entry : nodeToButton.entrySet()) {
             Node node = entry.getKey();
             JButton btn = entry.getValue();
-            btn.setText(node.getId());
+            //btn.setText(node.getId());
+            btn.setText("");
             btn.setForeground(Color.BLACK);
         }
     }
