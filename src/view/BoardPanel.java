@@ -44,7 +44,7 @@ public class BoardPanel extends JPanel {
         try {
             switch (boardType.toLowerCase()) {
                 case "square":
-                    backgroundImage = ImageIO.read(getClass().getResource("/square_board).png"));
+                    backgroundImage = ImageIO.read(getClass().getResource("/square_board.png"));
                     break;
                 case "pentagon":
                     backgroundImage = ImageIO.read(getClass().getResource("/pentagon_board.png"));
