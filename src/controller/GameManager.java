@@ -85,6 +85,7 @@ public class GameManager {
         }
     }
 
+    // 윷 던지기 처리 (랜덤 or 수동) 및 다음 이동 준비
     public void handleDiceRoll() {
         System.out.println("handleDiceRoll() 시작");
         capturedThisTurn = false;
@@ -114,6 +115,7 @@ public class GameManager {
         promptNextMove();
     }
 
+    // 윷 결과를 기반으로 말 이동 처리 및 후속 이동 반복
     private void promptNextMove() {
         // 모든 윷 결과를 소진한 경우
         if (remainingResults.isEmpty()) {
@@ -197,6 +199,7 @@ public class GameManager {
         );
     }
 
+    // 게임 전체 초기화 후 새 게임 준비
     public void restartGame() {
         board.resetAll();
         currentPlayerIndex = 0;
