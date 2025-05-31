@@ -1,10 +1,5 @@
 package controller;
-
-import model.YutResult;
-import model.DiceManager;
-import model.Horse;
-import model.Team;
-import model.Node;
+import model.*;
 import view.MainFrame;
 
 import javax.swing.*;
@@ -19,17 +14,20 @@ public class GameManager {
     private final List<Team> teams;
     private int currentPlayerIndex;
     private final String boardType;
+    private final ShortcutDecisionProvider shortcutDecisionProvider;
+
 
     private List<YutResult> remainingResults = new ArrayList<>();
     private boolean capturedThisTurn = false;
     private boolean bonusTurnRequested = false;
 
-    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams, String boardType) {
+    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams, String boardType, ShortcutDecisionProvider shortcutDecisionProvider) {
         this.mainFrame = mainFrame;
         this.board = board;
         this.diceManager = diceManager;
         this.teams = teams;
         this.boardType = boardType;
+        this.shortcutDecisionProvider = shortcutDecisionProvider;
         this.currentPlayerIndex = 0;
     }
 
@@ -167,7 +165,21 @@ public class GameManager {
         }
 
         Node from = horse.getPosition();
-        boolean captured = horse.move(steps, board.getNodes(), boardType);
+
+        ShortcutDecisionProvider provider = new ShortcutDecisionProvider() {
+            @Override
+            public boolean shouldUseShortcut(String direction) {
+                int response = JOptionPane.showConfirmDialog(
+                        mainFrame,
+                        "지름길 (" + direction + " 방향)로 진입하시겠습니까?",
+                        "지름길 선택",
+                        JOptionPane.YES_NO_OPTION
+                );
+                return response == JOptionPane.YES_OPTION;
+            }
+        };
+
+        boolean captured = horse.move(steps, board.getNodes(), boardType, provider);
         Node to = horse.getPosition();
 
         //말 잡았을 때 보너스 턴 플래그 설정
@@ -176,7 +188,9 @@ public class GameManager {
             System.out.println(horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
         }
 
-        mainFrame.getBoardPanel().updatePiecePosition(from, to, horse.getId(), horse.getTeamColor());
+        SwingUtilities.invokeLater(() -> {
+            mainFrame.getBoardPanel().updatePiecePosition(from, to);
+        });
 
         updateScoreboard();
 
@@ -218,7 +232,7 @@ public class GameManager {
 
         // UI 상 말 아이콘 완전 제거를 위해 노드들 강제 업데이트
         for (Node node : board.getNodes()) {
-            mainFrame.getBoardPanel().updatePiecePosition(node, null, "", null);
+            mainFrame.getBoardPanel().updatePiecePosition(node, null);
         }
 
     }

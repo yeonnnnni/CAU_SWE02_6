@@ -5,11 +5,7 @@ import builder.BoardBuilder;
 import builder.BoardFactory;
 import controller.Board;
 import controller.GameManager;
-import model.DiceManager;
-import model.Node;
-import model.Team;
-import model.YutResult;
-import model.Horse;
+import model.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -81,7 +77,7 @@ public class MainFrame extends JFrame {
         }
 
         // 뷰 구성: UI 패널들 준비
-        boardPanel = new BoardPanel();
+        //boardPanel = new BoardPanel();
         dicePanel = new DicePanel();
         currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
 
@@ -92,7 +88,9 @@ public class MainFrame extends JFrame {
         add(currentPlayerLabel, BorderLayout.SOUTH);
 
         // 게임 매니저 연결 (Controller 역할)
-        gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
+        ShortcutDecisionProvider provider = direction -> promptShortcutChoice(direction);
+        gameManager = new GameManager(this, board, new DiceManager(), teams, boardType, provider);
+
         gameManager.startGame();
 
         // 이벤트 리스너 연결
