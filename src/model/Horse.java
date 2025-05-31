@@ -305,14 +305,6 @@ public class Horse {
             this.state = HorseState.FINISHED;
             return;
         }
-
-        // 현재 위치에 같은 팀 말이 있으면 그룹핑
-//        List<Horse> others = position.getHorsesOnNode();
-//        for (Horse other : others) {
-//            if (this != other && isGroupable(other)) {
-//                groupWith(other);
-//            }
-//        }
     }
 
     /**
@@ -322,10 +314,6 @@ public class Horse {
      * - 말 잡기 및 FINISHED 상태 반영
      * @return 상대 말을 잡았을 경우 true
      */
-
-    public interface ShortcutDecider {
-        boolean shouldUseShortcut(String direction);
-    }
 
     // n칸 이동
     public boolean move(int steps, List<Node> board, String boardType, ShortcutDecisionProvider provider) {
@@ -416,18 +404,6 @@ public class Horse {
                 }
             }
         }
-
-        //printStatus(); // 디버깅 로그 출력
-
-        //FINISHED 상태이면 버튼 텍스트 초기화 -> ui로 넘길 예정
-        // 말이 끝에 도달하면 버튼 텍스트 원래대로
-        /*if (this.state == HorseState.FINISHED && this.position != null) {
-            JButton btn = MainFrame.getInstance().getBoardPanel().getNodeToButtonMap().get(this.position);
-            if (btn != null) {
-                btn.setText(this.position.getId());  // "A2"
-                btn.setForeground(Color.BLACK);      // 기본 색상으로
-            }
-        }*/
         return capturedSomeone;
     }
 
@@ -499,32 +475,6 @@ public class Horse {
     private boolean teamIdEquals(Horse other) {
         return this.teamID == other.teamID;
     }
-
-    // 디버깅용 말 상태 출력
-    /*public void printStatus() {
-        String positionId = (position != null) ? position.getId() : "null";
-        String coord = "null";
-
-        // 테스트 환경에서는 MainFrame이 null일 수 있음
-        MainFrame mf = MainFrame.getInstance();
-        if (mf != null && position != null) {
-            JButton btn = MainFrame.getInstance()
-                    .getBoardPanel()
-                    .getNodeToButtonMap()
-                    .get(position);
-            if (btn != null) {
-                Point p = btn.getLocation();
-                coord = "(" + p.x + ", " + p.y + ")";
-            } else {
-                coord = "(버튼 없음)";
-            }
-        }
-
-        System.out.printf(
-                "[말 상태] %s | 상태: %s | 위치: %s | 좌표: %s\n",
-                this.id, this.state, positionId, coord
-        );
-    }*/
 
     /**
      * 말의 간단한 문자열 반환 (예: A,H2)
