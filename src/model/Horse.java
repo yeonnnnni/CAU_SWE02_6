@@ -350,6 +350,12 @@ public class Horse {
                 String prevId = !positionHistory.isEmpty() ? positionHistory.peek().getId() : "없음";
                 if (!prevId.equals("N0")) {
                     this.state = HorseState.FINISHED;
+
+                    // ✅ 여기서 groupedHorses도 완주 처리 필요
+                    for (Horse grouped : groupedHorses) {
+                        grouped.state = HorseState.FINISHED;
+                    }
+
                     System.out.println("[완주] " + id + "가 A2에 도달했으며, " + prevId + "를 통해 A2로 들어왔습니다.");
                     return false;
                 } else {
