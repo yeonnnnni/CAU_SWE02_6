@@ -9,20 +9,25 @@ import javax.swing.JButton;
 import java.awt.Point;
 
 public class Horse {
+    // 고유 ID (예: "T1-H2")
     private final String id;
     private final int teamID;
-    private final int horseIdx;
+    private final int horseIdx;     // 팀 내 말 번호 (0~n)
     private final Team team;
 
-    private HorseState state;
-    private Node position;
-    private List<Horse> groupedHorses;
-    private HorseBackup backup;
+    private HorseState state;       // 말 상태 (WAITING, MOVING, FINISHED 등)
+    private Node position;          // 현재 위치한 노드
+    private List<Horse> groupedHorses; // 함께 이동하는 말 리스트 (업기)
+    private HorseBackup backup;     // 백업 상태 (롤백용)
 
     //빽도를 위한 경로 스택 생성
     private final Deque<Node> positionHistory = new ArrayDeque<>();
 
-
+    /**
+     * Horse 객체 생성자
+     * - 팀과 인덱스를 기반으로 고유 ID 부여
+     * - 상태 초기화 및 팀에 등록
+     */
     public Horse(int horseIdx, Team team) {
         this.horseIdx = horseIdx;
         this.teamID = team.getTeamID();
@@ -31,9 +36,9 @@ public class Horse {
         this.state = HorseState.WAITING;
         this.groupedHorses = new ArrayList<>();
         this.position = null;
-        team.addHorse(this);
+        team.addHorse(this);    // 팀 객체에 이 말 등록
     }
-
+    // Getter / Setter
     public String getId() { return id; }
     public int getTeamID() { return teamID; }
     public HorseState getState() { return state; }
@@ -45,11 +50,17 @@ public class Horse {
         return position;
     }
 
+    /**
+     * 팀의 색상 반환 (UI 표시용)
+     */
     public Color getTeamColor() {
         return team.getColor();
     }
 
-    // 말 위치 설정 (노드 등록 및 제거 포함)
+    /**
+     * 말 위치 설정 (현재 위치 제거 + 새 위치에 등록)
+     * - 백도 처리를 위해 이전 위치를 스택에 저장
+     */
     public void setPosition(Node position) {
         if (this.position != null) {
             this.position.removeHorse(this);
@@ -61,6 +72,9 @@ public class Horse {
         }
     }
 
+    /**
+     * 백도에서의 이동처럼, 스택 기록 없이 위치만 바꾸는 함수
+     */
     private void setPositionWithoutHistory(Node newPos) {
         if (this.position != null) {
             this.position.removeHorse(this);
@@ -72,12 +86,11 @@ public class Horse {
     }
 
 
-    // 분기점에서 사용자에게 경로 선택 유도
-    /*
-     * candidates: 현재 위치에서 갈 수 있는 노드들 → position.getNextNodes()가 넘겨주는 리스트
-     * 반환값: 다음에 이동할 Node
-     * 지금 위치한 노드(position)의 nextNodes 목록(candidates) 중에서 어디로 이동할지를 결정해주는 함수
-     * */
+    /**
+     * 분기점에서 다음 노드를 선택하는 로직
+     * - 다양한 조건 (중심 노드, A/B 라인, 지름길, 외곽 N라인 등)에 따라 다르게 처리됨
+     * - 지름길 진입 여부는 MainFrame에서 사용자에게 선택 받음
+     */
     private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft, String boardType) {
         // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
@@ -188,7 +201,7 @@ public class Horse {
 
         // 2. A2 노드인 경우 → 무조건 N0 선택
         //시작은 일단 무조건 앞으로 가야하니까.
-        //⚠️백도 나오면? 뒤로 가야하는 거 아닌가?
+        //백도 나오면? 뒤로 가야하는 거 아닌가?
         else if (currentId.equals("A2")) {
             return candidates.stream()
                     .filter(n -> n.getId().equals("N0"))
@@ -253,7 +266,12 @@ public class Horse {
         //위 조건 모두 해당 안 되는 경우는 그냥 첫 번째 후보 노드로 이동
         return candidates.getFirst();
     }
-
+    /**
+     * 말이 한 칸 이동하는 동작 (말 상태, 위치 업데이트 등 포함)
+     * - groupedHorses가 있는 경우 같이 이동
+     * - 말이 도착 지점일 경우 상태를 FINISHED로 설정
+     * - 동일 위치 말이 같은 팀이면 그룹핑 시도
+     */
     private void moveStep(boolean isRemain, boolean isFirstStep, int stepsLeft) {
         //현재 위치가 없으면 오류
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
@@ -272,7 +290,7 @@ public class Horse {
          * nextList.size() == 3: 후보가 3개 있을 때 → 지름길 포함된 분기점이라는 뜻
          * */
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
-                nextList.get(2) :
+                nextList.get(2) :   // 지름길 조건
                 chooseNextNode(nextList, isFirstStep, stepsLeft, team.getBoardType());
 
 
@@ -300,6 +318,14 @@ public class Horse {
 //        }
     }
 
+    /**
+     * 말이 주어진 칸 수만큼 이동하는 함수
+     * - 백도 처리
+     * - A2 완주 처리
+     * - 말 잡기 및 FINISHED 상태 반영
+     * @return 상대 말을 잡았을 경우 true
+     */
+
     // n칸 이동
     public boolean move(int steps, List<Node> board, String boardType) {
         if (isFinished()) return false;
@@ -307,12 +333,14 @@ public class Horse {
         backupState();
         boolean capturedSomeone = false;
 
+        // 처음 출발이면 시작 위치에 놓기
         if (position == null) {
             position = BoardFactory.getStartNode(board, boardType);
             state = HorseState.MOVING;
-            if (steps < 0) return false;
+            if (steps < 0) return false;    // 출발 전 백도 무시
         }
 
+        // 백도 처리: 스택에서 되돌림
         if (steps == -1) {
             if (!positionHistory.isEmpty()) {
                 Node previous = positionHistory.pop(); // 되돌아갈 위치
@@ -339,12 +367,14 @@ public class Horse {
             return false;
         }
 
+        // n칸만큼 순차적으로 이동
         for (int i = 0; i < steps; i++) {
             boolean isFirst = (i == 0);
             boolean isLast = (i == steps - 1);
             int stepsLeft = steps - i;
             moveStep(isLast, isFirst, stepsLeft);
 
+            // 완주 조건 (A2에 N0 경유 없이 도달)
             // A2 도달 + 직전 노드가 N0가 아니면 완주 처리
             if (position != null && position.getId().equals("A2")) {
                 String prevId = !positionHistory.isEmpty() ? positionHistory.peek().getId() : "없음";
@@ -385,6 +415,7 @@ public class Horse {
         printStatus(); // 디버깅 로그 출력
 
         //FINISHED 상태이면 버튼 텍스트 초기화
+        // 말이 끝에 도달하면 버튼 텍스트 원래대로
         if (this.state == HorseState.FINISHED && this.position != null) {
             JButton btn = MainFrame.getInstance().getBoardPanel().getNodeToButtonMap().get(this.position);
             if (btn != null) {
@@ -420,23 +451,42 @@ public class Horse {
         positionHistory.clear();
     }
 
+    /**
+     * 상대 말을 잡았는지 확인
+     */
     public boolean isCaptured(Horse other) {
         return !teamIdEquals(other) && this.position == other.position;
     }
 
+    /**
+     * 그룹핑 가능한 상대인지 확인
+     */
     public boolean isGroupable(Horse other) {
-        return teamIdEquals(other) && this.position == other.position && !groupedHorses.contains(other);
+        return teamIdEquals(other)
+            && this.position != null
+            && other.position != null
+            && this.position.equals(other.position)  // equals 사용
+            && !groupedHorses.contains(other);
     }
 
+    /**
+     * 말이 FINISHED 상태인지 확인
+     */
     public boolean isFinished() {
         return state == HorseState.FINISHED;
     }
 
+    /**
+     * 다른 말과 그룹핑 (업기)
+     */
     public void groupWith(Horse other) {
         if (isGroupable(other)) {
-            groupedHorses.add(other);
-            other.groupedHorses.clear();
-            other.groupedHorses.add(this);
+            if (!groupedHorses.contains(other)) {
+                groupedHorses.add(other);
+            }
+            if (!other.groupedHorses.contains(this)) {
+                other.groupedHorses.add(this);
+            }
             other.setPosition(this.position);
         }
     }
@@ -450,7 +500,9 @@ public class Horse {
         String positionId = (position != null) ? position.getId() : "null";
         String coord = "null";
 
-        if (position != null) {
+        // 테스트 환경에서는 MainFrame이 null일 수 있음
+        MainFrame mf = MainFrame.getInstance();
+        if (mf != null && position != null) {
             JButton btn = MainFrame.getInstance()
                     .getBoardPanel()
                     .getNodeToButtonMap()
@@ -468,11 +520,18 @@ public class Horse {
                 this.id, this.state, positionId, coord
         );
     }
+
+    /**
+     * 말의 간단한 문자열 반환 (예: A,H2)
+     */
     public String toString2() {
         char teamChar = (char) ('A' + teamID);
         return teamChar + ",H" + horseIdx;
     }
 
+    /**
+     * 말의 상세 문자열 반환 (예: Team A, H2)
+     */
     @Override
     public String toString() {
         char teamChar = (char) ('A' + teamID);

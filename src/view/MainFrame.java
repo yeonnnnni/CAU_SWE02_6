@@ -39,9 +39,11 @@ public class MainFrame extends JFrame {
         scoreboardPanel = new ScoreboardPanel();
         add(scoreboardPanel, BorderLayout.EAST);
 
+        //사용자로부터 말 개수, 플레이어 수 입력받음
         initCount();
 
         // 보드 생성
+        // JOptionPane으로 보드 타입(Square, Pentagon, Hexagon) 선택
         String[] types = {"square", "pentagon", "hexagon"};
         String boardType = (String) JOptionPane.showInputDialog(
                 null,
@@ -54,9 +56,15 @@ public class MainFrame extends JFrame {
         );
         if (boardType == null) boardType = "square";
 
+        // BoardBuilder 객체 생성 (BoardFactory.create(boardType))
         BoardBuilder builder = BoardFactory.create(boardType);
+        //builder.buildBoard() → 보드 노드 리스트 및 좌표 생성
         this.nodeList = builder.buildBoard();
 
+        // Board, Team, DiceManager, GameManager 객체 생성
+        // 모델 데이터: 노드 및 팀 준비
+        Board board = new Board();
+        board.setNodes(nodeList);
         // 보드 패널
         boardPanel = new BoardPanel();
         boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
@@ -64,16 +72,7 @@ public class MainFrame extends JFrame {
         //pack();
         setResizable(true);
 
-        // 윷 패널
-        dicePanel = new DicePanel();
-        add(dicePanel, BorderLayout.NORTH);
 
-        // 플레이어 라벨
-        currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
-        add(currentPlayerLabel, BorderLayout.SOUTH);
-
-        // 팀 구성 및 등록
-        // MainFrame에서 팀 만들 때
         List<Color> colors = List.of(Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.PINK);
         List<Team> teams = new ArrayList<>();
         for (int i = 0; i < playerCount; i++) {
@@ -81,19 +80,27 @@ public class MainFrame extends JFrame {
             teams.add(new Team(i, String.valueOf(name), colors.get(i), pieceCount, boardType));
         }
 
+        // 뷰 구성: UI 패널들 준비
+        boardPanel = new BoardPanel();
+        dicePanel = new DicePanel();
+        currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
 
-        Board board = new Board();
-        board.setNodes(nodeList);
-        //for (Team t : teams) board.registerTeam(t);
+        // UI에 컴포넌트 배치
+        boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
+        add(boardPanel, BorderLayout.CENTER);
+        add(dicePanel, BorderLayout.NORTH);
+        add(currentPlayerLabel, BorderLayout.SOUTH);
 
-        // 게임 매니저 연결
+        // 게임 매니저 연결 (Controller 역할)
         gameManager = new GameManager(this, board, new DiceManager(), teams, boardType);
         gameManager.startGame();
 
-        // 윷 이벤트
+        // 이벤트 리스너 연결
         dicePanel.addRollListener(e -> gameManager.handleDiceRoll());
 
+        // 최종 화면 표시
         setVisible(true);
+
     }
 
     public List<YutResult> promptYutOrder(List<YutResult> results) {

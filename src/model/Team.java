@@ -22,7 +22,7 @@ public class Team {
         this.boardType = boardType;
         this.horses = new ArrayList<>();
         for (int i = 0; i < pieceCount; i++) {
-            new Horse(i, this);
+            Horse h = new Horse(i, this);
         }
     }
 
