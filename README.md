@@ -35,7 +35,6 @@
 │   │   ├── pentagon_board.png
 │   │   └── square_board.png
 └── src
-    ├── App.java
     ├── builder
     │   ├── BoardBuilder.java
     │   ├── BoardFactory.java
