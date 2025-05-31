@@ -70,4 +70,19 @@ public class Node {
                 ", isCenter=" + isCenter +
                 '}';
     }
+
+    //id 값이 같은 노들 동등하게 인식
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Node other = (Node) obj;
+        return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
 }
