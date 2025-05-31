@@ -447,7 +447,11 @@ public class Horse {
      * 그룹핑 가능한 상대인지 확인
      */
     public boolean isGroupable(Horse other) {
-        return teamIdEquals(other) && this.position == other.position && !groupedHorses.contains(other);
+        return teamIdEquals(other)
+            && this.position != null
+            && other.position != null
+            && this.position.equals(other.position)  // equals 사용
+            && !groupedHorses.contains(other);
     }
 
     /**
@@ -462,14 +466,16 @@ public class Horse {
      */
     public void groupWith(Horse other) {
         if (isGroupable(other)) {
-            groupedHorses.add(other);
-            other.groupedHorses.clear();
-            other.groupedHorses.add(this);
+            if (!groupedHorses.contains(other)) {
+                groupedHorses.add(other);
+            }
+            if (!other.groupedHorses.contains(this)) {
+                other.groupedHorses.add(this);
+            }
             other.setPosition(this.position);
         }
     }
 
-    // 팀 ID가 같은지 비교
     private boolean teamIdEquals(Horse other) {
         return this.teamID == other.teamID;
     }
@@ -479,7 +485,9 @@ public class Horse {
         String positionId = (position != null) ? position.getId() : "null";
         String coord = "null";
 
-        if (position != null) {
+        // 테스트 환경에서는 MainFrame이 null일 수 있음
+        MainFrame mf = MainFrame.getInstance();
+        if (mf != null && position != null) {
             JButton btn = MainFrame.getInstance()
                     .getBoardPanel()
                     .getNodeToButtonMap()
