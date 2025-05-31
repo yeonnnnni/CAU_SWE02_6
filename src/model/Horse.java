@@ -337,9 +337,13 @@ public class Horse {
 
         // 처음 출발이면 시작 위치에 놓기
         if (position == null) {
+            if (steps < 0) {
+                // 출발 전에 백도 → 대기 상태 유지
+                state = HorseState.WAITING;
+                return false;
+            }
             position = BoardFactory.getStartNode(board, boardType);
             state = HorseState.MOVING;
-            if (steps < 0) return false;    // 출발 전 백도 무시
         }
 
         // 백도 처리: 스택에서 되돌림
