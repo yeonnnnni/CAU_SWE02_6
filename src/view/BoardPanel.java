@@ -173,27 +173,34 @@ public class BoardPanel extends JPanel {
         System.out.println("[BoardPanel] 총 노드 수: " + nodes.size());
     }
 
-    public void updatePiecePosition(Node from, Node to, String pieceText, Color color) {
+    public void updatePiecePosition(Node from, Node to) {
+
+        //출발 위치 처리
         if (from != null && nodeToButton.containsKey(from)) {
             JButton btn = nodeToButton.get(from);
-            btn.removeAll();
-            btn.setText("");
-            btn.revalidate();  // 🔥 추가
-            btn.repaint();     // 🔥 추가
+            btn.removeAll();         // 기존 아이콘 제거
+            btn.setText("");         // 텍스트도 초기화
+            btn.revalidate();        // UI 갱신
+            btn.repaint();           // 다시 그림
         }
 
+        //도착 위치 처리
         if (to != null && nodeToButton.containsKey(to)) {
             JButton btn = nodeToButton.get(to);
+            // 버튼 위 내용 싹 지움
             btn.removeAll();
-
+            // 해당 위치에 있는 말들
             List<Horse> horses = to.getHorsesOnNode();
             JPanel panel = new JPanel(new GridLayout(3, 2, 0, 0)); // 최대 6개 정렬
-            panel.setOpaque(false);
+            panel.setOpaque(false);     // 배경 투명
             panel.setBounds(0, 0, buttonSize, buttonSize);
 
             for (Horse h : horses) {
+                //완주한 말은 건너뜀
+                //말이 FINISHED 상태이면 continue로 건너뜀 → 말 표시 안 함
                 if (h.isFinished()) continue;
 
+                //말마다 팀 색과 번호로 아이콘을 생성하고, 그걸 버튼 위에 표시
                 int horseIdx = Integer.parseInt(h.getId().split("-H")[1]);
                 String colorKey = getColorKey(h.getTeamColor());
                 String iconKey = colorKey + "_h" + horseIdx;
@@ -206,46 +213,11 @@ public class BoardPanel extends JPanel {
                 }
             }
 
+            //버튼에 패널 붙이고 갱신
             btn.add(panel);
             btn.revalidate();
             btn.repaint();
         }
-
-//        if (from != null && nodeToButton.containsKey(from)) {
-//            JButton btn = nodeToButton.get(from);
-//            //btn.setText(from.getId());
-//            btn.removeAll();
-//            btn.setText("");
-//            //btn.setForeground(Color.BLACK);
-//        }
-//
-//        if (to != null && nodeToButton.containsKey(to)) {
-//            JButton btn = nodeToButton.get(to);
-//            List<Horse> horses = to.getHorsesOnNode();
-//
-//            StringBuilder sb = new StringBuilder();
-//            sb.append(to.getId()).append("<br>");
-//
-//            boolean hasVisibleHorse = false;
-//
-//            for (Horse h : horses) {
-//                if (h.isFinished()) continue;
-//                hasVisibleHorse = true;
-//                sb.append(h.toString2()).append("<br>");
-//            }
-//
-//            if (sb.toString().endsWith("<br>")) {
-//                sb.setLength(sb.length() - 4);
-//            }
-//
-//            btn.setText("<html><center>" + sb + "</center></html>");
-//
-//            if (hasVisibleHorse) {
-//                btn.setForeground(color);
-//            } else {
-//                btn.setForeground(Color.BLACK);
-//            }
-//        }
     }
 
     private String getColorKey(Color color) {

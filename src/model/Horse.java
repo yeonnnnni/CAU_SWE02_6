@@ -1,11 +1,9 @@
 package model;
-
 import builder.BoardFactory;
 import view.MainFrame;
 
 import java.awt.Color;
 import java.util.*;
-import javax.swing.JButton;
 import java.awt.Point;
 
 public class Horse {
@@ -49,7 +47,6 @@ public class Horse {
     public Node getPosition() {
         return position;
     }
-
     /**
      * 팀의 색상 반환 (UI 표시용)
      */
@@ -91,7 +88,7 @@ public class Horse {
      * - 다양한 조건 (중심 노드, A/B 라인, 지름길, 외곽 N라인 등)에 따라 다르게 처리됨
      * - 지름길 진입 여부는 MainFrame에서 사용자에게 선택 받음
      */
-    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft, String boardType) {
+    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft, String boardType, ShortcutDecisionProvider provider) {
         // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
 
@@ -167,7 +164,7 @@ public class Horse {
             System.out.println("vertex!!");
             //사용자가 지름길을 쓸지 물어보고, 사용하면 "D1"로, 아니면 "N*"으로 감.
             String direction = position.getId().substring(0, 1);    // D2 → "D" : 현재 노드의 맨 앞 알파벳 따옴.
-            boolean useShortcut = MainFrame.getInstance().promptShortcutChoice(direction);
+            boolean useShortcut = provider.shouldUseShortcut(direction);
 
             //지름길 선택한 경우
             if (useShortcut) {
@@ -272,7 +269,8 @@ public class Horse {
      * - 말이 도착 지점일 경우 상태를 FINISHED로 설정
      * - 동일 위치 말이 같은 팀이면 그룹핑 시도
      */
-    private void moveStep(boolean isRemain, boolean isFirstStep, int stepsLeft) {
+    private void moveStep(boolean isRemain, boolean isFirstStep, int stepsLeft, ShortcutDecisionProvider provider) {
+
         //현재 위치가 없으면 오류
         if (position == null) throw new IllegalStateException("현재 위치가 설정되지 않았습니다.");
 
@@ -291,7 +289,7 @@ public class Horse {
          * */
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
                 nextList.get(2) :   // 지름길 조건
-                chooseNextNode(nextList, isFirstStep, stepsLeft, team.getBoardType());
+                chooseNextNode(nextList, isFirstStep, stepsLeft, team.getBoardType(), provider);
 
 
         System.out.println("$$$$$$next: " + next.getId());
@@ -326,8 +324,12 @@ public class Horse {
      * @return 상대 말을 잡았을 경우 true
      */
 
+    public interface ShortcutDecider {
+        boolean shouldUseShortcut(String direction);
+    }
+
     // n칸 이동
-    public boolean move(int steps, List<Node> board, String boardType) {
+    public boolean move(int steps, List<Node> board, String boardType, ShortcutDecisionProvider provider) {
         if (isFinished()) return false;
 
         backupState();
@@ -363,7 +365,7 @@ public class Horse {
             } else {
                 System.out.println("[백도] 더 이상 되돌아갈 위치가 없습니다.");
             }
-            printStatus();
+            //printStatus();
             return false;
         }
 
@@ -372,7 +374,7 @@ public class Horse {
             boolean isFirst = (i == 0);
             boolean isLast = (i == steps - 1);
             int stepsLeft = steps - i;
-            moveStep(isLast, isFirst, stepsLeft);
+            moveStep(isLast, isFirst, stepsLeft, provider);
 
             // 완주 조건 (A2에 N0 경유 없이 도달)
             // A2 도달 + 직전 노드가 N0가 아니면 완주 처리
@@ -381,7 +383,7 @@ public class Horse {
                 if (!prevId.equals("N0")) {
                     this.state = HorseState.FINISHED;
 
-                    // ✅ 여기서 groupedHorses도 완주 처리 필요
+                    // 여기서 groupedHorses도 완주 처리 필요
                     for (Horse grouped : groupedHorses) {
                         grouped.state = HorseState.FINISHED;
                     }
@@ -403,7 +405,7 @@ public class Horse {
             }
         }
 
-        // ⭐ 도착 위치에서만 같은 팀 말과 그룹핑 (업기)
+        // 도착 위치에서만 같은 팀 말과 그룹핑 (업기)
         if (!isFinished() && position != null) {
             for (Horse other : position.getHorsesOnNode()) {
                 if (this != other && isGroupable(other)) {
@@ -412,17 +414,17 @@ public class Horse {
             }
         }
 
-        printStatus(); // 디버깅 로그 출력
+        //printStatus(); // 디버깅 로그 출력
 
-        //FINISHED 상태이면 버튼 텍스트 초기화
+        //FINISHED 상태이면 버튼 텍스트 초기화 -> ui로 넘길 예정
         // 말이 끝에 도달하면 버튼 텍스트 원래대로
-        if (this.state == HorseState.FINISHED && this.position != null) {
+        /*if (this.state == HorseState.FINISHED && this.position != null) {
             JButton btn = MainFrame.getInstance().getBoardPanel().getNodeToButtonMap().get(this.position);
             if (btn != null) {
                 btn.setText(this.position.getId());  // "A2"
                 btn.setForeground(Color.BLACK);      // 기본 색상으로
             }
-        }
+        }*/
         return capturedSomeone;
     }
 
@@ -496,7 +498,7 @@ public class Horse {
     }
 
     // 디버깅용 말 상태 출력
-    public void printStatus() {
+    /*public void printStatus() {
         String positionId = (position != null) ? position.getId() : "null";
         String coord = "null";
 
@@ -519,7 +521,7 @@ public class Horse {
                 "[말 상태] %s | 상태: %s | 위치: %s | 좌표: %s\n",
                 this.id, this.state, positionId, coord
         );
-    }
+    }*/
 
     /**
      * 말의 간단한 문자열 반환 (예: A,H2)

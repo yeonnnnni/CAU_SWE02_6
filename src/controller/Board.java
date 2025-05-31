@@ -35,11 +35,6 @@ public class Board {
         return team.getHorses();
     }
 
-    // 말 이동
-    public void moveHorse(Horse horse, int steps, List<Node> board, String boardType) {
-        horse.move(steps, board, boardType);
-    }
-
     //외부에서 생성된 노드 리스트를 설정 (Builder에서 주입)
     public void setNodes(List<Node> nodes) {
         this.nodes.clear();
