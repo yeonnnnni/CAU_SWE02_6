@@ -51,7 +51,7 @@ public class MainFrame extends JFrame {
                 "판 설정",
                 JOptionPane.PLAIN_MESSAGE,
                 null,
-                types,
+               types,
                 types[0]
         );
         if (boardType == null) boardType = "square";
@@ -65,6 +65,13 @@ public class MainFrame extends JFrame {
         // 모델 데이터: 노드 및 팀 준비
         Board board = new Board();
         board.setNodes(nodeList);
+        // 보드 패널
+        boardPanel = new BoardPanel();
+        boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
+        add(boardPanel, BorderLayout.CENTER);
+        //pack();
+        setResizable(true);
+
 
         List<Color> colors = List.of(Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.PINK);
         List<Team> teams = new ArrayList<>();
@@ -79,7 +86,7 @@ public class MainFrame extends JFrame {
         currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
 
         // UI에 컴포넌트 배치
-        boardPanel.renderBoard(nodeList, builder.getNodePositions());
+        boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
         add(boardPanel, BorderLayout.CENTER);
         add(dicePanel, BorderLayout.NORTH);
         add(currentPlayerLabel, BorderLayout.SOUTH);

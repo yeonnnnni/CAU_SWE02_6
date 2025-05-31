@@ -71,6 +71,9 @@ public class Board {
         for (Team team : playerToTeam.values()) {
             team.resetTeam();  // 팀 내 말들 초기화
         }
+        for (Node node : nodes) {
+            node.clearHorses(); // 말 위치 초기화
+        }
     }
 
     //시작 노드 반환 (ex: ID가 "A2"인 노드를 기준)

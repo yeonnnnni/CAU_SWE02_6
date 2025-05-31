@@ -310,12 +310,12 @@ public class Horse {
         }
 
         // 현재 위치에 같은 팀 말이 있으면 그룹핑
-        List<Horse> others = position.getHorsesOnNode();
-        for (Horse other : others) {
-            if (this != other && isGroupable(other)) {
-                groupWith(other);
-            }
-        }
+//        List<Horse> others = position.getHorsesOnNode();
+//        for (Horse other : others) {
+//            if (this != other && isGroupable(other)) {
+//                groupWith(other);
+//            }
+//        }
     }
 
     /**
@@ -380,6 +380,12 @@ public class Horse {
                 String prevId = !positionHistory.isEmpty() ? positionHistory.peek().getId() : "없음";
                 if (!prevId.equals("N0")) {
                     this.state = HorseState.FINISHED;
+
+                    // ✅ 여기서 groupedHorses도 완주 처리 필요
+                    for (Horse grouped : groupedHorses) {
+                        grouped.state = HorseState.FINISHED;
+                    }
+
                     System.out.println("[완주] " + id + "가 A2에 도달했으며, " + prevId + "를 통해 A2로 들어왔습니다.");
                     return false;
                 } else {
@@ -394,6 +400,15 @@ public class Horse {
             if (isCaptured(other)) {
                 other.reset();
                 capturedSomeone = true;
+            }
+        }
+
+        // ⭐ 도착 위치에서만 같은 팀 말과 그룹핑 (업기)
+        if (!isFinished() && position != null) {
+            for (Horse other : position.getHorsesOnNode()) {
+                if (this != other && isGroupable(other)) {
+                    groupWith(other);
+                }
             }
         }
 
