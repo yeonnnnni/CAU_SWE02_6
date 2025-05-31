@@ -292,12 +292,12 @@ public class Horse {
         }
 
         // 현재 위치에 같은 팀 말이 있으면 그룹핑
-        List<Horse> others = position.getHorsesOnNode();
-        for (Horse other : others) {
-            if (this != other && isGroupable(other)) {
-                groupWith(other);
-            }
-        }
+//        List<Horse> others = position.getHorsesOnNode();
+//        for (Horse other : others) {
+//            if (this != other && isGroupable(other)) {
+//                groupWith(other);
+//            }
+//        }
     }
 
     // n칸 이동
@@ -364,6 +364,15 @@ public class Horse {
             if (isCaptured(other)) {
                 other.reset();
                 capturedSomeone = true;
+            }
+        }
+
+        // ⭐ 도착 위치에서만 같은 팀 말과 그룹핑 (업기)
+        if (!isFinished() && position != null) {
+            for (Horse other : position.getHorsesOnNode()) {
+                if (this != other && isGroupable(other)) {
+                    groupWith(other);
+                }
             }
         }
 
