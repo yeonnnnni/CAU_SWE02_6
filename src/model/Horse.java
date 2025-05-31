@@ -1,6 +1,5 @@
 package model;
 import builder.BoardFactory;
-import view.MainFrame;
 
 import java.awt.Color;
 import java.util.*;

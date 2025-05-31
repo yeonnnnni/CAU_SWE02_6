@@ -5,6 +5,7 @@ import builder.BoardBuilder;
 import builder.BoardFactory;
 import controller.Board;
 import controller.GameManager;
+import controller.GameController;
 import model.*;
 
 import javax.swing.*;
@@ -12,8 +13,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainFrame extends JFrame {
-
+public class MainFrame extends JFrame implements GameUI {
     private BoardPanel boardPanel;
     private DicePanel dicePanel;
     private JLabel currentPlayerLabel;
@@ -89,16 +89,13 @@ public class MainFrame extends JFrame {
 
         // 게임 매니저 연결 (Controller 역할)
         ShortcutDecisionProvider provider = direction -> promptShortcutChoice(direction);
-        gameManager = new GameManager(this, board, new DiceManager(), teams, boardType, provider);
-
+        DiceManager diceManager = new DiceManager();
+        gameManager = new GameManager(this, board, diceManager, teams, boardType, provider);
+        new GameController(diceManager, gameManager, this );
         gameManager.startGame();
-
-        // 이벤트 리스너 연결
-        dicePanel.addRollListener(e -> gameManager.handleDiceRoll());
 
         // 최종 화면 표시
         setVisible(true);
-
     }
 
     public List<YutResult> promptYutOrder(List<YutResult> results) {
@@ -136,6 +133,27 @@ public class MainFrame extends JFrame {
     public BoardPanel getBoardPanel() { return boardPanel; }
     public DicePanel getDicePanel() { return dicePanel; }
     public List<Node> getNodes() { return nodeList; }
+
+    @Override
+    public boolean isRandomMode() {
+        return dicePanel.isRandomMode();
+    }
+
+    @Override
+    public String getManualInput() {
+        return dicePanel.getManualInputText();
+    }
+
+    @Override
+    public void showDiceResult(List<YutResult> results) {
+        dicePanel.showResult(results);
+    }
+
+    @Override
+    public void setRollListener(Runnable listener) {
+        dicePanel.addRollListener(e -> listener.run());
+    }
+
     public static MainFrame getInstance() { return instance; }
 
     public boolean promptShortcutChoice(String direction) {
