@@ -154,6 +154,76 @@ public class MainFrame extends JFrame implements GameUI {
         dicePanel.addRollListener(e -> listener.run());
     }
 
+    @Override
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    @Override
+    public boolean confirmShortcut(String direction) {
+        int response = JOptionPane.showConfirmDialog(
+                this,
+                "지름길 (" + direction + " 방향)로 진입하시겠습니까?",
+                "지름길 선택",
+                JOptionPane.YES_NO_OPTION
+        );
+        return response == JOptionPane.YES_OPTION;
+    }
+
+    @Override
+    public Horse selectHorse(List<Horse> candidates, int steps) {
+        Object[] options = candidates.toArray();
+        return (Horse) JOptionPane.showInputDialog(
+                this,
+                steps + "칸 이동할 말을 선택하세요:",
+                "말 선택",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+    }
+
+    @Override
+    public YutResult chooseYutResult(List<YutResult> options) {
+        Object[] choices = options.toArray();
+        return (YutResult) JOptionPane.showInputDialog(
+                this,
+                "사용할 윷 결과를 선택하세요:",
+                "결과 선택",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                choices,
+                choices[0]
+        );
+    }
+
+    @Override
+    public boolean promptRestart(String winnerName) {
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                winnerName + " 팀이 승리했습니다! 게임을 다시 시작할까요?",
+                "게임 종료",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new String[]{"다시 시작", "종료"},
+                "다시 시작"
+        );
+        return choice == JOptionPane.YES_OPTION;
+    }
+
+    @Override
+    public void updatePiece(Node from, Node to) {
+        boardPanel.updatePiecePosition(from, to);
+    }
+
+    @Override
+    public void setDiceRollEnabled(boolean enabled) {
+        dicePanel.setEnabled(enabled);
+    }
+
+
     public static MainFrame getInstance() { return instance; }
 
     public boolean promptShortcutChoice(String direction) {

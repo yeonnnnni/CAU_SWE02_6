@@ -1,14 +1,12 @@
 package controller;
 import model.*;
-import view.MainFrame;
+import view.GameUI;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameManager {
-    private final MainFrame mainFrame;
+    private final GameUI gameUI;
     private final Board board;
     private final DiceManager diceManager;
     private final List<Team> teams;
@@ -21,8 +19,8 @@ public class GameManager {
     private boolean capturedThisTurn = false;
     private boolean bonusTurnRequested = false;
 
-    public GameManager(MainFrame mainFrame, Board board, DiceManager diceManager, List<Team> teams, String boardType, ShortcutDecisionProvider shortcutDecisionProvider) {
-        this.mainFrame = mainFrame;
+    public GameManager(GameUI gameUI, Board board, DiceManager diceManager, List<Team> teams, String boardType, ShortcutDecisionProvider shortcutDecisionProvider) {
+        this.gameUI = gameUI;
         this.board = board;
         this.diceManager = diceManager;
         this.teams = teams;
@@ -41,8 +39,8 @@ public class GameManager {
         currentPlayerIndex = 0;                         // 첫 번째 플레이어로 설정
         updateCurrentPlayerLabel();                     // 상단에 현재 플레이어 표시
         board.resetAll();                               // 모든 말과 노드 상태 초기화
-        mainFrame.getBoardPanel().resetBoardUI();       // 보드 UI 초기화 (말, 색상 등 리셋)
-        mainFrame.getDicePanel().showResult(new ArrayList<>()); // 주사위 패널 초기화
+        gameUI.getBoardPanel().resetBoardUI();       // 보드 UI 초기화 (말, 색상 등 리셋)
+        gameUI.getDicePanel().showResult(new ArrayList<>()); // 주사위 패널 초기화
         updateScoreboard();                             // 점수판 초기화
     }
 
@@ -54,7 +52,7 @@ public class GameManager {
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % teams.size(); // 다음 플레이어 순환
         updateCurrentPlayerLabel();                     // 현재 플레이어 UI 갱신
-        mainFrame.getDicePanel().showResult(new ArrayList<>()); // 주사위 결과 초기화
+        gameUI.getDicePanel().showResult(new ArrayList<>()); // 주사위 결과 초기화
         updateScoreboard();                             // 점수판 갱신
     }
 
@@ -65,20 +63,10 @@ public class GameManager {
     public void checkWin() {
         Team team = getCurrentTeam();                   // 현재 턴의 팀 확인
         if (team.isWin()) {                             // 승리 조건 충족 여부 확인
-            int choice = JOptionPane.showOptionDialog(
-                    mainFrame,
-                    team.getName() + " 팀이 승리했습니다!", // 승리 메시지
-                    "게임 종료",
-                    JOptionPane.YES_NO_OPTION,           // 선택지: 다시 시작 / 종료
-                    JOptionPane.INFORMATION_MESSAGE,
-                    null,
-                    new Object[]{"다시 시작", "종료"},
-                    "다시 시작"
-            );
-            if (choice == JOptionPane.YES_OPTION) {
-                restartGame(); // 전체 게임 상태 초기화 후 새 게임 시작
+            if (gameUI.promptRestart(team.getName())) {
+                restartGame();
             } else {
-                System.exit(0); // 프로그램 종료
+                System.exit(0);
             }
         }
     }
@@ -86,7 +74,6 @@ public class GameManager {
     // 윷 던지기 처리 (랜덤 or 수동) 및 다음 이동 준비
     public void handleDiceRoll() {
         System.out.println("handleDiceRoll() 시작");
-        capturedThisTurn = false;
 
         // 새로운 턴 시작이므로 플래그 초기화
         capturedThisTurn = false;
@@ -94,21 +81,21 @@ public class GameManager {
 
         List<YutResult> results;
 
-        if (mainFrame.getDicePanel().isRandomMode()) {
+        if (gameUI.isRandomMode()) {
             results = diceManager.rollRandomSequence();
         } else {
             try {
-                int val = Integer.parseInt(mainFrame.getDicePanel().getManualInputText());
+                int val = Integer.parseInt(gameUI.getManualInput());
                 results = List.of(diceManager.rollManual(val));
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(mainFrame, "유효한 숫자를 입력해주세요.");
+                gameUI.showMessage("유효한 숫자를 입력해주세요.");
                 return;
             }
         }
 
         remainingResults.clear();
         remainingResults.addAll(results);
-        mainFrame.getDicePanel().showResult(results);
+        gameUI.showDiceResult(results);
 
         promptNextMove();
     }
@@ -122,14 +109,14 @@ public class GameManager {
             // 말 잡은 경우 -> 보너스 턴
             if (capturedThisTurn) {
                 System.out.println("보너스 턴 실행 중");
-                JOptionPane.showMessageDialog(mainFrame, "말을 잡았습니다! 한 번 더 던집니다.");
+                gameUI.showMessage("말을 잡았습니다! 한 번 더 던집니다.");
                 capturedThisTurn = false; // 보너스 턴 플래기 초기화
                 handleDiceRoll(); // 보너스 턴
             } else {
                 System.out.println("보너스 조건 없음, 턴 종료");
                 nextTurn(); // 다음 플레이어로 턴 넘김
             }
-            mainFrame.getDicePanel().setEnabled(true);
+            gameUI.setDiceRollEnabled(true);
             return;
         }
 
@@ -138,9 +125,9 @@ public class GameManager {
         if (remainingResults.size() == 1) {
             selected = remainingResults.get(0);
         } else {
-            selected = promptYutSingleChoice(remainingResults);
+            selected = gameUI.chooseYutResult(remainingResults);
             if (selected == null) {
-                mainFrame.getDicePanel().setEnabled(true);
+                gameUI.setDiceRollEnabled(true);
                 return;
             }
         }
@@ -151,33 +138,21 @@ public class GameManager {
         // 이동 가능한 말 목록을 계산
         List<Horse> movable = getMovableHorses(steps);
         if (movable.isEmpty()) {
-            JOptionPane.showMessageDialog(mainFrame, "이동 가능한 말이 없습니다.");
+            gameUI.showMessage("이동 가능한 말이 없습니다.");
             remainingResults.remove(selected);
             promptNextMove(); // 다음 윷 결과로 이동
             return;
         }
 
         // 사용자에게 말 선택하도록 요청
-        Horse horse = mainFrame.promptHorseSelection(movable, steps);
+        Horse horse = gameUI.selectHorse(movable, steps);
         if (horse == null) {
-            mainFrame.getDicePanel().setEnabled(true);
+            gameUI.setDiceRollEnabled(true);
             return;
         }
 
         Node from = horse.getPosition();
-
-        ShortcutDecisionProvider provider = new ShortcutDecisionProvider() {
-            @Override
-            public boolean shouldUseShortcut(String direction) {
-                int response = JOptionPane.showConfirmDialog(
-                        mainFrame,
-                        "지름길 (" + direction + " 방향)로 진입하시겠습니까?",
-                        "지름길 선택",
-                        JOptionPane.YES_NO_OPTION
-                );
-                return response == JOptionPane.YES_OPTION;
-            }
-        };
+        ShortcutDecisionProvider provider = direction -> gameUI.confirmShortcut(direction);
 
         boolean captured = horse.move(steps, board.getNodes(), boardType, provider);
         Node to = horse.getPosition();
@@ -188,29 +163,10 @@ public class GameManager {
             System.out.println(horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
         }
 
-        SwingUtilities.invokeLater(() -> {
-            mainFrame.getBoardPanel().updatePiecePosition(from, to);
-        });
-
+        gameUI.updatePiece(from, to);
         updateScoreboard();
-
         remainingResults.remove(selected);
-
         promptNextMove();
-    }
-
-
-    private YutResult promptYutSingleChoice(List<YutResult> options) {
-        Object[] choices = options.toArray();
-        return (YutResult) JOptionPane.showInputDialog(
-                mainFrame,
-                "사용할 윷 결과를 선택하세요:",
-                "결과 선택",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                choices,
-                choices[0]
-        );
     }
 
     // 게임 전체 초기화 후 새 게임 준비
@@ -226,15 +182,14 @@ public class GameManager {
         }
 
         updateCurrentPlayerLabel();
-        mainFrame.getBoardPanel().resetBoardUI();
-        mainFrame.getDicePanel().showResult(new ArrayList<>());
+        gameUI.getBoardPanel().resetBoardUI();
+        gameUI.getDicePanel().showResult(new ArrayList<>());
         updateScoreboard();
 
         // UI 상 말 아이콘 완전 제거를 위해 노드들 강제 업데이트
         for (Node node : board.getNodes()) {
-            mainFrame.getBoardPanel().updatePiecePosition(node, null);
+            gameUI.updatePiece(node, null);
         }
-
     }
 
     public Team getCurrentTeam() {
@@ -253,11 +208,9 @@ public class GameManager {
     }
 
     private void updateCurrentPlayerLabel() {
-        mainFrame.setCurrentPlayer(getCurrentTeam().getName());
+        gameUI.setCurrentPlayer(getCurrentTeam().getName());
     }
-
     private void updateScoreboard() {
-        mainFrame.getScoreboardPanel().updateScoreboard(teams);
+        gameUI.getScoreboardPanel().updateScoreboard(teams);
     }
-
 }
