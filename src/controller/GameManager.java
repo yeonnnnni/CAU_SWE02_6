@@ -212,6 +212,12 @@ public class GameManager {
         mainFrame.getBoardPanel().resetBoardUI();
         mainFrame.getDicePanel().showResult(new ArrayList<>());
         updateScoreboard();
+
+        // UI 상 말 아이콘 완전 제거를 위해 노드들 강제 업데이트
+        for (Node node : board.getNodes()) {
+            mainFrame.getBoardPanel().updatePiecePosition(node, null, "", null);
+        }
+
     }
 
     public Team getCurrentTeam() {
