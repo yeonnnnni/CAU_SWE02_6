@@ -4,6 +4,7 @@ import builder.BoardFactory;
 import java.awt.Color;
 import java.util.*;
 import java.awt.Point;
+import java.util.stream.Collectors;
 
 public class Horse {
     // 고유 ID (예: "T1-H2")
@@ -16,6 +17,7 @@ public class Horse {
     private Node position;          // 현재 위치한 노드
     private List<Horse> groupedHorses; // 함께 이동하는 말 리스트 (업기)
     private HorseBackup backup;     // 백업 상태 (롤백용)
+    private Horse master;
 
     //빽도를 위한 경로 스택 생성
     private final Deque<Node> positionHistory = new ArrayDeque<>();
@@ -34,7 +36,9 @@ public class Horse {
         this.groupedHorses = new ArrayList<>();
         this.position = null;
         team.addHorse(this);    // 팀 객체에 이 말 등록
+        this.master = null;
     }
+
     // Getter / Setter
     public String getId() { return id; }
     public int getTeamID() { return teamID; }
@@ -42,15 +46,14 @@ public class Horse {
     public List<Horse> getGroupedHorses() { return groupedHorses; }
     public void setState(HorseState state) { this.state = state; }
     public Team getTeam() { return team; }
+    public Node getPosition() { return position; }
+    public Color getTeamColor() { return team.getColor(); }
 
-    public Node getPosition() {
-        return position;
-    }
-    /**
-     * 팀의 색상 반환 (UI 표시용)
-     */
-    public Color getTeamColor() {
-        return team.getColor();
+    public boolean isMaster() { return master == null; }
+
+    public List<Horse> getGroupMembers() {
+        if (isMaster()) return groupedHorses;
+        return master.getGroupMembers();
     }
 
     /**
@@ -65,6 +68,11 @@ public class Horse {
         this.position = position;
         if (position != null) {
             position.addHorse(this);
+        }
+        for (Horse grouped : groupedHorses) {
+            if (grouped != this) {
+                grouped.setPositionWithoutHistory(position);
+            }
         }
     }
 
@@ -388,14 +396,12 @@ public class Horse {
         }
 
         // 도착 후 말 잡기
-        List<Horse> others = position.getHorsesOnNode();
-        for (Horse other : others) {
+        for (Horse other : position.getHorsesOnNode()) {
             if (isCaptured(other)) {
-                other.reset();
+                other.resetGroup();
                 capturedSomeone = true;
             }
         }
-
         // 도착 위치에서만 같은 팀 말과 그룹핑 (업기)
         if (!isFinished() && position != null) {
             for (Horse other : position.getHorsesOnNode()) {
@@ -421,6 +427,15 @@ public class Horse {
         }
     }
 
+    public void resetGroup() {
+        List<Horse> group = new ArrayList<>(groupedHorses);
+        group.add(this);
+
+        for (Horse h : group) {
+            h.reset();
+        }
+    }
+
     // 말 상태 초기화
     public void reset() {
         if (position != null) {
@@ -430,6 +445,7 @@ public class Horse {
         state = HorseState.WAITING;
         groupedHorses.clear();
         positionHistory.clear();
+        master = null;
     }
 
     /**
@@ -461,15 +477,17 @@ public class Horse {
      * 다른 말과 그룹핑 (업기)
      */
     public void groupWith(Horse other) {
-        if (isGroupable(other)) {
-            if (!groupedHorses.contains(other)) {
-                groupedHorses.add(other);
-            }
-            if (!other.groupedHorses.contains(this)) {
-                other.groupedHorses.add(this);
-            }
-            other.setPosition(this.position);
+        if (!isGroupable(other)) return;
+
+        if (!other.isMaster()){
+            other.getGroupMembers().add(this);
+            this.master = other.master;
+        } else {
+            this.getGroupMembers().add(other);
+            other.master = this;
         }
+
+        other.setPosition(this.position);
     }
 
     private boolean teamIdEquals(Horse other) {
