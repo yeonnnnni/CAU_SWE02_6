@@ -280,4 +280,10 @@ public class MainFrame extends JFrame implements GameUI {
             playerCount = 2;
         }
     }
+
+    @Override
+    public void refreshBoard() {
+        boardPanel.revalidate();
+        boardPanel.repaint();
+    }
 }

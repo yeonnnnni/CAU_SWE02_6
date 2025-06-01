@@ -24,4 +24,6 @@ public interface GameUI {
     DicePanel getDicePanel();
     ScoreboardPanel getScoreboardPanel();
     void setCurrentPlayer(String name);
+
+    void refreshBoard();
 }

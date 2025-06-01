@@ -161,6 +161,7 @@ public class GameManager {
         if (captured) {
             capturedThisTurn = true;
             System.out.println(horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
+            gameUI.refreshBoard();
         }
 
         gameUI.updatePiece(from, to);
