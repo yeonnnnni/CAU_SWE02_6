@@ -22,7 +22,8 @@ public class Team {
         this.boardType = boardType;
         this.horses = new ArrayList<>();
         for (int i = 0; i < pieceCount; i++) {
-            Horse h = new Horse(i, this);
+            Horse h = new Horse(String.valueOf(i), this);
+            horses.add(h);  // 이 라인도 누락되어 있으니 꼭 추가해야 함!
         }
     }
 

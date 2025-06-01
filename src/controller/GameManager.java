@@ -152,7 +152,17 @@ public class GameManager {
         }
 
         Node from = horse.getPosition();
-        ShortcutDecisionProvider provider = direction -> gameUI.confirmShortcut(direction);
+        ShortcutDecisionProvider provider = shortcutEntryNode -> {
+            String direction = shortcutEntryNode.getId().substring(0, 1); // 예: "D2" → "D"
+            boolean use = gameUI.confirmShortcut(direction); // UI로 확인 받기
+            if (use) {
+                // nextNodes.get(2)가 지름길이라고 가정할 경우
+                List<Node> nexts = shortcutEntryNode.getNextNodes();
+                return nexts.size() >= 3 ? nexts.get(2) : nexts.getFirst(); // 예외처리
+            } else {
+                return shortcutEntryNode.getNextNodes().getFirst(); // 일반 경로
+            }
+        };
 
         boolean captured = horse.move(steps, board.getNodes(), boardType, provider);
         Node to = horse.getPosition();

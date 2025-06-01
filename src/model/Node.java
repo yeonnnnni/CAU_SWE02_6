@@ -1,5 +1,7 @@
 package model;
 
+import controller.ShortcutDecisionProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +40,26 @@ public class Node {
         return isGoal;
     }
 
+    public boolean isShortcutNode() {
+        // 예: 지름길 시작점은 id가 특정 패턴일 경우로 구분 가능
+        return id.equals("S") || id.startsWith("SC");
+    }
+
     public void setGoal(boolean goal) {
         isGoal = goal;
+    }
+
+    public Node getNext(String boardType, ShortcutDecisionProvider provider) {
+        if (isShortcutNode()) {
+            return provider.chooseShortcut(this); // 인터페이스 통해 지름길 선택
+        }
+
+        // 다음 노드가 여러 개인 경우 (우선순위 0번으로)
+        if (!nextNodes.isEmpty()) {
+            return nextNodes.get(0);
+        }
+
+        return null; // 이동할 노드 없음
     }
 
     public boolean isCenter() {

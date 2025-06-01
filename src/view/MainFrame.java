@@ -6,6 +6,7 @@ import builder.BoardFactory;
 import controller.Board;
 import controller.GameManager;
 import controller.GameController;
+import controller.ShortcutDecisionProvider;
 import model.*;
 
 import javax.swing.*;
@@ -88,7 +89,12 @@ public class MainFrame extends JFrame implements GameUI {
         add(currentPlayerLabel, BorderLayout.SOUTH);
 
         // 게임 매니저 연결 (Controller 역할)
-        ShortcutDecisionProvider provider = direction -> promptShortcutChoice(direction);
+        ShortcutDecisionProvider provider = (Node node) -> {
+            String dir = node.getId().substring(0, 1); // "D2" → "D"
+            boolean use = promptShortcutChoice(dir);
+            List<Node> nexts = node.getNextNodes();   // Node의 메서드
+            return use && nexts.size() >= 3 ? nexts.get(2) : nexts.get(0);
+        };
         DiceManager diceManager = new DiceManager();
         gameManager = new GameManager(this, board, diceManager, teams, boardType, provider);
         new GameController(diceManager, gameManager, this );

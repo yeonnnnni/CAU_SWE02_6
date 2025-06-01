@@ -1,31 +1,25 @@
 package model;
 
-import builder.BoardFactory;
-import model.*;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.AllArgsConstructor;
-import java.awt.Color;
 import java.util.*;
 
-/**
- *
- |   |   |
- |---|---|
- |groupWith(Horse other)|말끼리 그룹핑 수행|
- |getGroupedHorses()|그룹된 말 리스트 반환|
+public class HorseGroupManager {
+    private final Map<Horse, List<Horse>> groupedMap = new HashMap<>();
 
- */
-@Getter
-@Setter
-@AllArgsConstructor
-public class HorseGroupManager{
-    private final Map<Horse, List<Horse>> groupedHorsesMap = new HashMap<>();
+    public void groupWith(Horse base, Horse other) {
+        groupedMap.computeIfAbsent(base, k -> new ArrayList<>()).add(other);
+        groupedMap.computeIfAbsent(other, k -> new ArrayList<>()).add(base);
+        other.setPosition(base.getPosition());
+    }
 
-    public List<Horse> getGroupedHorses(Horse horse);
-    public void addGroupedHorse(Horse horse, Horse toAdd);
-    public void removeGroupedHorse(Horse horse, Horse toRemove);
-    public void resetGroupedHorses(Horse horse);
+    public boolean isGroupable(Horse a, Horse b) {
+        return a.getTeam() == b.getTeam() && a != b && a.getPosition() == b.getPosition();
+    }
+
+    public List<Horse> getGroupedHorses(Horse horse) {
+        return groupedMap.getOrDefault(horse, new ArrayList<>());
+    }
+
+    public void resetGroupedHorses(Horse horse) {
+        groupedMap.remove(horse);
+    }
 }
-
