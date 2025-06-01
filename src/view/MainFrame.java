@@ -1,16 +1,12 @@
 // MainFrame.java
 package view;
 
-import builder.BoardBuilder;
-import builder.BoardFactory;
-import controller.Board;
 import controller.GameManager;
-import controller.GameController;
 import model.*;
+import java.util.Map;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainFrame extends JFrame implements GameUI {
@@ -24,79 +20,31 @@ public class MainFrame extends JFrame implements GameUI {
     private int pieceCount = 2;
     private int playerCount = 2;
 
-    public MainFrame() {
+    public MainFrame(List<Node> nodeList, Map<String, Point> nodePositions, String boardType) {
+        this.nodeList = nodeList;
+        this.setLayout(new BorderLayout());
         instance = this;
+
         setTitle("윷놀이 게임");
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // 추가
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
 
+        // UI 컴포넌트 배치
         scoreboardPanel = new ScoreboardPanel();
         add(scoreboardPanel, BorderLayout.EAST);
-
-        //사용자로부터 말 개수, 플레이어 수 입력받음
-        initCount();
-
-        // 보드 생성
-        // JOptionPane으로 보드 타입(Square, Pentagon, Hexagon) 선택
-        String[] types = {"square", "pentagon", "hexagon"};
-        String boardType = (String) JOptionPane.showInputDialog(
-                null,
-                "보드 유형을 선택하세요:",
-                "판 설정",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-               types,
-                types[0]
-        );
-        if (boardType == null) boardType = "square";
-
-        // BoardBuilder 객체 생성 (BoardFactory.create(boardType))
-        BoardBuilder builder = BoardFactory.create(boardType);
-        //builder.buildBoard() → 보드 노드 리스트 및 좌표 생성
-        this.nodeList = builder.buildBoard();
-
-        // Board, Team, DiceManager, GameManager 객체 생성
-        // 모델 데이터: 노드 및 팀 준비
-        Board board = new Board();
-        board.setNodes(nodeList);
-        // 보드 패널
         boardPanel = new BoardPanel();
-        boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
+        boardPanel.renderBoard(nodeList, nodePositions, boardType);
         add(boardPanel, BorderLayout.CENTER);
-        //pack();
-        setResizable(true);
 
-
-        List<Color> colors = List.of(Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.PINK);
-        List<Team> teams = new ArrayList<>();
-        for (int i = 0; i < playerCount; i++) {
-            char name = (char)('A' + i);
-            teams.add(new Team(i, String.valueOf(name), colors.get(i), pieceCount, boardType));
-        }
-
-        // 뷰 구성: UI 패널들 준비
-        //boardPanel = new BoardPanel();
         dicePanel = new DicePanel();
         currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
-
-        // UI에 컴포넌트 배치
-        boardPanel.renderBoard(nodeList, builder.getNodePositions(), boardType);
-        add(boardPanel, BorderLayout.CENTER);
         add(dicePanel, BorderLayout.NORTH);
         add(currentPlayerLabel, BorderLayout.SOUTH);
 
-        // 게임 매니저 연결 (Controller 역할)
-        ShortcutDecisionProvider provider = direction -> promptShortcutChoice(direction);
-        DiceManager diceManager = new DiceManager();
-        gameManager = new GameManager(this, board, diceManager, teams, boardType, provider);
-        new GameController(diceManager, gameManager, this );
-        gameManager.startGame();
-
-        // 최종 화면 표시
         setVisible(true);
     }
+
 
     public List<YutResult> promptYutOrder(List<YutResult> results) {
         DefaultListModel<YutResult> listModel = new DefaultListModel<>();
@@ -251,33 +199,5 @@ public class MainFrame extends JFrame implements GameUI {
                 options,
                 options[0]
         );
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainFrame::new);
-    }
-
-
-    // 말 개수 설정: 2~5개 입력, 그 외는 2로 설정
-    private void initCount(){
-        // piece init
-        try {
-            String pieceInput = JOptionPane.showInputDialog(null, "말 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
-            pieceCount = Integer.parseInt(pieceInput);
-            if (pieceCount < 2 || pieceCount > 5) throw new NumberFormatException();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
-            pieceCount = 2;
-        }
-
-        // player init
-        try {
-            String playerInput = JOptionPane.showInputDialog(null, "플레이어 개수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
-            playerCount = Integer.parseInt(playerInput);
-            if (playerCount < 2 || playerCount > 5) throw new NumberFormatException();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "잘못된 입력. 기본값 2개로 시작합니다.");
-            playerCount = 2;
-        }
     }
 }
