@@ -89,6 +89,7 @@ public class BoardPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
+            // 1. 보드 타입별 이미지 크기 지정
             int drawWidth, drawHeight;
 
             switch (boardType.toLowerCase()) {
@@ -106,9 +107,23 @@ public class BoardPanel extends JPanel {
                 default:
                     drawWidth = drawHeight = 350;
             }
-            int drawX = getWidth() / 2 - drawWidth / 2 - 15;
-            int drawY = getHeight() / 2 - drawHeight / 2+50;
 
+            // 2. 보드 타입별 위치 보정 오프셋 설정
+            Map<String, Point> offsetMap = new HashMap<>();
+            offsetMap.put("square", new Point(+125, -75));
+            offsetMap.put("pentagon", new Point(+100, -80));
+            offsetMap.put("hexagon", new Point(+70, -50));
+            Point offsetAdjust = offsetMap.getOrDefault(boardType.toLowerCase(), new Point(0, 0));
+//            int drawX = getWidth() / 2 - drawWidth / 2 - 15;
+//            int drawY = getHeight() / 2 - drawHeight / 2+50;
+            // 3. 이미지 그리기 좌표 계산 (버튼 기준과 정확히 일치)
+            int panelWidth = getPreferredSize().width;
+            int panelHeight = getPreferredSize().height;
+
+            int drawX = panelWidth / 2 - drawWidth / 2 + offsetAdjust.x;
+            int drawY = panelHeight / 2 - drawHeight / 2 + offsetAdjust.y;
+
+            // 4. 배경 이미지 그리기
             g.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight, this);
         }
     }
@@ -126,6 +141,14 @@ public class BoardPanel extends JPanel {
         nodeToButton.clear();
         buttonToNode.clear();
 
+        // 1. 오프셋 테이블 정의 (보드 타입별 버튼 위치 조정값)
+        Map<String, Point> offsetMap = new HashMap<>();
+        offsetMap.put("square", new Point(+125, -75));
+        offsetMap.put("pentagon", new Point(+100, -80));
+        offsetMap.put("hexagon", new Point(+70, -50));
+        Point offsetAdjust = offsetMap.getOrDefault(boardType.toLowerCase(), new Point(0, 0));
+
+        // 2. 중심 정렬용 좌표 계산
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
 
@@ -143,6 +166,7 @@ public class BoardPanel extends JPanel {
         int panelWidth = size.width;
         int panelHeight = size.height;
 
+        // 3. 각 노드에 버튼 배치
         for (Node node : nodes) {
             Point pt = nodePositions.get(node.getId());
             if (pt == null) {
@@ -151,11 +175,14 @@ public class BoardPanel extends JPanel {
             }
 
             JButton btn = new JButton();
-            btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2,
-                    pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
-                    buttonSize, buttonSize);
+            int drawX = pt.x - offsetX + panelWidth / 2 - buttonSize / 2 + offsetAdjust.x;
+            int drawY = pt.y - offsetY + panelHeight / 2 - buttonSize / 2 + offsetAdjust.y;
+            btn.setBounds(drawX, drawY, buttonSize, buttonSize);
+//            btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2,
+//                    pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
+//                    buttonSize, buttonSize);
             btn.setFont(new Font("Arial", Font.BOLD, 8));
-            btn.setText(node.getId());
+            //btn.setText(node.getId());
             btn.setText("");
             btn.setContentAreaFilled(false);
             btn.setBorderPainted(false);
