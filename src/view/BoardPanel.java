@@ -185,8 +185,8 @@ public class BoardPanel extends JPanel {
             //btn.setText(node.getId());
             btn.setText("");
             btn.setContentAreaFilled(false);
-            //btn.setBorderPainted(false);
-            //btn.setOpaque(false);
+            btn.setBorderPainted(false);
+            btn.setOpaque(false);
             btn.setLayout(null); // ✨ 아이콘 수동 배치용
             //btn.setBackground(Color.WHITE);
 
