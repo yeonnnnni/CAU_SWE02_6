@@ -107,7 +107,7 @@ public class BoardPanel extends JPanel {
                     drawWidth = drawHeight = 350;
             }
             int drawX = getWidth() / 2 - drawWidth / 2 - 15;
-            int drawY = getHeight() / 2 - drawHeight / 2+50;
+            int drawY = getHeight() / 2 - drawHeight / 2;
 
             g.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight, this);
         }
@@ -151,8 +151,8 @@ public class BoardPanel extends JPanel {
             }
 
             JButton btn = new JButton();
-            btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2,
-                    pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 100,
+            btn.setBounds(pt.x - offsetX + panelWidth / 2 - buttonSize / 2 + 125,
+                    pt.y - offsetY + panelHeight / 2 - buttonSize / 2 - 75,
                     buttonSize, buttonSize);
             btn.setFont(new Font("Arial", Font.BOLD, 8));
             btn.setText(node.getId());
