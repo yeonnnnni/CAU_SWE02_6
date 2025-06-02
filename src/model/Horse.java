@@ -339,6 +339,13 @@ public class Horse {
             if (!positionHistory.isEmpty()) {
                 Node previous = positionHistory.pop(); // 되돌아갈 위치
                 setPositionWithoutHistory(previous);
+                // 그룹 말도 각자 스택에서 되돌림
+                for (Horse grouped : groupedHorses) {
+                    if (!grouped.equals(this) && !grouped.positionHistory.isEmpty()) {
+                        Node groupedPrev = grouped.positionHistory.pop();
+                        grouped.setPositionWithoutHistory(groupedPrev);
+                    }
+                }
 
                 // 백도 위치에서 상대 말 제거 처리
                 List<Horse> others = new ArrayList<>(position.getHorsesOnNode());
@@ -484,6 +491,9 @@ public class Horse {
                 other.groupedHorses.add(this);
             }
             other.setPosition(this.position);
+            // 그룹된 말도 동일한 히스토리를 공유하도록 설정
+            other.positionHistory.clear();
+            other.positionHistory.addAll(this.positionHistory);
         }
     }
 
