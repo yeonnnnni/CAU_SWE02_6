@@ -13,7 +13,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameStarter {
+public class SwingStarter {
     public static void main(String[] args) {
         String mode = System.getProperty("ui.mode", "swing");
 
