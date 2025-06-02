@@ -4,6 +4,7 @@ import builder.BoardFactory;
 import java.awt.Color;
 import java.util.*;
 import java.awt.Point;
+import view.MainFrame;
 
 public class Horse {
     // 고유 ID (예: "T1-H2")
@@ -338,6 +339,16 @@ public class Horse {
             if (!positionHistory.isEmpty()) {
                 Node previous = positionHistory.pop(); // 되돌아갈 위치
                 setPositionWithoutHistory(previous);
+
+                // 백도 위치에서 상대 말 제거 처리
+                List<Horse> others = new ArrayList<>(position.getHorsesOnNode());
+                for (Horse other : others) {
+                    if (isCaptured(other)) {
+                        other.reset();
+                        System.out.println("[백도 잡기] " + this.getId() + "이(가) " + other.getId() + "를 잡았습니다.");
+                    }
+                }
+
                 System.out.println("[백도] 푸시 직전 스택 상태:");
                 for (Node n : positionHistory) {
                     System.out.println(" - " + n.getId());
@@ -356,7 +367,6 @@ public class Horse {
             } else {
                 System.out.println("[백도] 더 이상 되돌아갈 위치가 없습니다.");
             }
-            //printStatus();
             return false;
         }
 
@@ -388,11 +398,15 @@ public class Horse {
         }
 
         // 도착 후 말 잡기
-        List<Horse> others = position.getHorsesOnNode();
+        List<Horse> others = new ArrayList<>(position.getHorsesOnNode()); // 복사해서 안전하게 순회
         for (Horse other : others) {
             if (isCaptured(other)) {
+                // 말 제거 및 리셋
                 other.reset();
                 capturedSomeone = true;
+
+                // UI 반영을 위해 repaint가 필요할 수 있음
+                System.out.println("[잡기] " + this.getId() + "이(가) " + other.getId() + "를 잡았습니다.");
             }
         }
 
@@ -430,6 +444,7 @@ public class Horse {
         state = HorseState.WAITING;
         groupedHorses.clear();
         positionHistory.clear();
+        MainFrame.getInstance().updatePiece(this.position, null);  // UI에서 말 제거
     }
 
     /**

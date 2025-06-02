@@ -64,6 +64,7 @@ public class Node {
     public void removeHorse(Horse horse) {
         horsesOnNode.remove(horse);
     }
+
     public void clearHorses(){
         horsesOnNode.clear();
     }
