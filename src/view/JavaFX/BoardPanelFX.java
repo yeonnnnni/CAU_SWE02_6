@@ -22,7 +22,7 @@ public class BoardPanelFX extends Pane {
     private ImageView backgroundView;
 
     public BoardPanelFX() {
-        setPrefSize(350, 350);
+        setPrefSize(700, 700);
         loadHorseIcons();
 
         backgroundView = new ImageView();
@@ -77,7 +77,7 @@ public class BoardPanelFX extends Pane {
             btn.setPrefSize(buttonSize, buttonSize);
             btn.setLayoutX(x);
             btn.setLayoutY(y);
-            btn.setStyle("-fx-background-color: transparent; -fx-border-color: gray;");
+            btn.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
             getChildren().add(btn);
             nodeToButton.put(node, btn);
@@ -158,24 +158,24 @@ public class BoardPanelFX extends Pane {
                     case "square" -> {
                         backgroundView.setFitWidth(350);
                         backgroundView.setFitHeight(350);
-                        backgroundView.setLayoutX(220);
-                        backgroundView.setLayoutY(180);
+                        backgroundView.setLayoutX(200);
+                        backgroundView.setLayoutY(200);
                     }
                     case "pentagon" -> {
                         backgroundView.setFitWidth(600);
                         backgroundView.setFitHeight(580);
-                        backgroundView.setLayoutX(100);
-                        backgroundView.setLayoutY(100);
+                        backgroundView.setLayoutX(75);
+                        backgroundView.setLayoutY(80);
                     }
                     case "hexagon" -> {
                         backgroundView.setFitWidth(700);
                         backgroundView.setFitHeight(600);
-                        backgroundView.setLayoutX(50);
-                        backgroundView.setLayoutY(100);
+                        backgroundView.setLayoutX(30);
+                        backgroundView.setLayoutY(60);
                     }
                 }
 
-                backgroundView.setOpacity(0.6); // 필요시 조절
+                backgroundView.setOpacity(1); // 필요시 조절
             } catch (Exception e) {
                 System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
             }
