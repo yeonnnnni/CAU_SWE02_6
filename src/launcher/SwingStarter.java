@@ -6,15 +6,24 @@ import controller.Board;
 import controller.GameController;
 import controller.GameManager;
 import model.*;
-import view.MainFrame;
+import view.Swing.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameStarter {
+public class SwingStarter {
     public static void main(String[] args) {
+        String mode = System.getProperty("ui.mode", "swing");
+
+        if (mode.equalsIgnoreCase("javafx")) {
+            System.out.println("JavaFX!");
+//            여기서 Javafx 실행
+//            javafx.application.Application.launch(view.javafx.JavaFXMain.class, args);
+            return;
+        }
+
         SwingUtilities.invokeLater(() -> {
             // 1. 사용자 설정 입력 받기
             int pieceCount = promptPieceCount();
@@ -32,7 +41,7 @@ public class GameStarter {
             for (Team t : teams) board.registerTeam(t);
 
             // 4. UI 및 게임 매니저 생성
-            MainFrame view = new MainFrame(nodeList, builder.getNodePositions(), boardType);
+            MainFrame view = new view.Swing.MainFrame(nodeList, builder.getNodePositions(), boardType);
             ShortcutDecisionProvider provider = direction -> view.promptShortcutChoice(direction);
             DiceManager diceManager = new DiceManager();
             GameManager gameManager = new GameManager(view, board, diceManager, teams, boardType, provider);

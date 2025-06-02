@@ -6,7 +6,7 @@ import model.YutResult;
 
 import java.util.List;
 
-public interface GameUI {
+public interface GameUIBase {
     boolean isRandomMode();
     String getManualInput();
     void showDiceResult(List<YutResult> results);
@@ -19,9 +19,9 @@ public interface GameUI {
     boolean promptRestart(String winnerName);
     void updatePiece(Node from, Node to);
     void setDiceRollEnabled(boolean enabled);
-
-    BoardPanel getBoardPanel();
-    DicePanel getDicePanel();
-    ScoreboardPanel getScoreboardPanel();
     void setCurrentPlayer(String name);
+
+    default Object getBoardPanel() { return null; }
+    default Object getDicePanel() { return null; }
+    default Object getScoreboardPanel() { return null; }
 }

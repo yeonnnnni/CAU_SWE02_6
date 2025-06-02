@@ -6,9 +6,12 @@ import model.Team;
 
 import java.util.*;
 
-/*
-Board 클래스는 전체 팀과 말을 관리하고,
-게임판의 노드 및 말의 상태를 제어합니다.*/
+/**
+ * Board 클래스는 전체 팀, 말, 노드 상태를 종합적으로 관리한다.
+ * -플레이어 ID 기반으로 팀을 추적
+ * -말 객체를 모아 상태 변화 추적(잡기/완주 등)
+ * -게임판의 노드 상태 초기화, 검색, 시작점 식별 기능 제공
+ */
 public class Board {
     // 플레이어 ID → 팀 객체 매핑
     private final Map<String, Team> playerToTeam = new HashMap<>();
@@ -16,17 +19,6 @@ public class Board {
     private final List<Horse> allHorses = new ArrayList<>();
     // 게임판에 존재하는 모든 노드 리스트
     private final List<Node> nodes = new ArrayList<>();
-
-    // // 플레이어 등록 시 Team과 말 4개 생성
-    // public void registerPlayer(String playerId) {
-    //     int teamID = Integer.parseInt(playerId);       // 예: "0", "1" → 0, 1
-    //     Team team = new Team(teamID);
-    //     for (int i = 0; i < 4; i++) {
-    //         Horse h = new Horse(i, team);    // Horse 생성 시 team에 자동 등록됨
-    //         allHorses.add(h);   // 전체 말 리스트에 추가
-    //     }
-    //     playerToTeam.put(playerId, team);
-    // }
 
     // 플레이어 ID를 기준으로 말 리스트 반환
     public List<Horse> getHorsesForPlayer(String playerId) {
@@ -79,15 +71,21 @@ public class Board {
                 .orElseThrow(() -> new IllegalStateException("A2 노드를 찾을 수 없습니다."));
     }
 
+    /**
+     * 팀 등록 메서드: 중복 없이 등록
+     * -팀이 이미 등록되어 있으면 무시
+     * 팀에 속한 말들도 allHorses에 등록
+     * @param team
+     */
     public void registerTeam(Team team) {
-        String teamIdAsString = String.valueOf(team.getTeamID());
-        if (playerToTeam.containsKey(teamIdAsString)) return;
+        String teamIdAsString = String.valueOf(team.getTeamID());  // 정수 ID->문자열 변환
+        if (playerToTeam.containsKey(teamIdAsString)) return;    // 이미 등록되어 있으면 무시
 
         for (Horse h : team.getHorses()) {
-            allHorses.add(h);
+            allHorses.add(h);  // 전체 말 리스트에 추가
         }
 
-        playerToTeam.put(teamIdAsString, team);
+        playerToTeam.put(teamIdAsString, team);  // 팀 등록
     }
 
 }
