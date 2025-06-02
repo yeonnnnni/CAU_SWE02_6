@@ -6,6 +6,8 @@ import controller.Board;
 import controller.GameController;
 import controller.GameManager;
 import javafx.geometry.Point2D;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextInputDialog;
 import model.ShortcutDecisionProvider;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -23,9 +25,9 @@ public class FXStarter extends Application {
     @Override
     public void start(Stage primaryStage) {
         // 1. 사용자 입력 받기
-        int pieceCount = 2;  // TODO: JavaFX 다이얼로그로 변경 가능
-        int playerCount = 2;
-        String boardType = "square";
+        int pieceCount = promptPieceCount();
+        int playerCount = promptPlayerCount();
+        String boardType = promptBoardType();
 
         // 2. 보드 빌드
         BoardBuilder builder = BoardFactory.create(boardType);
@@ -39,6 +41,7 @@ public class FXStarter extends Application {
 
         // 4. UI 및 게임 매니저 생성
         MainFrameFX view = new MainFrameFX();
+        view.getBoardPanel().setBoardType(boardType);
         Map<String, Point2D> convertedPositions = new HashMap<>();
         for (var entry : builder.getNodePositions().entrySet()) {
             java.awt.Point awtPoint = entry.getValue();
@@ -62,6 +65,35 @@ public class FXStarter extends Application {
     public static void main(String[] args) {
         launch(args); // JavaFX Application 실행
     }
+
+    private int promptPieceCount() {
+        TextInputDialog dialog = new TextInputDialog("2");
+        dialog.setTitle("설정");
+        dialog.setHeaderText("말 개수 (2~5)를 입력하세요:");
+        return dialog.showAndWait()
+                .map(Integer::parseInt)
+                .filter(n -> n >= 2 && n <= 5)
+                .orElse(2);
+    }
+
+    private int promptPlayerCount() {
+        TextInputDialog dialog = new TextInputDialog("2");
+        dialog.setTitle("설정");
+        dialog.setHeaderText("플레이어 수 (2~5)를 입력하세요:");
+        return dialog.showAndWait()
+                .map(Integer::parseInt)
+                .filter(n -> n >= 2 && n <= 5)
+                .orElse(2);
+    }
+
+    private String promptBoardType() {
+        List<String> options = List.of("square", "pentagon", "hexagon");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("square", options);
+        dialog.setTitle("보드 타입 선택");
+        dialog.setHeaderText("보드 타입을 선택하세요:");
+        return dialog.showAndWait().orElse("square");
+    }
+
 
     private List<Team> createTeams(int playerCount, int pieceCount, String boardType) {
         List<javafx.scene.paint.Color> fxColors = List.of(
