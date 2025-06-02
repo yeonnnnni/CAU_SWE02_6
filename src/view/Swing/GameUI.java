@@ -1,27 +1,14 @@
-package view;
+package view.Swing;
 
-import model.Horse;
-import model.Node;
-import model.YutResult;
+import view.GameUIBase;
+import view.Swing.BoardPanel;
+import view.Swing.DicePanel;
+import view.Swing.ScoreboardPanel;
 
-import java.util.List;
-
-public interface GameUI {
-    boolean isRandomMode();
-    String getManualInput();
-    void showDiceResult(List<YutResult> results);
-    void setRollListener(Runnable listener);
-
-    void showMessage(String message);
-    boolean confirmShortcut(String direction);
-    Horse selectHorse(List<Horse> candidates, int steps);
-    YutResult chooseYutResult(List<YutResult> options);
-    boolean promptRestart(String winnerName);
-    void updatePiece(Node from, Node to);
-    void setDiceRollEnabled(boolean enabled);
-
-    BoardPanel getBoardPanel();
-    DicePanel getDicePanel();
-    ScoreboardPanel getScoreboardPanel();
-    void setCurrentPlayer(String name);
+// Swing
+public interface GameUI extends GameUIBase {
+    view.Swing.BoardPanel getBoardPanel();
+    view.Swing.DicePanel getDicePanel();
+    view.Swing.ScoreboardPanel getScoreboardPanel();
 }
+

@@ -4,7 +4,7 @@ import builder.BoardFactory;
 import java.awt.Color;
 import java.util.*;
 import java.awt.Point;
-import view.Swing.MainFrame;
+//import view.Swing.MainFrame;
 
 public class Horse {
     // 고유 ID (예: "T1-H2")
@@ -451,7 +451,6 @@ public class Horse {
         state = HorseState.WAITING;
         groupedHorses.clear();
         positionHistory.clear();
-        MainFrame.getInstance().updatePiece(this.position, null);  // UI에서 말 제거
     }
 
     /**

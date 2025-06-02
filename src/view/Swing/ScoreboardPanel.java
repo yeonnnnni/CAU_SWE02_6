@@ -1,5 +1,5 @@
 // view/ScoreboardPanel.java
-package view;
+package view.Swing;
 
 import model.Horse;
 import model.Team;

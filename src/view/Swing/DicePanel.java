@@ -1,4 +1,4 @@
-package view;
+package view.Swing;
 
 import model.YutResult;
 
