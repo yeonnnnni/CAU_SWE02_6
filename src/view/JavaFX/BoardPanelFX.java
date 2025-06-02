@@ -22,10 +22,11 @@ public class BoardPanelFX extends Pane {
     private ImageView backgroundView;
 
     public BoardPanelFX() {
-        setPrefSize(800, 800);
+        setPrefSize(350, 350);
         loadHorseIcons();
+
         backgroundView = new ImageView();
-        getChildren().add(backgroundView); // ⬅ 배경 먼저 추가
+        getChildren().add(backgroundView); //배경 추가
     }
 
     private void loadHorseIcons() {
@@ -49,14 +50,33 @@ public class BoardPanelFX extends Pane {
         getChildren().add(backgroundView); // 배경 먼저 add
         nodeToButton.clear();
 
+        double minX = Double.MAX_VALUE, maxX = Double.MIN_VALUE;
+        double minY = Double.MAX_VALUE, maxY = Double.MIN_VALUE;
+
+        for (Point2D pt : nodePositions.values()) {
+            if (pt.getX() < minX) minX = pt.getX();
+            if (pt.getX() > maxX) maxX = pt.getX();
+            if (pt.getY() < minY) minY = pt.getY();
+            if (pt.getY() > maxY) maxY = pt.getY();
+        }
+
+        double offsetX = (minX + maxX) / 2;
+        double offsetY = (minY + maxY) / 2;
+
+        double paneCenterX = getPrefWidth() / 2;
+        double paneCenterY = getPrefHeight() / 2;
+
         for (Node node : nodes) {
             Point2D pt = nodePositions.get(node.getId());
             if (pt == null) continue;
 
+            double x = pt.getX() - offsetX + paneCenterX;
+            double y = pt.getY() - offsetY + paneCenterY;
+
             Button btn = new Button();
             btn.setPrefSize(buttonSize, buttonSize);
-            btn.setLayoutX(pt.getX());
-            btn.setLayoutY(pt.getY());
+            btn.setLayoutX(x);
+            btn.setLayoutY(y);
             btn.setStyle("-fx-background-color: transparent; -fx-border-color: gray;");
 
             getChildren().add(btn);
@@ -132,14 +152,36 @@ public class BoardPanelFX extends Pane {
             try {
                 Image bg = new Image(getClass().getResourceAsStream(imagePath));
                 backgroundView.setImage(bg);
-                backgroundView.setFitWidth(800);
-                backgroundView.setFitHeight(800);
-                backgroundView.setOpacity(0.6); // 원하면 투명도 조절
+
+                // 보드 타입별로 이미지 크기 다르게 조정
+                switch (boardType) {
+                    case "square" -> {
+                        backgroundView.setFitWidth(350);
+                        backgroundView.setFitHeight(350);
+                        backgroundView.setLayoutX(220);
+                        backgroundView.setLayoutY(180);
+                    }
+                    case "pentagon" -> {
+                        backgroundView.setFitWidth(600);
+                        backgroundView.setFitHeight(580);
+                        backgroundView.setLayoutX(100);
+                        backgroundView.setLayoutY(100);
+                    }
+                    case "hexagon" -> {
+                        backgroundView.setFitWidth(700);
+                        backgroundView.setFitHeight(600);
+                        backgroundView.setLayoutX(50);
+                        backgroundView.setLayoutY(100);
+                    }
+                }
+
+                backgroundView.setOpacity(0.6); // 필요시 조절
             } catch (Exception e) {
                 System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
             }
         }
     }
+
 
 
     public Map<Node, Button> getNodeToButtonMap() {
