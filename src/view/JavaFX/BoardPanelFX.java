@@ -19,10 +19,13 @@ public class BoardPanelFX extends Pane {
     private final int buttonSize = 50;
     private String boardType = "square";
     private final Map<String, Image> horseIcons = new HashMap<>();
+    private ImageView backgroundView;
 
     public BoardPanelFX() {
         setPrefSize(800, 800);
         loadHorseIcons();
+        backgroundView = new ImageView();
+        getChildren().add(backgroundView); // ⬅ 배경 먼저 추가
     }
 
     private void loadHorseIcons() {
@@ -41,7 +44,9 @@ public class BoardPanelFX extends Pane {
     }
 
     public void renderBoard(List<Node> nodes, Map<String, Point2D> nodePositions) {
+        setBoardType(boardType); // 🆕 배경 먼저 설정
         getChildren().clear();
+        getChildren().add(backgroundView); // 배경 먼저 add
         nodeToButton.clear();
 
         for (Node node : nodes) {
@@ -113,6 +118,29 @@ public class BoardPanelFX extends Pane {
         if (java.awt.Color.PINK.equals(color)) return "pink";
         return "unknown";
     }
+
+    public void setBoardType(String boardType) {
+        this.boardType = boardType.toLowerCase();
+        String imagePath = switch (boardType) {
+            case "square" -> "/square_good.png";
+            case "pentagon" -> "/pentagon.png";
+            case "hexagon" -> "/hexagon.png";
+            default -> null;
+        };
+
+        if (imagePath != null) {
+            try {
+                Image bg = new Image(getClass().getResourceAsStream(imagePath));
+                backgroundView.setImage(bg);
+                backgroundView.setFitWidth(800);
+                backgroundView.setFitHeight(800);
+                backgroundView.setOpacity(0.6); // 원하면 투명도 조절
+            } catch (Exception e) {
+                System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
+            }
+        }
+    }
+
 
     public Map<Node, Button> getNodeToButtonMap() {
         return nodeToButton;
