@@ -1,22 +1,23 @@
 // MainFrame.java
-package view;
+package view.Swing;
 
 import controller.GameManager;
 import model.*;
 import java.util.Map;
+import view.Swing.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class MainFrame extends JFrame implements GameUI {
-    private BoardPanel boardPanel;
-    private DicePanel dicePanel;
+public class MainFrame extends JFrame implements view.GameUI {
+    private view.BoardPanel boardPanel;
+    private view.DicePanel dicePanel;
     private JLabel currentPlayerLabel;
     private GameManager gameManager;
     private List<Node> nodeList;
     private static MainFrame instance;
-    private ScoreboardPanel scoreboardPanel;
+    private view.ScoreboardPanel scoreboardPanel;
     private int pieceCount = 2;
     private int playerCount = 2;
 
@@ -31,13 +32,13 @@ public class MainFrame extends JFrame implements GameUI {
         setLocationRelativeTo(null);
 
         // UI 컴포넌트 배치
-        scoreboardPanel = new ScoreboardPanel();
+        scoreboardPanel = new view.ScoreboardPanel();
         add(scoreboardPanel, BorderLayout.EAST);
-        boardPanel = new BoardPanel();
+        boardPanel = new view.BoardPanel();
         boardPanel.renderBoard(nodeList, nodePositions, boardType);
         add(boardPanel, BorderLayout.CENTER);
 
-        dicePanel = new DicePanel();
+        dicePanel = new view.DicePanel();
         currentPlayerLabel = new JLabel("현재: ", SwingConstants.CENTER);
         add(dicePanel, BorderLayout.NORTH);
         add(currentPlayerLabel, BorderLayout.SOUTH);
@@ -70,7 +71,7 @@ public class MainFrame extends JFrame implements GameUI {
     }
 
     // getter 추가
-    public ScoreboardPanel getScoreboardPanel() {
+    public view.ScoreboardPanel getScoreboardPanel() {
         return scoreboardPanel;
     }
 
@@ -78,8 +79,8 @@ public class MainFrame extends JFrame implements GameUI {
         currentPlayerLabel.setText("현재: " + name);
     }
 
-    public BoardPanel getBoardPanel() { return boardPanel; }
-    public DicePanel getDicePanel() { return dicePanel; }
+    public view.BoardPanel getBoardPanel() { return boardPanel; }
+    public view.DicePanel getDicePanel() { return dicePanel; }
     public List<Node> getNodes() { return nodeList; }
 
     @Override

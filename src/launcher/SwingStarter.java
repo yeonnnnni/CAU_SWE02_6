@@ -6,7 +6,7 @@ import controller.Board;
 import controller.GameController;
 import controller.GameManager;
 import model.*;
-import view.MainFrame;
+import view.Swing.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,7 +41,7 @@ public class SwingStarter {
             for (Team t : teams) board.registerTeam(t);
 
             // 4. UI 및 게임 매니저 생성
-            MainFrame view = new MainFrame(nodeList, builder.getNodePositions(), boardType);
+            MainFrame view = new view.Swing.MainFrame(nodeList, builder.getNodePositions(), boardType);
             ShortcutDecisionProvider provider = direction -> view.promptShortcutChoice(direction);
             DiceManager diceManager = new DiceManager();
             GameManager gameManager = new GameManager(view, board, diceManager, teams, boardType, provider);

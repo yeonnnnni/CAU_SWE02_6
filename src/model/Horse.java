@@ -4,7 +4,7 @@ import builder.BoardFactory;
 import java.awt.Color;
 import java.util.*;
 import java.awt.Point;
-import view.MainFrame;
+import view.Swing.MainFrame;
 
 public class Horse {
     // 고유 ID (예: "T1-H2")
