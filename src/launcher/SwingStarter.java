@@ -55,9 +55,9 @@ public class SwingStarter {
 
     private static int promptPlayerCount() {
         try {
-            String input = JOptionPane.showInputDialog(null, "플레이어 수 (2~5):", "설정", JOptionPane.QUESTION_MESSAGE);
+            String input = JOptionPane.showInputDialog(null, "플레이어 수 (2~4):", "설정", JOptionPane.QUESTION_MESSAGE);
             int value = Integer.parseInt(input);
-            return (value < 2 || value > 5) ? 2 : value;
+            return (value < 2 || value > 4) ? 2 : value;
         } catch (Exception e) {
             return 2;
         }

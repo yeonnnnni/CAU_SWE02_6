@@ -21,5 +21,6 @@ public interface BoardBuilder {
      * @return 노드 ID와 Point 좌표를 매핑한 정보
      */
     Map<String, Point> getNodePositions();
+
 }
 
