@@ -48,7 +48,7 @@ public class BoardPanel extends JPanel {
                     Image scaled = raw.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH); // ✅ 크기 조정
                     horseIcons.put(key, new ImageIcon(scaled));
                 } catch (Exception e) {
-                    System.err.println("❌ 아이콘 로딩 실패: " + key);
+                    System.err.println("아이콘 로딩 실패: " + key);
                 }
             }
         }
@@ -81,7 +81,7 @@ public class BoardPanel extends JPanel {
                     backgroundImage = null; //타입이 잘못된 경우 null
             }
         } catch (IOException | IllegalArgumentException e) {
-            System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
+            System.err.println("배경 이미지 로딩 실패: " + e.getMessage());
             backgroundImage = null;
         }
     }

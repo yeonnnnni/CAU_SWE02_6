@@ -38,14 +38,14 @@ public class BoardPanelFX extends Pane {
                     Image img = new Image(getClass().getResourceAsStream("/horses/" + key + ".png"), 30, 30, true, true);
                     horseIcons.put(key, img);
                 } catch (Exception e) {
-                    System.err.println("❌ 아이콘 로딩 실패: " + key);
+                    System.err.println("아이콘 로딩 실패: " + key);
                 }
             }
         }
     }
 
     public void renderBoard(List<Node> nodes, Map<String, Point2D> nodePositions) {
-        setBoardType(boardType); // 🆕 배경 먼저 설정
+        setBoardType(boardType); // 배경 먼저 설정
         getChildren().clear();
         getChildren().add(backgroundView); // 배경 먼저 add
         nodeToButton.clear();
@@ -177,7 +177,7 @@ public class BoardPanelFX extends Pane {
 
                 backgroundView.setOpacity(1); // 필요시 조절
             } catch (Exception e) {
-                System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
+                System.err.println("배경 이미지 로딩 실패: " + e.getMessage());
             }
         }
     }

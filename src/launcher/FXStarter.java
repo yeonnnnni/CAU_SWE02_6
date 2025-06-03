@@ -79,10 +79,10 @@ public class FXStarter extends Application {
     private int promptPlayerCount() {
         TextInputDialog dialog = new TextInputDialog("2");
         dialog.setTitle("설정");
-        dialog.setHeaderText("플레이어 수 (2~5)를 입력하세요:");
+        dialog.setHeaderText("플레이어 수 (2~4)를 입력하세요:");
         return dialog.showAndWait()
                 .map(Integer::parseInt)
-                .filter(n -> n >= 2 && n <= 5)
+                .filter(n -> n >= 2 && n <= 4)
                 .orElse(2);
     }
 
