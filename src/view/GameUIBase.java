@@ -13,6 +13,7 @@ public interface GameUIBase {
     void setRollListener(Runnable listener);
 
     void showMessage(String message);
+    void showErrorMessage(String message);
     boolean confirmShortcut(String direction);
     Horse selectHorse(List<Horse> candidates, int steps);
     YutResult chooseYutResult(List<YutResult> options);

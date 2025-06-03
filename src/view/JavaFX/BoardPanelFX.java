@@ -1,14 +1,14 @@
 package view.JavaFX;
 
+import model.Horse;
+import model.Node;
+
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import model.Horse;
-import model.Node;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +45,9 @@ public class BoardPanelFX extends Pane {
     }
 
     public void renderBoard(List<Node> nodes, Map<String, Point2D> nodePositions) {
-        setBoardType(boardType); // 배경 먼저 설정
+        setBoardType(boardType);
         getChildren().clear();
-        getChildren().add(backgroundView); // 배경 먼저 add
+        getChildren().add(backgroundView);
         nodeToButton.clear();
 
         double minX = Double.MAX_VALUE, maxX = Double.MIN_VALUE;
@@ -180,11 +180,5 @@ public class BoardPanelFX extends Pane {
                 System.err.println("배경 이미지 로딩 실패: " + e.getMessage());
             }
         }
-    }
-
-
-
-    public Map<Node, Button> getNodeToButtonMap() {
-        return nodeToButton;
     }
 }

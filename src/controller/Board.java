@@ -20,13 +20,6 @@ public class Board {
     // 게임판에 존재하는 모든 노드 리스트
     private final List<Node> nodes = new ArrayList<>();
 
-    // 플레이어 ID를 기준으로 말 리스트 반환
-    public List<Horse> getHorsesForPlayer(String playerId) {
-        Team team = playerToTeam.get(playerId);
-        if (team == null) return new ArrayList<>();
-        return team.getHorses();
-    }
-
     //외부에서 생성된 노드 리스트를 설정 (Builder에서 주입)
     public void setNodes(List<Node> nodes) {
         this.nodes.clear();
@@ -61,14 +54,6 @@ public class Board {
         for (Node node : nodes) {
             node.clearHorses(); // 말 위치 초기화
         }
-    }
-
-    //시작 노드 반환 (ex: ID가 "A2"인 노드를 기준)
-    public Node getStartNode(List<Node> board) {
-        return board.stream()
-                .filter(n -> "A2".equals(n.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("A2 노드를 찾을 수 없습니다."));
     }
 
     /**

@@ -1,7 +1,6 @@
 package model;
 
 //윷 결과를 열거형으로 정의하고, 각 결과에 이동할 칸 수를 연결합니다.
-
 public enum YutResult {
     BACKDO(-1),
     DO(1),

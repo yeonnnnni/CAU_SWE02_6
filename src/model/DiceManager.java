@@ -58,7 +58,6 @@ public class DiceManager {
      * - UI나 말 이동 로직에서 사용됨
      */
     public int convertToSteps(YutResult result) {
-
         return result.getSteps();
     }
 }

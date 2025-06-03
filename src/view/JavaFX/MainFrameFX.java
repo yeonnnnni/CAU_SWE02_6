@@ -1,19 +1,14 @@
 package view.JavaFX;
 
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
 import model.Horse;
 import model.Node;
-import model.Team;
 import model.YutResult;
+
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.application.Platform;
 
 import java.util.*;
 
@@ -42,7 +37,6 @@ public class MainFrameFX extends BorderPane implements GameUIFX {
     }
 
     public ScoreboardPanelFX getScoreboardPanel() { return scoreboardPanelFX;}
-
 
     public view.JavaFX.BoardPanelFX getBoardPanel() {
         return boardPanelFX;
@@ -132,6 +126,17 @@ public class MainFrameFX extends BorderPane implements GameUIFX {
         dicePanelFX.setRollEnabled(enabled);
     }
 
+    @Override
+    public void showErrorMessage(String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("오류");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+
     public List<YutResult> promptYutOrder(List<YutResult> results) {
         // ListView로 사용자에게 결과 순서 재정렬 받기
         ListView<YutResult> listView = new ListView<>();
@@ -158,6 +163,4 @@ public class MainFrameFX extends BorderPane implements GameUIFX {
 
         return results; // 취소 시 기본 순서
     }
-
-
 }

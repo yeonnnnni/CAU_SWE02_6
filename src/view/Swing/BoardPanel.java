@@ -4,6 +4,7 @@ import model.Horse;
 import model.Node;
 
 import javax.swing.*; //swing 컴포넌트(JPanel, JButton 등)
+
 import java.awt.*;  //Graphics, Color, Point 등 그래픽 도구
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ public class BoardPanel extends JPanel {
                 try {
                     ImageIcon raw = new ImageIcon(getClass().getResource("/horses/" + key + ".png"));
                     //아이콘의 크기를 30x30으로 리사이징
-                    Image scaled = raw.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH); // ✅ 크기 조정
+                    Image scaled = raw.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH); // 크기 조정
                     horseIcons.put(key, new ImageIcon(scaled));
                 } catch (Exception e) {
                     System.err.println("아이콘 로딩 실패: " + key);
@@ -178,6 +179,7 @@ public class BoardPanel extends JPanel {
 
             // 버튼 생성
             JButton btn = new JButton();
+
             // 중앙 정렬 + 오프셋 보정 적용
             int drawX = pt.x - offsetX + panelWidth / 2 - buttonSize / 2 + offsetAdjust.x;
             int drawY = pt.y - offsetY + panelHeight / 2 - buttonSize / 2 + offsetAdjust.y;

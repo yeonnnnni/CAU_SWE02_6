@@ -5,15 +5,16 @@ import builder.BoardFactory;
 import controller.Board;
 import controller.GameController;
 import controller.GameManager;
+import model.ShortcutDecisionProvider;
+import model.*;
+import view.JavaFX.MainFrameFX;
+
 import javafx.geometry.Point2D;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
-import model.ShortcutDecisionProvider;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import model.*;
-import view.JavaFX.MainFrameFX;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 public class FXStarter extends Application {
-
     @Override
     public void start(Stage primaryStage) {
         // 1. 사용자 입력 받기

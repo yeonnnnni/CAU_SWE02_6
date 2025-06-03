@@ -1,6 +1,5 @@
 package builder;
 
-import builder.BoardBuilder;
 import model.Node;
 
 import java.awt.*;

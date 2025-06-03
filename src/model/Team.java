@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 // Team 클래스는 팀의 ID, 이름, 색상, 보유한 말(Horse) 목록을 관리합니다.
 public class Team {
     private final int teamID;           // 팀 고유 ID
@@ -60,10 +58,6 @@ public class Team {
     // 팀 색상 반환
     public Color getColor() {
         return color;
-    }
-
-    public String getBoardType() {
-        return boardType;
     }
 
     // 모든 말이 FINISHED 상태인지 확인 (승리 조건)

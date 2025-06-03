@@ -42,18 +42,8 @@ public class Node {
         isGoal = goal;
     }
 
-    public boolean isCenter() {
-        return isCenter;
-    }
-
     public void setCenter(boolean center) {
         isCenter = center;
-    }
-
-    //Corner 노드 판별
-    public boolean isCorner() {
-        if (id == null || id.startsWith("N")) return false;
-        return id.length() >= 2 && id.charAt(1) == '2';
     }
 
     //말 관리 기능
@@ -97,5 +87,4 @@ public class Node {
     public int hashCode() {
         return id.hashCode();
     }
-
 }
