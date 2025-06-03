@@ -17,7 +17,7 @@ import model.YutResult;
 
 import java.util.*;
 
-class DicePanelFX extends VBox {
+public class DicePanelFX extends VBox {
     private final Label resultLabel;
     private final Button rollButton;
     private final TextField manualInput;
