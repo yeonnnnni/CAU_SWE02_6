@@ -3,8 +3,6 @@ import builder.BoardFactory;
 
 import java.awt.Color;
 import java.util.*;
-import java.awt.Point;
-import view.MainFrame;
 
 public class Horse {
     // 고유 ID (예: "T1-H2")
@@ -38,7 +36,6 @@ public class Horse {
     }
     // Getter / Setter
     public String getId() { return id; }
-    public int getTeamID() { return teamID; }
     public HorseState getState() { return state; }
     public List<Horse> getGroupedHorses() { return groupedHorses; }
     public void setState(HorseState state) { this.state = state; }
@@ -88,14 +85,14 @@ public class Horse {
      * - 다양한 조건 (중심 노드, A/B 라인, 지름길, 외곽 N라인 등)에 따라 다르게 처리됨
      * - 지름길 진입 여부는 MainFrame에서 사용자에게 선택 받음
      */
-    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft, String boardType, ShortcutDecisionProvider provider) {
+    private Node chooseNextNode(List<Node> candidates, boolean isFirstStep, int stepsLeft, ShortcutDecisionProvider provider) {
         // 현재 말의 위치 ID
         String currentId = position.getId();  // position은 Node
 
         // 중심 노드일 경우: "OO"
         // center 노드인 경우
-        //"A" 방향으로 가는 지름길 선택 (우선순위) -> 도착지점에 가장 가까운게 A니까.
-        //A방향 노드 (A1, A0 등)가 없다면 그냥 candidates의 첫 번째 노드 선택
+        // "A" 방향으로 가는 지름길 선택 (우선순위) -> 도착지점에 가장 가까운게 A니까.
+        // A방향 노드 (A1, A0 등)가 없다면 그냥 candidates의 첫 번째 노드 선택
         if (currentId.equals("00")) {
             if (isFirstStep) {
                 return candidates.stream()
@@ -289,11 +286,10 @@ public class Horse {
          * */
         Node next = (isRemain && position.getId().startsWith("N") && nextList.size() == 3) ?
                 nextList.get(2) :   // 지름길 조건
-                chooseNextNode(nextList, isFirstStep, stepsLeft, team.getBoardType(), provider);
+                chooseNextNode(nextList, isFirstStep, stepsLeft, provider);
 
 
         System.out.println("$$$$$$next: " + next.getId());
-        System.out.println("next: " + nextList.toString());
         setPosition(next);
 
         // 그룹 말도 함께 이동
@@ -304,7 +300,6 @@ public class Horse {
         // 도착 지점인지 확인
         if (position.isGoal()) {
             this.state = HorseState.FINISHED;
-            return;
         }
     }
 
@@ -451,7 +446,6 @@ public class Horse {
         state = HorseState.WAITING;
         groupedHorses.clear();
         positionHistory.clear();
-        MainFrame.getInstance().updatePiece(this.position, null);  // UI에서 말 제거
     }
 
     /**
@@ -516,4 +510,5 @@ public class Horse {
     public String toString() {
         char teamChar = (char) ('A' + teamID);
         return "Team " + teamChar + ", H" + horseIdx;
-    }}
+    }
+}

@@ -1,6 +1,7 @@
 package builder;
 
 import model.Node;
+
 import java.awt.Point;
 import java.util.*;
 
@@ -57,7 +58,7 @@ public class HexagonBoardBuilder implements BoardBuilder {
             }
         }
 
-        node("A2").setGoal(true);  // ✅ A2만 goal
+        node("A2").setGoal(true);  // A2만 goal
     }
 
     /**

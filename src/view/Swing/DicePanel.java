@@ -1,9 +1,10 @@
-package view;
+package view.Swing;
 
 import model.YutResult;
 
 import javax.swing.*;
 import javax.swing.text.*;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
@@ -97,14 +98,6 @@ public class DicePanel extends JPanel {
      */
     public String getManualInputText() {
         return manualInputField.getText();
-    }
-
-    /**
-     * 마지막 윷 결과들을 큐 형태로 반환
-     * @return 결과 큐 복사본
-     */
-    public Queue<YutResult> getResultQueue() {
-        return new LinkedList<>(lastResults);
     }
 
     /**

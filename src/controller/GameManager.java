@@ -1,12 +1,15 @@
 package controller;
+
 import model.*;
-import view.GameUI;
+import view.GameUIBase;
+import view.Swing.GameUI;
+import view.JavaFX.GameUIFX;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameManager {
-    private final GameUI gameUI;
+    private final GameUIBase gameUIBase;
     private final Board board;
     private final DiceManager diceManager;
     private final List<Team> teams;
@@ -19,8 +22,8 @@ public class GameManager {
     private boolean capturedThisTurn = false;
     private boolean bonusTurnRequested = false;
 
-    public GameManager(GameUI gameUI, Board board, DiceManager diceManager, List<Team> teams, String boardType, ShortcutDecisionProvider shortcutDecisionProvider) {
-        this.gameUI = gameUI;
+    public GameManager(GameUIBase gameUIBase, Board board, DiceManager diceManager, List<Team> teams, String boardType, ShortcutDecisionProvider shortcutDecisionProvider) {
+        this.gameUIBase = gameUIBase;
         this.board = board;
         this.diceManager = diceManager;
         this.teams = teams;
@@ -39,8 +42,14 @@ public class GameManager {
         currentPlayerIndex = 0;                         // 첫 번째 플레이어로 설정
         updateCurrentPlayerLabel();                     // 상단에 현재 플레이어 표시
         board.resetAll();                               // 모든 말과 노드 상태 초기화
-        gameUI.getBoardPanel().resetBoardUI();       // 보드 UI 초기화 (말, 색상 등 리셋)
-        gameUI.getDicePanel().showResult(new ArrayList<>()); // 주사위 패널 초기화
+        // 보드 UI 초기화 (말, 색상 등 리셋), 주사위 패널 초기화
+        if (gameUIBase instanceof GameUI) {
+            ((GameUI) gameUIBase).getBoardPanel().resetBoardUI();
+            ((GameUI) gameUIBase).getDicePanel().showResult(new ArrayList<>());
+        } else if (gameUIBase instanceof GameUIFX) {
+            ((GameUIFX) gameUIBase).getBoardPanel().resetBoardUI();
+            ((GameUIFX) gameUIBase).showDiceResult(new ArrayList<>());
+        }
         updateScoreboard();                             // 점수판 초기화
     }
 
@@ -52,7 +61,12 @@ public class GameManager {
     public void nextTurn() {
         currentPlayerIndex = (currentPlayerIndex + 1) % teams.size(); // 다음 플레이어 순환
         updateCurrentPlayerLabel();                     // 현재 플레이어 UI 갱신
-        gameUI.getDicePanel().showResult(new ArrayList<>()); // 주사위 결과 초기화
+        // 주사위 결과 초기화
+        if (gameUIBase instanceof GameUI) {
+            ((GameUI) gameUIBase).getDicePanel().showResult(new ArrayList<>());
+        } else if (gameUIBase instanceof GameUIFX) {
+            ((GameUIFX) gameUIBase).showDiceResult(new ArrayList<>());
+        }
         updateScoreboard();                             // 점수판 갱신
     }
 
@@ -63,7 +77,7 @@ public class GameManager {
     public void checkWin() {
         Team team = getCurrentTeam();                   // 현재 턴의 팀 확인
         if (team.isWin()) {                             // 승리 조건 충족 여부 확인
-            if (gameUI.promptRestart(team.getName())) {
+            if (gameUIBase.promptRestart(team.getName())) {
                 restartGame();
             } else {
                 System.exit(0);
@@ -81,21 +95,28 @@ public class GameManager {
 
         List<YutResult> results;
 
-        if (gameUI.isRandomMode()) {
+        if (gameUIBase.isRandomMode()) {
             results = diceManager.rollRandomSequence();
         } else {
             try {
-                int val = Integer.parseInt(gameUI.getManualInput());
+                int val = Integer.parseInt(gameUIBase.getManualInput());
                 results = List.of(diceManager.rollManual(val));
-            } catch (Exception e) {
-                gameUI.showMessage("유효한 숫자를 입력해주세요.");
+            } catch (NumberFormatException e) {
+                String msg = "숫자 형식이 잘못되었습니다.";
+                System.err.println(msg);
+                gameUIBase.showErrorMessage(msg);
+                return;
+            } catch (IllegalArgumentException e) {
+                String msg = "유효하지 않은 윷 입력값: " + e.getMessage();
+                System.err.println(msg);
+                gameUIBase.showErrorMessage(msg);
                 return;
             }
         }
 
         remainingResults.clear();
         remainingResults.addAll(results);
-        gameUI.showDiceResult(results);
+        gameUIBase.showDiceResult(results);
 
         promptNextMove();
     }
@@ -109,14 +130,14 @@ public class GameManager {
             // 말 잡은 경우 -> 보너스 턴
             if (capturedThisTurn) {
                 System.out.println("보너스 턴 실행 중");
-                gameUI.showMessage("말을 잡았습니다! 한 번 더 던집니다.");
+                gameUIBase.showMessage("말을 잡았습니다! 한 번 더 던집니다.");
                 capturedThisTurn = false; // 보너스 턴 플래기 초기화
                 handleDiceRoll(); // 보너스 턴
             } else {
                 System.out.println("보너스 조건 없음, 턴 종료");
                 nextTurn(); // 다음 플레이어로 턴 넘김
             }
-            gameUI.setDiceRollEnabled(true);
+            gameUIBase.setDiceRollEnabled(true);
             return;
         }
 
@@ -125,9 +146,9 @@ public class GameManager {
         if (remainingResults.size() == 1) {
             selected = remainingResults.get(0);
         } else {
-            selected = gameUI.chooseYutResult(remainingResults);
+            selected = gameUIBase.chooseYutResult(remainingResults);
             if (selected == null) {
-                gameUI.setDiceRollEnabled(true);
+                gameUIBase.setDiceRollEnabled(true);
                 return;
             }
         }
@@ -138,21 +159,21 @@ public class GameManager {
         // 이동 가능한 말 목록을 계산
         List<Horse> movable = getMovableHorses(steps);
         if (movable.isEmpty()) {
-            gameUI.showMessage("이동 가능한 말이 없습니다.");
+            gameUIBase.showMessage("이동 가능한 말이 없습니다.");
             remainingResults.remove(selected);
             promptNextMove(); // 다음 윷 결과로 이동
             return;
         }
 
         // 사용자에게 말 선택하도록 요청
-        Horse horse = gameUI.selectHorse(movable, steps);
+        Horse horse = gameUIBase.selectHorse(movable, steps);
         if (horse == null) {
-            gameUI.setDiceRollEnabled(true);
+            gameUIBase.setDiceRollEnabled(true);
             return;
         }
 
         Node from = horse.getPosition();
-        ShortcutDecisionProvider provider = direction -> gameUI.confirmShortcut(direction);
+        ShortcutDecisionProvider provider = direction -> gameUIBase.confirmShortcut(direction);
 
         boolean captured = horse.move(steps, board.getNodes(), boardType, provider);
         Node to = horse.getPosition();
@@ -161,9 +182,18 @@ public class GameManager {
         if (captured) {
             capturedThisTurn = true;
             System.out.println(horse.getId() + " 이(가) 상대 말을 잡았습니다. 추가 턴이 부여됩니다.");
+
+            // UI 갱신: 잡힌 말들 null로 반영
+            for (Team team : teams) {
+                for (Horse h : team.getHorses()) {
+                    if (h.getState() == HorseState.WAITING && h.getPosition() == null) {
+                        gameUIBase.updatePiece(h.getPosition(), null);
+                    }
+                }
+            }
         }
 
-        gameUI.updatePiece(from, to);
+        gameUIBase.updatePiece(from, to);
         updateScoreboard();
         remainingResults.remove(selected);
         promptNextMove();
@@ -182,13 +212,19 @@ public class GameManager {
         }
 
         updateCurrentPlayerLabel();
-        gameUI.getBoardPanel().resetBoardUI();
-        gameUI.getDicePanel().showResult(new ArrayList<>());
+        if (gameUIBase instanceof GameUI) {
+            ((GameUI) gameUIBase).getBoardPanel().resetBoardUI();
+            ((GameUI) gameUIBase).getDicePanel().showResult(new ArrayList<>());
+        } else if (gameUIBase instanceof GameUIFX) {
+            ((GameUIFX) gameUIBase).getBoardPanel().resetBoardUI();
+            ((GameUIFX) gameUIBase).showDiceResult(new ArrayList<>());
+        }
+
         updateScoreboard();
 
         // UI 상 말 아이콘 완전 제거를 위해 노드들 강제 업데이트
         for (Node node : board.getNodes()) {
-            gameUI.updatePiece(node, null);
+            gameUIBase.updatePiece(node, null);
         }
     }
 
@@ -208,9 +244,14 @@ public class GameManager {
     }
 
     private void updateCurrentPlayerLabel() {
-        gameUI.setCurrentPlayer(getCurrentTeam().getName());
+        gameUIBase.setCurrentPlayer(getCurrentTeam().getName());
     }
+
     private void updateScoreboard() {
-        gameUI.getScoreboardPanel().updateScoreboard(teams);
+        if (gameUIBase instanceof GameUI) {
+            ((GameUI) gameUIBase).getScoreboardPanel().updateScoreboard(teams);
+        } else if (gameUIBase instanceof GameUIFX) {
+            ((GameUIFX) gameUIBase).getScoreboardPanel().updateScoreboard(teams);
+        }
     }
 }
