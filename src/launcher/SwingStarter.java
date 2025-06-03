@@ -9,21 +9,13 @@ import model.*;
 import view.Swing.MainFrame;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SwingStarter {
     public static void main(String[] args) {
-        String mode = System.getProperty("ui.mode", "swing");
-
-        if (mode.equalsIgnoreCase("javafx")) {
-            System.out.println("JavaFX!");
-//            여기서 Javafx 실행
-//            javafx.application.Application.launch(view.javafx.JavaFXMain.class, args);
-            return;
-        }
-
         SwingUtilities.invokeLater(() -> {
             // 1. 사용자 설정 입력 받기
             int pieceCount = promptPieceCount();
@@ -94,6 +86,4 @@ public class SwingStarter {
         }
         return teams;
     }
-
-
 }

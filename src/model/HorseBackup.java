@@ -1,7 +1,7 @@
 package model;
+
 import java.util.ArrayList;
 import java.util.List;
-import model.Node;
 
 public class HorseBackup {
     public final Node position;

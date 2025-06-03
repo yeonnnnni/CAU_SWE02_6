@@ -1,24 +1,21 @@
 // MainFrame.java
 package view.Swing;
 
-import controller.GameManager;
 import model.*;
-import java.util.Map;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 
 public class MainFrame extends JFrame implements GameUI {
     private view.Swing.BoardPanel boardPanel;
     private view.Swing.DicePanel dicePanel;
     private JLabel currentPlayerLabel;
-    private GameManager gameManager;
     private List<Node> nodeList;
     private static MainFrame instance;
     private view.Swing.ScoreboardPanel scoreboardPanel;
-    private int pieceCount = 2;
-    private int playerCount = 2;
 
     public MainFrame(List<Node> nodeList, Map<String, Point> nodePositions, String boardType) {
         this.nodeList = nodeList;
@@ -43,30 +40,6 @@ public class MainFrame extends JFrame implements GameUI {
         add(currentPlayerLabel, BorderLayout.SOUTH);
 
         setVisible(true);
-    }
-
-
-    public List<YutResult> promptYutOrder(List<YutResult> results) {
-        DefaultListModel<YutResult> listModel = new DefaultListModel<>();
-        for (YutResult r : results) listModel.addElement(r);
-
-        JList<YutResult> resultList = new JList<>(listModel);
-        resultList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
-        JOptionPane.showMessageDialog(
-                this,
-                new JScrollPane(resultList),
-                "사용할 윷 결과의 순서를 선택하세요 (위→아래 순서)",
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        List<YutResult> selected = resultList.getSelectedValuesList();
-        if (selected.size() != results.size()) {
-            JOptionPane.showMessageDialog(this, "모든 결과를 선택해야 합니다. 기본 순서로 진행합니다.");
-            return results;
-        }
-
-        return selected;
     }
 
     // getter 추가
@@ -171,8 +144,11 @@ public class MainFrame extends JFrame implements GameUI {
         dicePanel.setEnabled(enabled);
     }
 
+    @Override
+    public void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "오류", JOptionPane.ERROR_MESSAGE);
+    }
 
-    public static MainFrame getInstance() { return instance; }
 
     public boolean promptShortcutChoice(String direction) {
         int choice = JOptionPane.showOptionDialog(
@@ -186,18 +162,5 @@ public class MainFrame extends JFrame implements GameUI {
                 "예"
         );
         return choice == JOptionPane.YES_OPTION;
-    }
-
-    public Horse promptHorseSelection(List<Horse> candidates, int steps) {
-        Object[] options = candidates.toArray();
-        return (Horse) JOptionPane.showInputDialog(
-                this,
-                steps + "칸 이동할 말을 선택하세요:",
-                "말 선택",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                options,
-                options[0]
-        );
     }
 }

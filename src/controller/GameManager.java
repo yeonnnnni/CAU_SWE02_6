@@ -1,4 +1,5 @@
 package controller;
+
 import model.*;
 import view.GameUIBase;
 import view.Swing.GameUI;
@@ -100,8 +101,15 @@ public class GameManager {
             try {
                 int val = Integer.parseInt(gameUIBase.getManualInput());
                 results = List.of(diceManager.rollManual(val));
-            } catch (Exception e) {
-                gameUIBase.showMessage("유효한 숫자를 입력해주세요.");
+            } catch (NumberFormatException e) {
+                String msg = "숫자 형식이 잘못되었습니다.";
+                System.err.println(msg);
+                gameUIBase.showErrorMessage(msg);
+                return;
+            } catch (IllegalArgumentException e) {
+                String msg = "유효하지 않은 윷 입력값: " + e.getMessage();
+                System.err.println(msg);
+                gameUIBase.showErrorMessage(msg);
                 return;
             }
         }

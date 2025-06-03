@@ -1,4 +1,5 @@
 package view.JavaFX;
+
 import javafx.beans.property.*;
 
 public class TeamScoreFX {

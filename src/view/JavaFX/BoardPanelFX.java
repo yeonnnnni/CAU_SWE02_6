@@ -1,14 +1,14 @@
 package view.JavaFX;
 
+import model.Horse;
+import model.Node;
+
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import model.Horse;
-import model.Node;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,16 +38,16 @@ public class BoardPanelFX extends Pane {
                     Image img = new Image(getClass().getResourceAsStream("/horses/" + key + ".png"), 30, 30, true, true);
                     horseIcons.put(key, img);
                 } catch (Exception e) {
-                    System.err.println("❌ 아이콘 로딩 실패: " + key);
+                    System.err.println("아이콘 로딩 실패: " + key);
                 }
             }
         }
     }
 
     public void renderBoard(List<Node> nodes, Map<String, Point2D> nodePositions) {
-        setBoardType(boardType); // 🆕 배경 먼저 설정
+        setBoardType(boardType);
         getChildren().clear();
-        getChildren().add(backgroundView); // 배경 먼저 add
+        getChildren().add(backgroundView);
         nodeToButton.clear();
 
         double minX = Double.MAX_VALUE, maxX = Double.MIN_VALUE;
@@ -177,14 +177,8 @@ public class BoardPanelFX extends Pane {
 
                 backgroundView.setOpacity(1); // 필요시 조절
             } catch (Exception e) {
-                System.err.println("⚠️ 배경 이미지 로딩 실패: " + e.getMessage());
+                System.err.println("배경 이미지 로딩 실패: " + e.getMessage());
             }
         }
-    }
-
-
-
-    public Map<Node, Button> getNodeToButtonMap() {
-        return nodeToButton;
     }
 }
